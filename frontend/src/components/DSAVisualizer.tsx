@@ -916,93 +916,779 @@ const StacksQueuesVisualizer: React.FC = () => {
   );
 };
 
+// TreesVisualizer component
 const TreesVisualizer: React.FC = () => {
   const theme = useTheme();
+  const [treeValues, setTreeValues] = useState<number[]>([]);
+  const [nodeValue, setNodeValue] = useState<string>('');
+  const [treeOperation, setTreeOperation] = useState<string>('insert');
+  const [isAnimating, setIsAnimating] = useState<boolean>(false);
+  const [activeNodes, setActiveNodes] = useState<number[]>([]);
+  const [visitedNodes, setVisitedNodes] = useState<number[]>([]);
+  const [highlightedPath, setHighlightedPath] = useState<number[]>([]);
+  const [traversalOrder, setTraversalOrder] = useState<number[]>([]);
+  const [statusMessage, setStatusMessage] = useState<string>('Start by inserting values into the binary search tree.');
+  const animationTimerRef = useRef<NodeJS.Timeout | null>(null);
   
+  // Effect to clean up timers
+  useEffect(() => {
+    return () => {
+      if (animationTimerRef.current) {
+        clearTimeout(animationTimerRef.current);
+      }
+    };
+  }, []);
+
+  // Create a tree from the values
+  class TreeNode {
+    val: number;
+    left: TreeNode | null;
+    right: TreeNode | null;
+    id: number;
+    x: number;
+    y: number;
+    
+    constructor(val: number, id: number, level: number = 0, position: number = 0) {
+      this.val = val;
+      this.left = null;
+      this.right = null;
+      this.id = id;
+      this.x = position;
+      this.y = level * 70; // Vertical spacing between levels
+    }
+  }
+
+  // Build the BST from the values array
+  const buildTree = (values: number[]): TreeNode | null => {
+    if (values.length === 0) return null;
+    
+    let root: TreeNode | null = null;
+    let nodeId = 0;
+    
+    // Insert values one by one to create a BST
+    for (const value of values) {
+      root = insertNode(root, value, nodeId);
+      nodeId++;
+    }
+    
+    // Assign horizontal positions to create a balanced visual tree
+    if (root) {
+      computeNodePositions(root);
+    }
+    
+    return root;
+  };
+
+  // Insert a node into the BST
+  const insertNode = (
+    node: TreeNode | null, 
+    value: number, 
+    nodeId: number, 
+    level: number = 0, 
+    position: number = 0
+  ): TreeNode => {
+    if (node === null) {
+      return new TreeNode(value, nodeId, level, position);
+    }
+    
+    if (value < node.val) {
+      node.left = insertNode(node.left, value, nodeId, level + 1, position - 1);
+    } else if (value > node.val) {
+      node.right = insertNode(node.right, value, nodeId, level + 1, position + 1);
+    }
+    
+    return node;
+  };
+
+  // Compute horizontal positions for a balanced visual layout
+  const computeNodePositions = (root: TreeNode): void => {
+    const nodePositions = new Map<number, number>(); // Map to store horizontal positions
+    const minMaxX = { min: 0, max: 0 };
+    
+    // First pass: compute relative positions
+    calculateInitialPositions(root, 0, nodePositions, minMaxX);
+    
+    // Normalize positions to be centered
+    const totalWidth = minMaxX.max - minMaxX.min;
+    const center = (minMaxX.min + minMaxX.max) / 2;
+    
+    // Second pass: apply normalized positions
+    applyNormalizedPositions(root, nodePositions, center, totalWidth);
+  };
+
+  // Calculate initial relative positions
+  const calculateInitialPositions = (
+    node: TreeNode | null, 
+    level: number, 
+    positions: Map<number, number>,
+    minMaxX: { min: number, max: number }
+  ): number => {
+    if (!node) return 0;
+    
+    const leftWidth = calculateInitialPositions(node.left, level + 1, positions, minMaxX);
+    const rightWidth = calculateInitialPositions(node.right, level + 1, positions, minMaxX);
+    
+    // Current node's position is based on its children
+    const nodePosition = node.left ? positions.get(node.left.id)! + 1 : 
+                           (positions.size > 0 ? Math.min(...Array.from(positions.values())) - 1 : 0);
+    
+    positions.set(node.id, nodePosition);
+    node.y = level * 70;
+    
+    // Update min and max horizontal positions
+    minMaxX.min = Math.min(minMaxX.min, nodePosition);
+    minMaxX.max = Math.max(minMaxX.max, nodePosition);
+    
+    return leftWidth + 1 + rightWidth;
+  };
+
+  // Apply normalized positions for visual balance
+  const applyNormalizedPositions = (
+    node: TreeNode | null, 
+    positions: Map<number, number>,
+    center: number,
+    totalWidth: number
+  ): void => {
+    if (!node) return;
+    
+    // Normalize the position to be between 0 and 1, then scale to desired width
+    const normalizedPosition = (positions.get(node.id)! - center) / (totalWidth || 1);
+    node.x = normalizedPosition * 300; // Scale to visual width
+    
+    applyNormalizedPositions(node.left, positions, center, totalWidth);
+    applyNormalizedPositions(node.right, positions, center, totalWidth);
+  };
+
+  // Find a node in the BST
+  const findNode = (root: TreeNode | null, value: number, path: number[] = []): number[] | null => {
+    if (!root) return null;
+    
+    path.push(root.id);
+    
+    if (root.val === value) {
+      return path;
+    }
+    
+    if (value < root.val && root.left) {
+      return findNode(root.left, value, path);
+    } else if (value > root.val && root.right) {
+      return findNode(root.right, value, path);
+    }
+    
+    return path; // Return the path even if node not found (to show search path)
+  };
+
+  // Traversal algorithms
+  const inOrderTraversal = (root: TreeNode | null, result: number[] = []): number[] => {
+    if (!root) return result;
+    
+    inOrderTraversal(root.left, result);
+    result.push(root.id);
+    inOrderTraversal(root.right, result);
+    
+    return result;
+  };
+
+  const preOrderTraversal = (root: TreeNode | null, result: number[] = []): number[] => {
+    if (!root) return result;
+    
+    result.push(root.id);
+    preOrderTraversal(root.left, result);
+    preOrderTraversal(root.right, result);
+    
+    return result;
+  };
+
+  const postOrderTraversal = (root: TreeNode | null, result: number[] = []): number[] => {
+    if (!root) return result;
+    
+    postOrderTraversal(root.left, result);
+    postOrderTraversal(root.right, result);
+    result.push(root.id);
+    
+    return result;
+  };
+
+  const levelOrderTraversal = (root: TreeNode | null): number[] => {
+    const result: number[] = [];
+    if (!root) return result;
+    
+    const queue: TreeNode[] = [root];
+    
+    while (queue.length > 0) {
+      const node = queue.shift()!;
+      result.push(node.id);
+      
+      if (node.left) queue.push(node.left);
+      if (node.right) queue.push(node.right);
+    }
+    
+    return result;
+  };
+
+  // Handle tree operations
+  const handleOperation = () => {
+    const value = parseInt(nodeValue);
+    
+    if (isNaN(value)) {
+      setStatusMessage('Please enter a valid number.');
+      return;
+    }
+    
+    if (treeOperation === 'insert') {
+      if (treeValues.includes(value)) {
+        setStatusMessage(`Value ${value} already exists in the tree.`);
+        return;
+      }
+      
+      setTreeValues([...treeValues, value]);
+      setStatusMessage(`Value ${value} has been inserted.`);
+      setNodeValue('');
+    } else if (treeOperation === 'search') {
+      setNodeValue('');
+      animateSearch(value);
+    } else if (treeOperation === 'traversal') {
+      animateTraversal(value);
+    }
+  };
+
+  // Handle random tree generation
+  const generateRandomTree = () => {
+    if (isAnimating) return;
+    
+    const uniqueValues = new Set<number>();
+    const numberOfNodes = Math.floor(Math.random() * 6) + 5; // 5-10 nodes
+    
+    while (uniqueValues.size < numberOfNodes) {
+      uniqueValues.add(Math.floor(Math.random() * 100));
+    }
+    
+    setTreeValues(Array.from(uniqueValues));
+    setStatusMessage(`Generated a random tree with ${numberOfNodes} nodes.`);
+    setActiveNodes([]);
+    setVisitedNodes([]);
+    setHighlightedPath([]);
+    setTraversalOrder([]);
+  };
+
+  // Handle clearing the tree
+  const clearTree = () => {
+    if (isAnimating) return;
+    
+    setTreeValues([]);
+    setNodeValue('');
+    setActiveNodes([]);
+    setVisitedNodes([]);
+    setHighlightedPath([]);
+    setTraversalOrder([]);
+    setStatusMessage('Tree cleared. Start by inserting values.');
+  };
+
+  // Animate the search operation
+  const animateSearch = (value: number) => {
+    if (isAnimating) return;
+    
+    const tree = buildTree(treeValues);
+    if (!tree) {
+      setStatusMessage('Tree is empty. Please insert values first.');
+      return;
+    }
+    
+    const searchPath = findNode(tree, value);
+    if (!searchPath || searchPath.length === 0) {
+      setStatusMessage(`Value ${value} not found in the tree.`);
+      return;
+    }
+    
+    setIsAnimating(true);
+    setActiveNodes([]);
+    setVisitedNodes([]);
+    setHighlightedPath([]);
+    setStatusMessage(`Searching for ${value}...`);
+    
+    // Animate search path
+    let step = 0;
+    const animateStep = () => {
+      if (step < searchPath.length) {
+        setActiveNodes([searchPath[step]]);
+        setHighlightedPath(searchPath.slice(0, step + 1));
+        
+        const node = getNodeById(tree, searchPath[step]);
+        if (node) {
+          if (node.val === value) {
+            setStatusMessage(`Found ${value} at node ID ${searchPath[step]}!`);
+          } else if (value < node.val) {
+            setStatusMessage(`${value} < ${node.val}, moving to left child...`);
+          } else {
+            setStatusMessage(`${value} > ${node.val}, moving to right child...`);
+          }
+        }
+        
+        step++;
+        animationTimerRef.current = setTimeout(animateStep, 1000);
+      } else {
+        const lastNode = getNodeById(tree, searchPath[searchPath.length - 1]);
+        if (lastNode && lastNode.val !== value) {
+          setStatusMessage(`Value ${value} not found in the tree.`);
+        }
+        setIsAnimating(false);
+      }
+    };
+    
+    animateStep();
+  };
+
+  // Get a node by its ID
+  const getNodeById = (root: TreeNode | null, id: number): TreeNode | null => {
+    if (!root) return null;
+    if (root.id === id) return root;
+    
+    const leftResult = getNodeById(root.left, id);
+    if (leftResult) return leftResult;
+    
+    return getNodeById(root.right, id);
+  };
+
+  // Animate the traversal operation
+  const animateTraversal = (traversalType: number) => {
+    if (isAnimating) return;
+    
+    const tree = buildTree(treeValues);
+    if (!tree) {
+      setStatusMessage('Tree is empty. Please insert values first.');
+      return;
+    }
+    
+    setIsAnimating(true);
+    setActiveNodes([]);
+    setVisitedNodes([]);
+    setHighlightedPath([]);
+    
+    let traversalPath: number[] = [];
+    let traversalName = '';
+    
+    // Get the traversal path based on the selected type
+    switch (traversalType) {
+      case 1: // In-order
+        traversalPath = inOrderTraversal(tree);
+        traversalName = 'In-order';
+        break;
+      case 2: // Pre-order
+        traversalPath = preOrderTraversal(tree);
+        traversalName = 'Pre-order';
+        break;
+      case 3: // Post-order
+        traversalPath = postOrderTraversal(tree);
+        traversalName = 'Post-order';
+        break;
+      case 4: // Level-order
+        traversalPath = levelOrderTraversal(tree);
+        traversalName = 'Level-order';
+        break;
+      default:
+        traversalPath = inOrderTraversal(tree);
+        traversalName = 'In-order';
+    }
+    
+    setTraversalOrder(traversalPath);
+    setStatusMessage(`${traversalName} traversal: Starting...`);
+    
+    // Animate traversal
+    let step = 0;
+    const animateStep = () => {
+      if (step < traversalPath.length) {
+        const nodeId = traversalPath[step];
+        setActiveNodes([nodeId]);
+        setVisitedNodes(prev => [...prev, nodeId]);
+        
+        const node = getNodeById(tree, nodeId);
+        if (node) {
+          setStatusMessage(`${traversalName} traversal: Visiting node with value ${node.val}`);
+        }
+        
+        step++;
+        animationTimerRef.current = setTimeout(animateStep, 1000);
+      } else {
+        // Create value sequence for the traversal
+        const valueSequence = traversalPath.map(id => {
+          const node = getNodeById(tree, id);
+          return node ? node.val : null;
+        }).filter(val => val !== null);
+        
+        setStatusMessage(
+          `${traversalName} traversal complete. Order: [${valueSequence.join(', ')}]`
+        );
+        setActiveNodes([]);
+        setIsAnimating(false);
+      }
+    };
+    
+    animateStep();
+  };
+
+  // Render the tree
+  const renderTree = () => {
+    const tree = buildTree(treeValues);
+    if (!tree) return null;
+    
+    // Collect all nodes for rendering
+    const nodes: TreeNode[] = [];
+    const edges: { from: TreeNode, to: TreeNode }[] = [];
+    
+    // Traverse the tree to collect nodes and edges
+    const collectNodes = (node: TreeNode | null) => {
+      if (!node) return;
+      
+      nodes.push(node);
+      
+      if (node.left) {
+        edges.push({ from: node, to: node.left });
+        collectNodes(node.left);
+      }
+      
+      if (node.right) {
+        edges.push({ from: node, to: node.right });
+        collectNodes(node.right);
+      }
+    };
+    
+    collectNodes(tree);
+    
+    // Calculate the tree dimensions
+    const maxY = Math.max(...nodes.map(n => n.y)) + 70;
+    const minX = Math.min(...nodes.map(n => n.x));
+    const maxX = Math.max(...nodes.map(n => n.x));
+    const width = Math.max(600, maxX - minX + 200);
+    
+    return (
+      <Box sx={{ 
+        position: 'relative', 
+        height: maxY,
+        width: '100%',
+        overflow: 'hidden'
+      }}>
+        {/* Render edges */}
+        {edges.map((edge, index) => {
+          const fromX = edge.from.x + width / 2;
+          const fromY = edge.from.y + 20;
+          const toX = edge.to.x + width / 2;
+          const toY = edge.to.y;
+          
+          // Check if this edge is part of the highlighted path
+          const isHighlighted = highlightedPath.includes(edge.from.id) && 
+                               highlightedPath.includes(edge.to.id) &&
+                               Math.abs(highlightedPath.indexOf(edge.from.id) - 
+                                       highlightedPath.indexOf(edge.to.id)) === 1;
+          
+          return (
+            <Box 
+              key={`edge-${index}`}
+              sx={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                overflow: 'visible',
+                zIndex: 1
+              }}
+            >
+              <svg width="100%" height="100%" style={{ overflow: 'visible' }}>
+                <line
+                  x1={fromX}
+                  y1={fromY}
+                  x2={toX}
+                  y2={toY}
+                  stroke={isHighlighted ? theme.palette.error.main : theme.palette.text.secondary}
+                  strokeWidth={isHighlighted ? 3 : 1.5}
+                  strokeDasharray={isHighlighted ? "none" : "none"}
+                />
+              </svg>
+            </Box>
+          );
+        })}
+        
+        {/* Render nodes */}
+        {nodes.map((node) => {
+          const isActive = activeNodes.includes(node.id);
+          const isVisited = visitedNodes.includes(node.id);
+          const isInPath = highlightedPath.includes(node.id);
+          
+          // Calculate animation index for traversal
+          const traversalIndex = traversalOrder.indexOf(node.id);
+          
+          let bgColor = theme.palette.primary.main;
+          if (isActive) {
+            bgColor = theme.palette.error.main;
+          } else if (isVisited) {
+            bgColor = theme.palette.success.main;
+          } else if (isInPath) {
+            bgColor = theme.palette.warning.main;
+          }
+          
+          return (
+            <Box
+              key={`node-${node.id}`}
+              sx={{
+                position: 'absolute',
+                top: node.y,
+                left: `calc(50% + ${node.x}px - 20px)`,
+                width: 40,
+                height: 40,
+                borderRadius: '50%',
+                bgcolor: bgColor,
+                color: 'white',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                fontWeight: 'bold',
+                zIndex: 2,
+                boxShadow: isActive || isInPath ? 4 : 1,
+                transition: 'all 0.3s ease-in-out',
+                border: isActive ? `2px solid ${theme.palette.error.light}` : 'none'
+              }}
+            >
+              {node.val}
+              {traversalIndex !== -1 && (
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    top: -15,
+                    right: -15,
+                    width: 20,
+                    height: 20,
+                    borderRadius: '50%',
+                    bgcolor: theme.palette.secondary.main,
+                    color: 'white',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    fontSize: '0.75rem',
+                    fontWeight: 'bold'
+                  }}
+                >
+                  {traversalIndex + 1}
+                </Box>
+              )}
+            </Box>
+          );
+        })}
+      </Box>
+    );
+  };
+
   return (
     <Box>
       <Typography variant="h5" gutterBottom>Trees</Typography>
       <Typography variant="body1" paragraph>
-        Trees are hierarchical data structures with a root value and subtrees of children nodes.
+        Trees are hierarchical data structures with a root value and subtrees of children with a parent node.
       </Typography>
       
-      <Accordion defaultExpanded>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography variant="h6">Binary Tree</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <Paper elevation={3} sx={{ p: 3, minHeight: '300px', textAlign: 'center' }}>
-            <Typography variant="body1" sx={{ mt: 8 }}>
-              Binary Tree visualization will be implemented in a future update.
-            </Typography>
-          </Paper>
-        </AccordionDetails>
-      </Accordion>
+      <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
+        <Typography variant="h6" gutterBottom>Binary Search Tree Visualizer</Typography>
+        
+        <Box sx={{ mb: 3, display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+          <FormControl sx={{ minWidth: 120 }}>
+            <InputLabel id="operation-select-label">Operation</InputLabel>
+            <Select
+              labelId="operation-select-label"
+              id="operation-select"
+              value={treeOperation}
+              label="Operation"
+              onChange={(e) => setTreeOperation(e.target.value)}
+              disabled={isAnimating}
+            >
+              <MenuItem value="insert">Insert</MenuItem>
+              <MenuItem value="search">Search</MenuItem>
+              <MenuItem value="traversal">Traversal</MenuItem>
+            </Select>
+          </FormControl>
+          
+          {treeOperation === 'traversal' ? (
+            <FormControl sx={{ minWidth: 150 }}>
+              <InputLabel id="traversal-select-label">Traversal Type</InputLabel>
+              <Select
+                labelId="traversal-select-label"
+                id="traversal-select"
+                value={nodeValue || '1'}
+                label="Traversal Type"
+                onChange={(e) => setNodeValue(e.target.value)}
+                disabled={isAnimating}
+              >
+                <MenuItem value="1">In-order</MenuItem>
+                <MenuItem value="2">Pre-order</MenuItem>
+                <MenuItem value="3">Post-order</MenuItem>
+                <MenuItem value="4">Level-order</MenuItem>
+              </Select>
+            </FormControl>
+          ) : (
+            <TextField
+              label="Node Value"
+              variant="outlined"
+              value={nodeValue}
+              onChange={(e) => setNodeValue(e.target.value)}
+              type="number"
+              disabled={isAnimating}
+              sx={{ width: 150 }}
+            />
+          )}
+          
+          <Button
+            variant="contained"
+            onClick={handleOperation}
+            disabled={
+              isAnimating || 
+              (treeOperation !== 'traversal' && !nodeValue) || 
+              (treeOperation === 'search' && treeValues.length === 0)
+            }
+          >
+            {treeOperation === 'insert' ? 'Insert' : 
+              treeOperation === 'search' ? 'Search' : 'Start Traversal'}
+          </Button>
+          
+          <Button
+            variant="outlined"
+            onClick={generateRandomTree}
+            disabled={isAnimating}
+          >
+            Random Tree
+          </Button>
+          
+          <Button
+            variant="outlined"
+            color="secondary"
+            onClick={clearTree}
+            disabled={isAnimating || treeValues.length === 0}
+          >
+            Clear Tree
+          </Button>
+        </Box>
+        
+        <Paper 
+          elevation={1}
+          sx={{ 
+            p: 2, 
+            mb: 3, 
+            bgcolor: theme.palette.background.default,
+            minHeight: '50px'
+          }}
+        >
+          <Typography variant="body1">{statusMessage}</Typography>
+        </Paper>
+        
+        <Box 
+          sx={{ 
+            height: 350, 
+            p: 2, 
+            display: 'flex', 
+            justifyContent: 'center',
+            bgcolor: 'rgba(0,0,0,0.02)',
+            borderRadius: 1,
+            overflow: 'auto'
+          }}
+        >
+          {treeValues.length > 0 ? (
+            renderTree()
+          ) : (
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+              <Typography variant="body1" color="text.secondary">
+                Tree is empty. Insert nodes or generate a random tree.
+              </Typography>
+            </Box>
+          )}
+        </Box>
+        
+        <Box sx={{ mt: 3 }}>
+          <Typography variant="subtitle2" gutterBottom>Legend:</Typography>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Box sx={{ width: 16, height: 16, borderRadius: '50%', bgcolor: theme.palette.primary.main, mr: 1 }}></Box>
+              <Typography variant="body2">Regular Node</Typography>
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Box sx={{ width: 16, height: 16, borderRadius: '50%', bgcolor: theme.palette.error.main, mr: 1 }}></Box>
+              <Typography variant="body2">Current Node</Typography>
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Box sx={{ width: 16, height: 16, borderRadius: '50%', bgcolor: theme.palette.warning.main, mr: 1 }}></Box>
+              <Typography variant="body2">Path Node</Typography>
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Box sx={{ width: 16, height: 16, borderRadius: '50%', bgcolor: theme.palette.success.main, mr: 1 }}></Box>
+              <Typography variant="body2">Visited Node</Typography>
+            </Box>
+          </Box>
+        </Box>
+        
+        <Box sx={{ mt: 4 }}>
+          <Typography variant="h6">Binary Search Tree Operations</Typography>
+          <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 2, mt: 1 }}>
+            <Box sx={{ flex: { xs: '1', md: '0 0 48%' } }}>
+              <Typography variant="subtitle1" gutterBottom>
+                <strong>Insertion:</strong> O(log n) average, O(n) worst case
+              </Typography>
+              <Typography variant="body2" paragraph>
+                Nodes are added based on their value - smaller values go left, larger values go right.
+                This creates an ordered tree where in-order traversal gives sorted values.
+              </Typography>
+            </Box>
+            <Box sx={{ flex: { xs: '1', md: '0 0 48%' } }}>
+              <Typography variant="subtitle1" gutterBottom>
+                <strong>Traversal Types:</strong>
+              </Typography>
+              <Typography variant="body2" component="div">
+                <ul style={{ margin: 0, paddingLeft: '1.5rem' }}>
+                  <li><strong>In-order:</strong> Left → Root → Right (gives sorted order)</li>
+                  <li><strong>Pre-order:</strong> Root → Left → Right (useful for copying a tree)</li>
+                  <li><strong>Post-order:</strong> Left → Right → Root (useful for deletion)</li>
+                  <li><strong>Level-order:</strong> Visit nodes by level, from top to bottom</li>
+                </ul>
+              </Typography>
+            </Box>
+          </Box>
+        </Box>
+      </Paper>
       
-      <Accordion>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography variant="h6">Binary Search Tree</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <Paper elevation={3} sx={{ p: 3, minHeight: '300px', textAlign: 'center' }}>
-            <Typography variant="body1" sx={{ mt: 8 }}>
-              Binary Search Tree visualization will be implemented in a future update.
+      <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
+        <Typography variant="h6" gutterBottom>Tree Data Structure Properties</Typography>
+        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 3 }}>
+          <Box sx={{ flex: { xs: '1', md: '0 0 31%' } }}>
+            <Typography variant="subtitle1" gutterBottom>
+              <strong>Binary Search Tree</strong>
             </Typography>
-          </Paper>
-        </AccordionDetails>
-      </Accordion>
-      
-      <Accordion>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography variant="h6">BST Insert and Remove</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <Paper elevation={3} sx={{ p: 3, minHeight: '300px', textAlign: 'center' }}>
-            <Typography variant="body1" sx={{ mt: 8 }}>
-              BST insertion and removal visualization will be implemented in a future update.
+            <Typography variant="body2" paragraph>
+              • Each node has at most 2 children<br />
+              • Left child is less than parent<br />
+              • Right child is greater than parent<br />
+              • Allows for efficient searching, insertion and deletion<br />
+              • Search: O(log n) average case
             </Typography>
-          </Paper>
-        </AccordionDetails>
-      </Accordion>
-      
-      <Accordion>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography variant="h6">Depth-First Search</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <Paper elevation={3} sx={{ p: 3, minHeight: '300px', textAlign: 'center' }}>
-            <Typography variant="body1" sx={{ mt: 8 }}>
-              Depth-First Search visualization will be implemented in a future update.
+          </Box>
+          <Box sx={{ flex: { xs: '1', md: '0 0 31%' } }}>
+            <Typography variant="subtitle1" gutterBottom>
+              <strong>Balanced vs Unbalanced</strong>
             </Typography>
-          </Paper>
-        </AccordionDetails>
-      </Accordion>
-      
-      <Accordion>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography variant="h6">Breadth-First Search</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <Paper elevation={3} sx={{ p: 3, minHeight: '300px', textAlign: 'center' }}>
-            <Typography variant="body1" sx={{ mt: 8 }}>
-              Breadth-First Search visualization will be implemented in a future update.
+            <Typography variant="body2" paragraph>
+              • Balanced trees maintain O(log n) operations<br />
+              • Unbalanced trees degrade to O(n) in worst case<br />
+              • Self-balancing trees (AVL, Red-Black) maintain balance<br />
+              • Balancing adds overhead but guarantees performance
             </Typography>
-          </Paper>
-        </AccordionDetails>
-      </Accordion>
-      
-      <Accordion>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography variant="h6">BST Sets and Maps</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <Paper elevation={3} sx={{ p: 3, minHeight: '300px', textAlign: 'center' }}>
-            <Typography variant="body1" sx={{ mt: 8 }}>
-              BST Sets and Maps visualization will be implemented in a future update.
+          </Box>
+          <Box sx={{ flex: { xs: '1', md: '0 0 31%' } }}>
+            <Typography variant="subtitle1" gutterBottom>
+              <strong>Other Tree Types</strong>
             </Typography>
-          </Paper>
-        </AccordionDetails>
-      </Accordion>
+            <Typography variant="body2" paragraph>
+              • AVL Tree: Strictly balanced BST<br />
+              • Red-Black Tree: Nearly balanced BST<br />
+              • B-Tree: Multi-way search tree (databases)<br />
+              • Trie: Digital tree for strings<br />
+              • Heap: Complete binary tree (priority queue)
+            </Typography>
+          </Box>
+        </Box>
+      </Paper>
     </Box>
   );
 };
