@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Container,
   Typography,
@@ -29,6 +29,7 @@ import PauseIcon from '@mui/icons-material/Pause';
 import StopIcon from '@mui/icons-material/Stop';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import SearchIcon from '@mui/icons-material/Search';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -1217,205 +1218,179 @@ const BitManipulationVisualizer: React.FC = () => {
 // Recursion Visualizer component
 const RecursionVisualizer: React.FC = () => {
   const theme = useTheme();
-  const [factorialInput, setFactorialInput] = useState<number>(5);
-  const [fibonacciInput, setFibonacciInput] = useState<number>(6);
+  const [recursionType, setRecursionType] = useState<string>('factorial');
+  const [inputValue, setInputValue] = useState<number>(5);
+  const [maxDepth, setMaxDepth] = useState<number>(10);
+  
+  // Implement factorial function
+  const factorial = (n: number): number => {
+    if (n <= 1) return 1;
+    return n * factorial(n - 1);
+  };
+  
+  // Implement fibonacci function
+  const fibonacci = (n: number): number => {
+    if (n <= 0) return 0;
+    if (n === 1) return 1;
+    return fibonacci(n - 1) + fibonacci(n - 2);
+  };
+  
+  // Calculate recursive result
+  const calculateResult = (): number => {
+    if (recursionType === 'factorial') {
+      return factorial(inputValue);
+    } else {
+      return fibonacci(inputValue);
+    }
+  };
   
   return (
     <Box>
       <Typography variant="h5" gutterBottom>Recursion</Typography>
       <Typography variant="body1" paragraph>
-        Recursion is a method where the solution depends on solutions to smaller instances of the same problem.
-        It involves a function calling itself until it reaches a base case.
+        Recursion is a method of solving problems where a function calls itself as a subroutine.
       </Typography>
       
+      {/* Recursion Type Selection */}
+      <FormControl fullWidth sx={{ mb: 3 }}>
+        <InputLabel id="recursion-type-label">Recursion Type</InputLabel>
+        <Select
+          labelId="recursion-type-label"
+          id="recursion-type"
+          value={recursionType}
+          label="Recursion Type"
+          onChange={(e) => {
+            setRecursionType(e.target.value);
+            setInputValue(e.target.value === 'factorial' ? 5 : 6);
+          }}
+        >
+          <MenuItem value="factorial">Factorial</MenuItem>
+          <MenuItem value="fibonacci">Fibonacci</MenuItem>
+        </Select>
+      </FormControl>
+      
       {/* Factorial Section */}
-      <Accordion defaultExpanded>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography variant="h6">Factorial</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <Box>
-            <Typography variant="body1" paragraph>
-              The factorial of a non-negative integer n, denoted by n!, is the product of all positive integers less than or equal to n.
-            </Typography>
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
-              <Box sx={{ flex: '1 1 100%', minWidth: '300px', maxWidth: { xs: '100%', md: '45%' } }}>
-                <Typography variant="subtitle1" gutterBottom>Recursive Definition:</Typography>
-                <ul>
-                  <li>
-                    <Typography variant="body1">
-                      <strong>Base case:</strong> 0! = 1
-                    </Typography>
-                  </li>
-                  <li>
-                    <Typography variant="body1">
-                      <strong>Recursive case:</strong> n! = n × (n-1)!
-                    </Typography>
-                  </li>
-                </ul>
-                <Box sx={{ mt: 2 }}>
-                  <Typography variant="subtitle1" gutterBottom>Recursive Code:</Typography>
-                  <Paper sx={{ p: 2, bgcolor: 'background.paper' }}>
-                    <pre style={{ margin: 0, overflow: 'auto' }}>
-                      {`def factorial(n):
-    # Base case
-    if n == 0 or n == 1:
-        return 1
-    
-    # Recursive case
-    return n * factorial(n - 1)`}
-                    </pre>
-                  </Paper>
-                </Box>
-              </Box>
-              <Box sx={{ flex: '1 1 100%', minWidth: '300px', maxWidth: { xs: '100%', md: '45%' } }}>
-                <Paper elevation={1} sx={{ p: 2, bgcolor: 'background.default' }}>
-                  <Typography variant="subtitle1" gutterBottom>Factorial Call Stack Visualization</Typography>
+      {recursionType === 'factorial' && (
+        <Accordion defaultExpanded>
+          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+            <Typography variant="h6">Factorial Recursion</Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            <Box>
+              <Typography variant="body1" paragraph>
+                <strong>Base case:</strong> factorial(0) = 1
+                <br />
+                <strong>Recursive case:</strong> factorial(n) = n × factorial(n-1) for n {'>'} 0
+              </Typography>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+                <Box sx={{ flex: '1 1 100%', minWidth: '300px', maxWidth: { xs: '100%', md: '45%' } }}>
+                  <Typography variant="subtitle1" gutterBottom>Factorial Calculation:</Typography>
                   <Box sx={{ mb: 2 }}>
-                    <Typography variant="body2">Enter n:</Typography>
+                    <Typography variant="body2" gutterBottom>Select value for n:</Typography>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 1 }}>
                       <Slider
-                        value={factorialInput}
-                        onChange={(_, value) => setFactorialInput(value as number)}
+                        value={inputValue}
+                        onChange={(_, value) => setInputValue(value as number)}
                         step={1}
                         marks
                         min={0}
-                        max={8}
+                        max={10}
                         valueLabelDisplay="auto"
                         sx={{ flex: 1 }}
                       />
-                      <Typography variant="body1" sx={{ width: 40 }}>{factorialInput}</Typography>
+                      <Typography variant="body1" sx={{ width: 40 }}>{inputValue}</Typography>
                     </Box>
                   </Box>
-                  
-                  <Divider sx={{ my: 2 }} />
-                  
-                  <Box sx={{ 
-                    display: 'flex',
-                    flexDirection: 'column',
-                    mt: 2
+                  <Box sx={{ mt: 3 }}>
+                    <Typography variant="body1">
+                      <strong>Result: factorial({inputValue}) = {factorial(inputValue)}</strong>
+                    </Typography>
+                  </Box>
+                </Box>
+                <Box sx={{ flex: '1 1 100%', minWidth: '300px', maxWidth: { xs: '100%', md: '45%' } }}>
+                  <Typography variant="subtitle1" gutterBottom>Recursive Call Stack:</Typography>
+                  <Box sx={{
+                    border: `1px solid ${theme.palette.divider}`,
+                    maxHeight: '240px',
+                    overflow: 'auto',
+                    borderRadius: '4px'
                   }}>
-                    <Typography variant="body2" sx={{ mb: 1 }}>Call Stack (grows downward):</Typography>
-                    <Box sx={{ 
-                      display: 'flex',
-                      flexDirection: 'column',
-                      border: `1px solid ${theme.palette.divider}`,
-                      borderRadius: '4px'
-                    }}>
-                      {Array.from({ length: factorialInput + 1 }).map((_, index) => {
-                        const n = factorialInput - index;
-                        return (
-                          <Box key={index} sx={{
-                            p: 1.5,
-                            borderBottom: index < factorialInput ? `1px solid ${theme.palette.divider}` : 'none',
-                            bgcolor: index === 0 
-                              ? theme.palette.primary.main 
-                              : index === factorialInput 
-                                ? theme.palette.success.light
-                                : theme.palette.primary.dark,
-                            color: 'white',
-                            display: 'flex',
-                            justifyContent: 'space-between'
-                          }}>
-                            <Typography variant="body2">
-                              {index === factorialInput 
-                                ? 'factorial(0) = 1' 
-                                : `factorial(${n}) = ${n} × factorial(${n-1})`}
-                            </Typography>
-                            <Typography variant="body2">
-                              {index === factorialInput 
-                                ? '→ 1' 
-                                : `→ ${n} × ${Array(n).fill(0).map((_, i) => n-i-1 > 0 ? n-i-1 : 1).reduce((a, b) => a * b, 1)} = ${factorial(n)}`}
-                            </Typography>
-                          </Box>
-                        );
-                      })}
-                    </Box>
+                    {Array.from({ length: inputValue + 1 }).map((_, index) => {
+                      const n = inputValue - index;
+                      return (
+                        <Box key={index} sx={{
+                          p: 1.5,
+                          borderBottom: index < inputValue ? `1px solid ${theme.palette.divider}` : 'none',
+                          bgcolor: index === 0 
+                            ? theme.palette.primary.main 
+                            : index === inputValue 
+                              ? theme.palette.success.light
+                              : theme.palette.primary.dark,
+                          color: 'white',
+                          fontFamily: 'monospace',
+                          fontSize: '0.875rem'
+                        }}>
+                          {index === 0 ? (
+                            <Box>
+                              <Typography variant="body2" component="span" sx={{ fontWeight: 'bold' }}>
+                                factorial({n})
+                              </Typography>
+                              <Typography variant="body2" component="span" sx={{ opacity: 0.8, ml: 1 }}>
+                                // Initial call
+                              </Typography>
+                            </Box>
+                          ) : index === inputValue ? (
+                            <Box>
+                              <Typography variant="body2" component="span" sx={{ fontWeight: 'bold' }}>
+                                factorial(0) = 1
+                              </Typography>
+                              <Typography variant="body2" component="span" sx={{ opacity: 0.8, ml: 1 }}>
+                                // Base case reached
+                              </Typography>
+                            </Box>
+                          ) : (
+                            <Box>
+                              <Typography variant="body2" component="span" sx={{ fontWeight: 'bold' }}>
+                                factorial({n}) = {n} × factorial({n-1})
+                              </Typography>
+                              <Typography variant="body2" component="span" sx={{ opacity: 0.8, ml: 1 }}>
+                                = {n} × {factorial(n-1)} = {factorial(n)}
+                              </Typography>
+                            </Box>
+                          )}
+                        </Box>
+                      );
+                    })}
                   </Box>
-                  
-                  <Box sx={{ mt: 3, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 1 }}>
-                    <Typography variant="h6">Result: {factorialInput}! = </Typography>
-                    <Typography variant="h6" color="primary">{factorial(factorialInput)}</Typography>
-                  </Box>
-                </Paper>
+                </Box>
               </Box>
             </Box>
-          </Box>
-        </AccordionDetails>
-      </Accordion>
+          </AccordionDetails>
+        </Accordion>
+      )}
       
-      {/* Fibonacci Sequence Section */}
-      <Accordion>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography variant="h6">Fibonacci Sequence</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <Box>
-            <Typography variant="body1" paragraph>
-              The Fibonacci sequence is a series of numbers where each number is the sum of the two preceding ones, 
-              usually starting with 0 and 1.
-            </Typography>
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
-              <Box sx={{ flex: '1 1 100%', minWidth: '300px', maxWidth: { xs: '100%', md: '45%' } }}>
-                <Typography variant="subtitle1" gutterBottom>Recursive Definition:</Typography>
-                <ul>
-                  <li>
-                    <Typography variant="body1">
-                      <strong>Base cases:</strong> fib(0) = 0, fib(1) = 1
-                    </Typography>
-                  </li>
-                  <li>
-                    <Typography variant="body1">
-                      <strong>Recursive case:</strong> fib(n) = fib(n-1) + fib(n-2) for n {'>'}1
-                    </Typography>
-                  </li>
-                </ul>
-                <Box sx={{ mt: 2 }}>
-                  <Typography variant="subtitle1" gutterBottom>Recursive Code:</Typography>
-                  <Paper sx={{ p: 2, bgcolor: 'background.paper' }}>
-                    <pre style={{ margin: 0, overflow: 'auto' }}>
-                      {`def fibonacci(n):
-    # Base cases
-    if n == 0:
-        return 0
-    if n == 1:
-        return 1
-    
-    # Recursive case
-    return fibonacci(n - 1) + fibonacci(n - 2)`}
-                    </pre>
-                  </Paper>
-                </Box>
-                <Box sx={{ mt: 3 }}>
-                  <Typography variant="subtitle1" gutterBottom>Problems with simple recursion:</Typography>
-                  <ul>
-                    <li>
-                      <Typography variant="body1">
-                        <strong>Exponential time complexity:</strong> O(2^n) due to repeated subproblems
-                      </Typography>
-                    </li>
-                    <li>
-                      <Typography variant="body1">
-                        <strong>Redundant calculations:</strong> fib(n-2) is calculated multiple times
-                      </Typography>
-                    </li>
-                    <li>
-                      <Typography variant="body1">
-                        <strong>Solution:</strong> Dynamic programming (memoization) can optimize this to O(n)
-                      </Typography>
-                    </li>
-                  </ul>
-                </Box>
-              </Box>
-              <Box sx={{ flex: '1 1 100%', minWidth: '300px', maxWidth: { xs: '100%', md: '45%' } }}>
-                <Paper elevation={1} sx={{ p: 2, bgcolor: 'background.default' }}>
-                  <Typography variant="subtitle1" gutterBottom>Fibonacci Sequence Visualization</Typography>
+      {/* Fibonacci Section */}
+      {recursionType === 'fibonacci' && (
+        <Accordion defaultExpanded>
+          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+            <Typography variant="h6">Fibonacci Recursion</Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            <Box>
+              <Typography variant="body1" paragraph>
+                <strong>Base cases:</strong> fib(0) = 0, fib(1) = 1
+                <br />
+                <strong>Recursive case:</strong> fib(n) = fib(n-1) + fib(n-2) for n {'>'}1
+              </Typography>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+                <Box sx={{ flex: '1 1 100%', minWidth: '300px', maxWidth: { xs: '100%', md: '45%' } }}>
+                  <Typography variant="subtitle1" gutterBottom>Fibonacci Calculation:</Typography>
                   <Box sx={{ mb: 2 }}>
-                    <Typography variant="body2">Enter n:</Typography>
+                    <Typography variant="body2" gutterBottom>Select value for n:</Typography>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 1 }}>
                       <Slider
-                        value={fibonacciInput}
-                        onChange={(_, value) => setFibonacciInput(value as number)}
+                        value={inputValue}
+                        onChange={(_, value) => setInputValue(value as number)}
                         step={1}
                         marks
                         min={1}
@@ -1423,275 +1398,49 @@ const RecursionVisualizer: React.FC = () => {
                         valueLabelDisplay="auto"
                         sx={{ flex: 1 }}
                       />
-                      <Typography variant="body1" sx={{ width: 40 }}>{fibonacciInput}</Typography>
+                      <Typography variant="body1" sx={{ width: 40 }}>{inputValue}</Typography>
                     </Box>
                   </Box>
-                  
-                  <Divider sx={{ my: 2 }} />
-                  
-                  <Box sx={{ mt: 2 }}>
-                    <Typography variant="body2" gutterBottom>Fibonacci sequence (first {fibonacciInput+1} terms):</Typography>
-                    <Box sx={{ 
-                      display: 'flex', 
-                      flexWrap: 'wrap',
-                      gap: 1,
-                      mt: 1,
-                      justifyContent: 'center'
-                    }}>
-                      {Array.from({ length: fibonacciInput + 1 }).map((_, index) => (
-                        <Box key={index} sx={{
-                          width: '40px',
-                          height: '40px',
-                          display: 'flex',
-                          justifyContent: 'center',
-                          alignItems: 'center',
-                          bgcolor: index === fibonacciInput 
-                            ? theme.palette.secondary.main
-                            : theme.palette.primary.main,
-                          color: 'white',
-                          borderRadius: '4px',
-                          position: 'relative'
-                        }}>
-                          {fibonacci(index)}
-                          <Box sx={{ 
-                            position: 'absolute',
-                            top: '-20px',
-                            fontSize: '0.75rem'
-                          }}>
-                            fib({index})
-                          </Box>
-                        </Box>
-                      ))}
-                    </Box>
-                  </Box>
-                  
-                  <Divider sx={{ my: 3 }} />
-                  
-                  <Box sx={{ mt: 2 }}>
-                    <Typography variant="subtitle2" gutterBottom>Recursive Tree for fib({fibonacciInput > 5 ? 5 : fibonacciInput}):</Typography>
-                    <Typography variant="caption" paragraph>
-                      (Showing a simplified tree - the actual tree grows exponentially)
+                  <Box sx={{ mt: 3 }}>
+                    <Typography variant="body1">
+                      <strong>Result: fibonacci({inputValue}) = {fibonacci(inputValue)}</strong>
                     </Typography>
-                    <Box sx={{ 
-                      display: 'flex',
-                      justifyContent: 'center',
-                      position: 'relative',
-                      minHeight: '200px',
-                      mt: 3
-                    }}>
-                      {/* Root node */}
-                      <Box sx={{
-                        position: 'absolute',
-                        top: 0,
-                        width: '40px',
-                        height: '40px',
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        bgcolor: theme.palette.secondary.main,
-                        color: 'white',
-                        borderRadius: '50%',
-                        boxShadow: 1,
-                        zIndex: 1
-                      }}>
-                        fib({fibonacciInput > 5 ? 5 : fibonacciInput})
-                      </Box>
-                      
-                      {fibonacciInput > 1 && fibonacciInput <= 5 && (
-                        <>
-                          {/* Left branch connector */}
-                          <Box sx={{
-                            position: 'absolute',
-                            top: '40px',
-                            left: 'calc(50% - 40px)',
-                            width: '40px',
-                            height: '20px',
-                            borderLeft: `1px solid ${theme.palette.divider}`,
-                            borderBottom: `1px solid ${theme.palette.divider}`,
-                          }} />
-                          
-                          {/* Right branch connector */}
-                          <Box sx={{
-                            position: 'absolute',
-                            top: '40px',
-                            right: 'calc(50% - 40px)',
-                            width: '40px',
-                            height: '20px',
-                            borderRight: `1px solid ${theme.palette.divider}`,
-                            borderBottom: `1px solid ${theme.palette.divider}`,
-                          }} />
-                          
-                          {/* First level nodes */}
-                          <Box sx={{
-                            position: 'absolute',
-                            top: '60px',
-                            left: 'calc(50% - 70px)',
-                            width: '35px',
-                            height: '35px',
-                            display: 'flex',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            bgcolor: theme.palette.primary.main,
-                            color: 'white',
-                            borderRadius: '50%',
-                            boxShadow: 1
-                          }}>
-                            fib({fibonacciInput > 5 ? 4 : fibonacciInput - 1})
-                          </Box>
-                          
-                          <Box sx={{
-                            position: 'absolute',
-                            top: '60px',
-                            right: 'calc(50% - 70px)',
-                            width: '35px',
-                            height: '35px',
-                            display: 'flex',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            bgcolor: theme.palette.primary.main,
-                            color: 'white',
-                            borderRadius: '50%',
-                            boxShadow: 1
-                          }}>
-                            fib({fibonacciInput > 5 ? 3 : fibonacciInput - 2})
-                          </Box>
-                        </>
-                      )}
-                      
-                      {fibonacciInput > 2 && fibonacciInput <= 5 && (
-                        <>
-                          {/* Second level connectors - left side */}
-                          <Box sx={{
-                            position: 'absolute',
-                            top: '95px',
-                            left: 'calc(50% - 90px)',
-                            width: '30px',
-                            height: '20px',
-                            borderLeft: `1px solid ${theme.palette.divider}`,
-                            borderBottom: `1px solid ${theme.palette.divider}`,
-                          }} />
-                          
-                          <Box sx={{
-                            position: 'absolute',
-                            top: '95px',
-                            left: 'calc(50% - 60px)',
-                            width: '30px',
-                            height: '20px',
-                            borderRight: `1px solid ${theme.palette.divider}`,
-                            borderBottom: `1px solid ${theme.palette.divider}`,
-                          }} />
-                          
-                          {/* Second level connectors - right side */}
-                          <Box sx={{
-                            position: 'absolute',
-                            top: '95px',
-                            right: 'calc(50% - 90px)',
-                            width: '30px',
-                            height: '20px',
-                            borderLeft: `1px solid ${theme.palette.divider}`,
-                            borderBottom: `1px solid ${theme.palette.divider}`,
-                          }} />
-                          
-                          <Box sx={{
-                            position: 'absolute',
-                            top: '95px',
-                            right: 'calc(50% - 60px)',
-                            width: '30px',
-                            height: '20px',
-                            borderRight: `1px solid ${theme.palette.divider}`,
-                            borderBottom: `1px solid ${theme.palette.divider}`,
-                          }} />
-                          
-                          {/* Second level nodes */}
-                          <Box sx={{
-                            position: 'absolute',
-                            top: '115px',
-                            left: 'calc(50% - 110px)',
-                            width: '30px',
-                            height: '30px',
-                            display: 'flex',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            bgcolor: theme.palette.primary.dark,
-                            color: 'white',
-                            borderRadius: '50%',
-                            boxShadow: 1,
-                            fontSize: '0.75rem'
-                          }}>
-                            fib({fibonacciInput > 5 ? 3 : fibonacciInput - 2})
-                          </Box>
-                          
-                          <Box sx={{
-                            position: 'absolute',
-                            top: '115px',
-                            left: 'calc(50% - 50px)',
-                            width: '30px',
-                            height: '30px',
-                            display: 'flex',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            bgcolor: theme.palette.primary.dark,
-                            color: 'white',
-                            borderRadius: '50%',
-                            boxShadow: 1,
-                            fontSize: '0.75rem'
-                          }}>
-                            fib({fibonacciInput > 5 ? 2 : fibonacciInput - 3})
-                          </Box>
-                          
-                          <Box sx={{
-                            position: 'absolute',
-                            top: '115px',
-                            right: 'calc(50% - 110px)',
-                            width: '30px',
-                            height: '30px',
-                            display: 'flex',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            bgcolor: theme.palette.primary.dark,
-                            color: 'white',
-                            borderRadius: '50%',
-                            boxShadow: 1,
-                            fontSize: '0.75rem'
-                          }}>
-                            fib({fibonacciInput > 5 ? 2 : fibonacciInput - 3})
-                          </Box>
-                          
-                          <Box sx={{
-                            position: 'absolute',
-                            top: '115px',
-                            right: 'calc(50% - 50px)',
-                            width: '30px',
-                            height: '30px',
-                            display: 'flex',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            bgcolor: theme.palette.primary.dark,
-                            color: 'white',
-                            borderRadius: '50%',
-                            boxShadow: 1,
-                            fontSize: '0.75rem'
-                          }}>
-                            fib({fibonacciInput > 5 ? 1 : (fibonacciInput - 4 > 0 ? fibonacciInput - 4 : 1)})
-                          </Box>
-                        </>
-                      )}
-                    </Box>
-                  </Box>
-                  
-                  <Box sx={{ mt: 3, textAlign: 'center' }}>
-                    <Typography variant="h6">Result: fib({fibonacciInput}) = {fibonacci(fibonacciInput)}</Typography>
-                    <Typography variant="caption" sx={{ display: 'block', mt: 1, fontStyle: 'italic' }}>
-                      Notice how the number of recursive calls grows exponentially, showing why simple 
-                      recursive Fibonacci is inefficient for large inputs.
+                    <Typography variant="body2" sx={{ mt: 1 }}>
+                      Fibonacci Sequence: {Array.from({ length: inputValue + 1 }).map((_, i) => fibonacci(i)).join(', ')}
                     </Typography>
                   </Box>
-                </Paper>
+                </Box>
+                <Box sx={{ flex: '1 1 100%', minWidth: '300px', maxWidth: { xs: '100%', md: '45%' } }}>
+                  <Typography variant="subtitle1" gutterBottom>Problems with Simple Recursion:</Typography>
+                  <Typography variant="body2" paragraph>
+                    Computing the Fibonacci sequence using simple recursion has <strong>exponential time complexity</strong> (O(2ⁿ)) because:
+                  </Typography>
+                  <ul>
+                    <li>
+                      <Typography variant="body2">
+                        <strong>Redundant calculations:</strong> fib(n-2) is computed multiple times
+                      </Typography>
+                    </li>
+                    <li>
+                      <Typography variant="body2">
+                        <strong>Deep recursion:</strong> For larger values of n, the recursion tree grows very large
+                      </Typography>
+                    </li>
+                    <li>
+                      <Typography variant="body2">
+                        <strong>Solution:</strong> Dynamic Programming (memoization) optimizes to O(n)
+                      </Typography>
+                    </li>
+                  </ul>
+                  <Typography variant="subtitle2" sx={{ mt: 2 }}>
+                    Try n = 40 with simple recursion vs. memoization to see the difference!
+                  </Typography>
+                </Box>
               </Box>
             </Box>
-          </Box>
-        </AccordionDetails>
-      </Accordion>
+          </AccordionDetails>
+        </Accordion>
+      )}
     </Box>
   );
 };
@@ -1702,27 +1451,642 @@ const SortingVisualizer: React.FC = () => {
   const [array, setArray] = useState<number[]>([]);
   const [sortingSpeed, setSortingSpeed] = useState<number>(50);
   const [isSorting, setIsSorting] = useState<boolean>(false);
+  const [isPaused, setIsPaused] = useState<boolean>(false);
   const [sortingAlgorithm, setSortingAlgorithm] = useState<string>('insertion');
+  const [animations, setAnimations] = useState<any[]>([]);
+  const [animationIndex, setAnimationIndex] = useState<number>(0);
+  const [currentArray, setCurrentArray] = useState<number[]>([]);
+  const [comparingIndices, setComparingIndices] = useState<number[]>([]);
+  const [swappingIndices, setSwappingIndices] = useState<number[]>([]);
+  const [sortedIndices, setSortedIndices] = useState<number[]>([]);
+  const [pivotIndex, setPivotIndex] = useState<number>(-1); // For quicksort pivot visualization
+  const animationTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Generate random array on component mount and when reset is clicked
   useEffect(() => {
     resetArray();
+    return () => {
+      if (animationTimerRef.current) {
+        clearTimeout(animationTimerRef.current);
+      }
+    };
   }, []);
 
+  // Effect to handle animations
+  useEffect(() => {
+    if (isSorting && !isPaused && animations.length > 0 && animationIndex < animations.length) {
+      const animation = animations[animationIndex];
+      
+      // Apply the current animation step
+      if (animation.type === 'compare') {
+        setComparingIndices(animation.indices);
+        setSwappingIndices([]);
+        setPivotIndex(animation.pivot !== undefined ? animation.pivot : -1);
+      } else if (animation.type === 'swap') {
+        setComparingIndices([]);
+        setSwappingIndices(animation.indices);
+        setPivotIndex(animation.pivot !== undefined ? animation.pivot : -1);
+        setCurrentArray([...animation.array]);
+      } else if (animation.type === 'sorted') {
+        setSortedIndices(prev => [...prev, ...animation.indices]);
+        setComparingIndices([]);
+        setSwappingIndices([]);
+      } else if (animation.type === 'final') {
+        setCurrentArray([...animation.array]);
+        setSortedIndices(Array.from({ length: animation.array.length }, (_, i) => i));
+        setComparingIndices([]);
+        setSwappingIndices([]);
+        setPivotIndex(-1);
+      }
+
+      // Schedule next animation step
+      const speed = 110 - sortingSpeed; // Invert speed (higher value = faster)
+      animationTimerRef.current = setTimeout(() => {
+        setAnimationIndex(animationIndex + 1);
+        if (animationIndex === animations.length - 1) {
+          setIsSorting(false);
+          setAnimationIndex(0);
+          setAnimations([]);
+        }
+      }, speed);
+    }
+
+    return () => {
+      if (animationTimerRef.current) {
+        clearTimeout(animationTimerRef.current);
+      }
+    };
+  }, [isSorting, isPaused, animations, animationIndex, sortingSpeed]);
+
   const resetArray = () => {
+    stopSorting();
     const newArray = [];
-    for (let i = 0; i < 20; i++) {
+    for (let i = 0; i < 15; i++) { // Reduce to 15 elements for clearer visualization
       newArray.push(Math.floor(Math.random() * 80) + 10); // Random numbers between 10 and 90
     }
     setArray(newArray);
+    setCurrentArray(newArray);
+    setSortedIndices([]);
   };
 
   const handleAlgorithmChange = (event: SelectChangeEvent) => {
-    setSortingAlgorithm(event.target.value);
+    if (!isSorting) {
+      setSortingAlgorithm(event.target.value);
+      resetArray();
+    }
   };
 
   const handleSpeedChange = (event: Event, newValue: number | number[]) => {
     setSortingSpeed(newValue as number);
+  };
+
+  const startSorting = () => {
+    if (isSorting && isPaused) {
+      // Resume sorting
+      setIsPaused(false);
+      return;
+    }
+    
+    if (!isSorting) {
+      setIsSorting(true);
+      setIsPaused(false);
+      setSortedIndices([]);
+      setComparingIndices([]);
+      setSwappingIndices([]);
+      setPivotIndex(-1);
+      
+      // Generate animations based on the selected algorithm
+      let sortAnimations: any[] = [];
+      switch (sortingAlgorithm) {
+        case 'insertion':
+          sortAnimations = getInsertionSortAnimations([...array]);
+          break;
+        case 'merge':
+          sortAnimations = getMergeSortAnimations([...array]);
+          break;
+        case 'quick':
+          sortAnimations = getQuickSortAnimations([...array]);
+          break;
+        case 'bucket':
+          sortAnimations = getBucketSortAnimations([...array]);
+          break;
+        default:
+          sortAnimations = getInsertionSortAnimations([...array]);
+      }
+      
+      setAnimations(sortAnimations);
+      setAnimationIndex(0);
+    }
+  };
+
+  const pauseSorting = () => {
+    setIsPaused(true);
+  };
+
+  const stopSorting = () => {
+    setIsSorting(false);
+    setIsPaused(false);
+    setAnimationIndex(0);
+    setAnimations([]);
+    setComparingIndices([]);
+    setSwappingIndices([]);
+    setSortedIndices([]);
+    setCurrentArray([...array]);
+    setPivotIndex(-1);
+  };
+
+  // Animation generators for each algorithm
+  const getInsertionSortAnimations = (arr: number[]): any[] => {
+    const animations: any[] = [];
+    const arrayCopy = [...arr];
+    
+    for (let i = 1; i < arrayCopy.length; i++) {
+      const current = arrayCopy[i];
+      
+      // Add animation to show the current element we're placing
+      animations.push({ 
+        type: 'compare', 
+        indices: [i],
+        description: `Selecting element ${current} at index ${i} to insert into sorted portion`
+      });
+      
+      let j = i - 1;
+      while (j >= 0 && arrayCopy[j] > current) {
+        // Compare current element with element at j
+        animations.push({ 
+          type: 'compare', 
+          indices: [i, j],
+          description: `Comparing ${current} with ${arrayCopy[j]} at index ${j}`
+        });
+        
+        // Shift element to the right
+        arrayCopy[j + 1] = arrayCopy[j];
+        animations.push({ 
+          type: 'swap', 
+          indices: [j, j + 1],
+          array: [...arrayCopy],
+          description: `Shifting ${arrayCopy[j]} to the right`
+        });
+        
+        j--;
+      }
+      
+      // Place current element in its correct position
+      arrayCopy[j + 1] = current;
+      animations.push({ 
+        type: 'swap', 
+        indices: [j + 1],
+        array: [...arrayCopy],
+        description: `Placing ${current} at correct position (index ${j + 1})`
+      });
+      
+      // Mark first i+1 elements as sorted
+      animations.push({ 
+        type: 'sorted', 
+        indices: [j + 1],
+        description: `Element ${current} is now in sorted position`
+      });
+    }
+    
+    animations.push({ 
+      type: 'final', 
+      array: arrayCopy,
+      description: 'Array is fully sorted'
+    });
+    
+    return animations;
+  };
+
+  const getMergeSortAnimations = (arr: number[]): any[] => {
+    const animations: any[] = [];
+    const arrayCopy = [...arr];
+    const auxArray = [...arr];
+    
+    mergeSortHelper(arrayCopy, 0, arrayCopy.length - 1, auxArray, animations);
+    
+    animations.push({ 
+      type: 'final', 
+      array: arrayCopy,
+      description: 'Array is fully sorted'
+    });
+    
+    return animations;
+  };
+
+  const mergeSortHelper = (
+    mainArray: number[], 
+    start: number, 
+    end: number, 
+    auxArray: number[], 
+    animations: any[]
+  ) => {
+    if (start === end) return;
+    
+    const mid = Math.floor((start + end) / 2);
+    
+    // Add an animation to show the split points
+    if (end - start > 1) {
+      animations.push({
+        type: 'compare',
+        indices: [start, mid, end],
+        description: `Dividing array from index ${start} to ${end} at midpoint ${mid}`
+      });
+    }
+    
+    mergeSortHelper(auxArray, start, mid, mainArray, animations);
+    mergeSortHelper(auxArray, mid + 1, end, mainArray, animations);
+    
+    // Add an animation to show we're about to merge
+    animations.push({
+      type: 'compare',
+      indices: Array.from({ length: end - start + 1 }, (_, i) => start + i),
+      description: `Merging subarrays from index ${start} to ${end}`
+    });
+    
+    merge(mainArray, start, mid, end, auxArray, animations);
+  };
+
+  const merge = (
+    mainArray: number[], 
+    start: number, 
+    mid: number, 
+    end: number, 
+    auxArray: number[], 
+    animations: any[]
+  ) => {
+    let k = start;
+    let i = start;
+    let j = mid + 1;
+    
+    // Add animation to show the two arrays we're merging
+    animations.push({
+      type: 'compare',
+      indices: [...Array.from({ length: mid - start + 1 }, (_, idx) => start + idx), 
+                ...Array.from({ length: end - mid }, (_, idx) => mid + 1 + idx)],
+      description: `Comparing elements from left subarray (${start}-${mid}) and right subarray (${mid+1}-${end})`
+    });
+    
+    while (i <= mid && j <= end) {
+      // Compare values
+      animations.push({ 
+        type: 'compare', 
+        indices: [i, j],
+        description: `Comparing ${auxArray[i]} and ${auxArray[j]}`
+      });
+      
+      if (auxArray[i] <= auxArray[j]) {
+        // Overwrite value at k in the original array with value at i in the auxiliary array
+        mainArray[k] = auxArray[i];
+        animations.push({ 
+          type: 'swap', 
+          indices: [k],
+          array: [...mainArray],
+          description: `Placing ${auxArray[i]} at position ${k}`
+        });
+        i++;
+      } else {
+        // Overwrite value at k in the original array with value at j in the auxiliary array
+        mainArray[k] = auxArray[j];
+        animations.push({ 
+          type: 'swap', 
+          indices: [k],
+          array: [...mainArray],
+          description: `Placing ${auxArray[j]} at position ${k}`
+        });
+        j++;
+      }
+      k++;
+    }
+    
+    while (i <= mid) {
+      // Copy remaining elements from left side
+      animations.push({ 
+        type: 'compare', 
+        indices: [i],
+        description: `Copying remaining element ${auxArray[i]} from left side`
+      });
+      
+      mainArray[k] = auxArray[i];
+      animations.push({ 
+        type: 'swap', 
+        indices: [k],
+        array: [...mainArray],
+        description: `Placing ${auxArray[i]} at position ${k}`
+      });
+      i++;
+      k++;
+    }
+    
+    while (j <= end) {
+      // Copy remaining elements from right side
+      animations.push({ 
+        type: 'compare', 
+        indices: [j],
+        description: `Copying remaining element ${auxArray[j]} from right side`
+      });
+      
+      mainArray[k] = auxArray[j];
+      animations.push({ 
+        type: 'swap', 
+        indices: [k],
+        array: [...mainArray],
+        description: `Placing ${auxArray[j]} at position ${k}`
+      });
+      j++;
+      k++;
+    }
+    
+    // Mark sorted region
+    if (end - start > 0) {
+      animations.push({ 
+        type: 'sorted', 
+        indices: Array.from({ length: end - start + 1 }, (_, i) => start + i),
+        description: `Subarray from index ${start} to ${end} is now merged and sorted`
+      });
+    }
+  };
+
+  const getQuickSortAnimations = (arr: number[]): any[] => {
+    const animations: any[] = [];
+    const arrayCopy = [...arr];
+    
+    quickSortHelper(arrayCopy, 0, arrayCopy.length - 1, animations);
+    
+    animations.push({ 
+      type: 'final', 
+      array: arrayCopy,
+      description: 'Array is fully sorted'
+    });
+    
+    return animations;
+  };
+
+  const quickSortHelper = (
+    array: number[], 
+    low: number, 
+    high: number, 
+    animations: any[]
+  ) => {
+    if (low < high) {
+      // Add animation to show the current partition range
+      animations.push({ 
+        type: 'compare', 
+        indices: Array.from({ length: high - low + 1 }, (_, i) => low + i),
+        pivot: high,
+        description: `Partitioning subarray from index ${low} to ${high} with pivot ${array[high]}`
+      });
+      
+      const pivotIndex = partition(array, low, high, animations);
+      
+      // Mark pivot as in correct final position
+      animations.push({ 
+        type: 'sorted', 
+        indices: [pivotIndex],
+        description: `Pivot ${array[pivotIndex]} is now in its correct sorted position at index ${pivotIndex}`
+      });
+      
+      // Recursively sort left and right partitions
+      if (low < pivotIndex - 1) {
+        animations.push({ 
+          type: 'compare', 
+          indices: Array.from({ length: pivotIndex - low }, (_, i) => low + i),
+          description: `Sorting left subarray from index ${low} to ${pivotIndex - 1}`
+        });
+      }
+      
+      quickSortHelper(array, low, pivotIndex - 1, animations);
+      
+      if (pivotIndex + 1 < high) {
+        animations.push({ 
+          type: 'compare', 
+          indices: Array.from({ length: high - pivotIndex }, (_, i) => pivotIndex + 1 + i),
+          description: `Sorting right subarray from index ${pivotIndex + 1} to ${high}`
+        });
+      }
+      
+      quickSortHelper(array, pivotIndex + 1, high, animations);
+    } else if (low === high) {
+      // Single element is always sorted
+      animations.push({ 
+        type: 'sorted', 
+        indices: [low],
+        description: `Single element ${array[low]} at index ${low} is inherently sorted`
+      });
+    }
+  };
+
+  const partition = (
+    array: number[], 
+    low: number, 
+    high: number, 
+    animations: any[]
+  ): number => {
+    const pivot = array[high];
+    animations.push({ 
+      type: 'compare', 
+      indices: [high],
+      pivot: high,
+      description: `Selected pivot element: ${pivot}`
+    });
+    
+    let i = low - 1;
+    
+    for (let j = low; j < high; j++) {
+      animations.push({ 
+        type: 'compare', 
+        indices: [j, high],
+        pivot: high,
+        description: `Comparing element ${array[j]} with pivot ${pivot}`
+      });
+      
+      if (array[j] <= pivot) {
+        i++;
+        
+        // Only add swap animation if indices are different
+        if (i !== j) {
+          // Swap array[i] and array[j]
+          [array[i], array[j]] = [array[j], array[i]];
+          animations.push({ 
+            type: 'swap', 
+            indices: [i, j],
+            pivot: high,
+            array: [...array],
+            description: `Swapping ${array[i]} and ${array[j]} since ${array[i]} ≤ ${pivot}`
+          });
+        } else {
+          animations.push({ 
+            type: 'compare', 
+            indices: [i],
+            pivot: high,
+            description: `Element ${array[i]} is already in correct position relative to pivot`
+          });
+        }
+      }
+    }
+    
+    // Only add swap animation if indices are different
+    if (i + 1 !== high) {
+      // Swap pivot into its final position
+      [array[i + 1], array[high]] = [array[high], array[i + 1]];
+      animations.push({ 
+        type: 'swap', 
+        indices: [i + 1, high],
+        pivot: i + 1, // Pivot is now at i+1
+        array: [...array],
+        description: `Moving pivot ${pivot} to its correct position at index ${i + 1}`
+      });
+    }
+    
+    return i + 1;
+  };
+
+  const getBucketSortAnimations = (arr: number[]): any[] => {
+    const animations: any[] = [];
+    const arrayCopy = [...arr];
+    const bucketCount = 4; // Reduced for clarity
+    
+    if (arrayCopy.length <= 1) {
+      animations.push({ 
+        type: 'final', 
+        array: arrayCopy,
+        description: 'Array with 0 or 1 elements is already sorted'
+      });
+      return animations;
+    }
+    
+    // Find min and max values
+    const minValue = Math.min(...arrayCopy);
+    const maxValue = Math.max(...arrayCopy);
+    animations.push({ 
+      type: 'compare', 
+      indices: [],
+      description: `Finding min (${minValue}) and max (${maxValue}) values for bucket distribution`
+    });
+    
+    const range = maxValue - minValue;
+    
+    // Create buckets visualization
+    const buckets: number[][] = Array(bucketCount)
+      .fill(null)
+      .map(() => []);
+    
+    // Show empty buckets
+    animations.push({ 
+      type: 'compare', 
+      indices: [],
+      description: `Created ${bucketCount} empty buckets for distribution`
+    });
+    
+    // Distribute values into buckets
+    for (let i = 0; i < arrayCopy.length; i++) {
+      animations.push({ 
+        type: 'compare', 
+        indices: [i],
+        description: `Processing element ${arrayCopy[i]} for bucket placement`
+      });
+      
+      // Calculate bucket index
+      const num = arrayCopy[i];
+      let bucketIndex: number;
+      
+      if (range === 0) {
+        bucketIndex = 0;
+        animations.push({ 
+          type: 'compare', 
+          indices: [i],
+          description: `All elements are equal, placing in bucket 0`
+        });
+      } else {
+        bucketIndex = Math.min(
+          Math.floor(((num - minValue) / range) * bucketCount),
+          bucketCount - 1
+        );
+        animations.push({ 
+          type: 'compare', 
+          indices: [i],
+          description: `Placing ${num} in bucket ${bucketIndex}`
+        });
+      }
+      
+      // Add element to appropriate bucket
+      buckets[bucketIndex].push(num);
+    }
+    
+    // Sort individual buckets
+    let sortedIndex = 0;
+    for (let b = 0; b < buckets.length; b++) {
+      if (buckets[b].length > 0) {
+        animations.push({ 
+          type: 'compare', 
+          indices: [],
+          description: `Sorting bucket ${b} with elements: [${buckets[b].join(', ')}]`
+        });
+        
+        // Sort this bucket (using simple sort for visualization)
+        const bucket = buckets[b].sort((a, b) => a - b);
+        
+        // Show sorted bucket
+        animations.push({ 
+          type: 'compare', 
+          indices: [],
+          description: `Bucket ${b} after sorting: [${bucket.join(', ')}]`
+        });
+        
+        // Place sorted elements back in the array
+        for (let i = 0; i < bucket.length; i++) {
+          arrayCopy[sortedIndex] = bucket[i];
+          
+          animations.push({ 
+            type: 'swap', 
+            indices: [sortedIndex],
+            array: [...arrayCopy],
+            description: `Placing ${bucket[i]} from bucket ${b} at position ${sortedIndex} in the final array`
+          });
+          
+          // Mark as sorted
+          animations.push({ 
+            type: 'sorted', 
+            indices: [sortedIndex],
+            description: `Element ${bucket[i]} is now in its sorted position`
+          });
+          
+          sortedIndex++;
+        }
+      }
+    }
+    
+    animations.push({ 
+      type: 'final', 
+      array: arrayCopy,
+      description: 'Array is fully sorted'
+    });
+    
+    return animations;
+  };
+
+  // Bar color logic
+  const getBarColor = (index: number) => {
+    if (sortedIndices.includes(index)) {
+      return theme.palette.success.main;
+    }
+    if (pivotIndex === index) {
+      return theme.palette.error.dark; // Pivot is bright red
+    }
+    if (swappingIndices.includes(index)) {
+      return theme.palette.error.main;
+    }
+    if (comparingIndices.includes(index)) {
+      return theme.palette.warning.main;
+    }
+    return theme.palette.primary.main;
+  };
+
+  // Get current animation description
+  const getCurrentDescription = () => {
+    if (!isSorting || animations.length === 0 || animationIndex >= animations.length) {
+      return "Select an algorithm and press Start to begin visualization";
+    }
+    return animations[animationIndex].description || "";
   };
 
   return (
@@ -1760,7 +2124,7 @@ const SortingVisualizer: React.FC = () => {
               aria-labelledby="speed-slider-label"
               min={10}
               max={100}
-              disabled={isSorting}
+              disabled={isSorting && !isPaused}
             />
           </Box>
           <Box sx={{ flex: { xs: '1', sm: '0 0 40%' } }}>
@@ -1769,22 +2133,23 @@ const SortingVisualizer: React.FC = () => {
                 variant="contained" 
                 startIcon={<RestartAltIcon />}
                 onClick={resetArray}
-                disabled={isSorting}
+                disabled={isSorting && !isPaused}
               >
                 Reset Array
               </Button>
               <Button 
                 variant="contained" 
                 color="primary" 
-                startIcon={isSorting ? <PauseIcon /> : <PlayArrowIcon />}
-                disabled={true} // Enabled once implementations are added
+                startIcon={isSorting && !isPaused ? <PauseIcon /> : <PlayArrowIcon />}
+                onClick={isSorting && !isPaused ? pauseSorting : startSorting}
               >
-                {isSorting ? 'Pause' : 'Start'}
+                {isSorting && !isPaused ? 'Pause' : 'Start'}
               </Button>
               <Button 
                 variant="contained" 
                 color="secondary" 
                 startIcon={<StopIcon />}
+                onClick={stopSorting}
                 disabled={!isSorting}
               >
                 Stop
@@ -1794,389 +2159,161 @@ const SortingVisualizer: React.FC = () => {
         </Box>
       </Box>
       
-      {/* Insertion Sort Section */}
-      <Accordion defaultExpanded={sortingAlgorithm === 'insertion'}>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography variant="h6">Insertion Sort</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <Box>
-            <Typography variant="body1" paragraph>
-              Insertion sort builds the final sorted array one item at a time. It's much less efficient on large lists than more advanced algorithms.
-            </Typography>
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
-              <Box sx={{ flex: '1 1 100%', minWidth: '300px', maxWidth: { xs: '100%', md: '45%' } }}>
-                <Typography variant="subtitle1" gutterBottom>Characteristics:</Typography>
-                <ul>
-                  <li>
-                    <Typography variant="body1">
-                      <strong>Time Complexity:</strong> O(n²) in worst and average case
-                    </Typography>
-                  </li>
-                  <li>
-                    <Typography variant="body1">
-                      <strong>Space Complexity:</strong> O(1) - in-place sorting
-                    </Typography>
-                  </li>
-                  <li>
-                    <Typography variant="body1">
-                      <strong>Stability:</strong> Stable sort algorithm
-                    </Typography>
-                  </li>
-                  <li>
-                    <Typography variant="body1">
-                      <strong>Adaptive:</strong> O(n) time when array is nearly sorted
-                    </Typography>
-                  </li>
-                </ul>
-                <Box sx={{ mt: 2 }}>
-                  <Typography variant="subtitle1" gutterBottom>Code Implementation:</Typography>
-                  <Paper sx={{ p: 2, bgcolor: 'background.paper' }}>
-                    <pre style={{ margin: 0, overflow: 'auto' }}>
-                      {`def insertion_sort(arr):
-    # Create a copy of the input array
-    sorted_arr = arr.copy()
-    
-    for i in range(1, len(sorted_arr)):
-        current = sorted_arr[i]
-        j = i - 1
+      {/* Visualization Panel - Shared across all algorithms */}
+      <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
+        <Typography variant="h6" gutterBottom align="center">
+          {sortingAlgorithm.charAt(0).toUpperCase() + sortingAlgorithm.slice(1)} Sort Visualization
+        </Typography>
         
-        # Shift elements that are greater than current
-        # to one position ahead of their current position
-        while j >= 0 and sorted_arr[j] > current:
-            sorted_arr[j + 1] = sorted_arr[j]
-            j -= 1
+        {/* Animation Description */}
+        <Paper 
+          elevation={1} 
+          sx={{ 
+            p: 2, 
+            bgcolor: theme.palette.background.default, 
+            mb: 3,
+            minHeight: '60px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          <Typography variant="body1" align="center">
+            {getCurrentDescription()}
+          </Typography>
+        </Paper>
         
-        sorted_arr[j + 1] = current
-    
-    return sorted_arr`}
-                    </pre>
-                  </Paper>
-                </Box>
-              </Box>
-              <Box sx={{ flex: '1 1 100%', minWidth: '300px', maxWidth: { xs: '100%', md: '45%' } }}>
-                <Paper elevation={1} sx={{ p: 2, bgcolor: 'background.default' }}>
-                  <Typography variant="subtitle1" gutterBottom>Visualization</Typography>
-                  <Box sx={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'center', height: '200px', mt: 2 }}>
-                    {array.map((value, index) => (
-                      <Box 
-                        key={index}
-                        sx={{ 
-                          width: `${100 / array.length}%`,
-                          maxWidth: '30px',
-                          height: `${value * 2}px`,
-                          bgcolor: theme.palette.primary.main,
-                          mx: 0.5,
-                          borderRadius: '2px 2px 0 0'
-                        }}
-                      />
-                    ))}
-                  </Box>
-                  <Typography variant="body2" sx={{ mt: 3, fontStyle: 'italic', textAlign: 'center' }}>
-                    Insertion sort will be animated in a future update.
-                  </Typography>
-                </Paper>
-              </Box>
+        {/* Array Visualization */}
+        <Box 
+          sx={{ 
+            display: 'flex', 
+            alignItems: 'flex-end', 
+            justifyContent: 'center', 
+            height: '240px', 
+            mt: 2,
+            mb: 3,
+            position: 'relative',
+            mx: 'auto',
+            width: '100%'
+          }}
+        >
+          {(isSorting ? currentArray : array).map((value, index) => (
+            <Box 
+              key={index}
+              sx={{ 
+                width: `${80 / array.length}%`,
+                maxWidth: '50px',
+                height: `${value * 2}px`,
+                bgcolor: getBarColor(index),
+                mx: 0.5,
+                borderRadius: '2px 2px 0 0',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'flex-end',
+                pb: 0.5,
+                color: 'white',
+                fontSize: array.length <= 15 ? '0.8rem' : '0',
+                fontWeight: 'bold',
+                transition: 'height 0.3s ease, background-color 0.3s ease'
+              }}
+            >
+              {array.length <= 15 ? value : ''}
+            </Box>
+          ))}
+        </Box>
+        
+        {/* Animation Legend */}
+        <Box sx={{ mt: 2 }}>
+          <Typography variant="body2" sx={{ mb: 1 }}>Legend:</Typography>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, justifyContent: 'center' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Box sx={{ width: 20, height: 20, bgcolor: theme.palette.primary.main, mr: 1, borderRadius: '2px' }}></Box>
+              <Typography variant="body2">Unsorted</Typography>
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Box sx={{ width: 20, height: 20, bgcolor: theme.palette.warning.main, mr: 1, borderRadius: '2px' }}></Box>
+              <Typography variant="body2">Comparing</Typography>
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Box sx={{ width: 20, height: 20, bgcolor: theme.palette.error.main, mr: 1, borderRadius: '2px' }}></Box>
+              <Typography variant="body2">Swapping</Typography>
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Box sx={{ width: 20, height: 20, bgcolor: theme.palette.error.dark, mr: 1, borderRadius: '2px' }}></Box>
+              <Typography variant="body2">Pivot (Quick Sort)</Typography>
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Box sx={{ width: 20, height: 20, bgcolor: theme.palette.success.main, mr: 1, borderRadius: '2px' }}></Box>
+              <Typography variant="body2">Sorted</Typography>
             </Box>
           </Box>
-        </AccordionDetails>
-      </Accordion>
+        </Box>
+      </Paper>
+      
+      {/* Insertion Sort Section */}
+      <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
+        <Typography variant="h6">Insertion Sort</Typography>
+        <Typography variant="body1" sx={{ mb: 2 }}>
+          Insertion sort builds the final sorted array one item at a time.
+          It iterates through an array, consuming one input element at each repetition,
+          and growing a sorted output list.
+        </Typography>
+        <Typography variant="body2" paragraph>
+          <strong>Time Complexity:</strong> O(n²) average and worst case
+          <br />
+          <strong>Space Complexity:</strong> O(1)
+          <br />
+          <strong>Stable:</strong> Yes
+        </Typography>
+      </Paper>
       
       {/* Merge Sort Section */}
-      <Accordion defaultExpanded={sortingAlgorithm === 'merge'}>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography variant="h6">Merge Sort</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <Box>
-            <Typography variant="body1" paragraph>
-              Merge sort is an efficient, stable, divide-and-conquer sorting algorithm that divides the input array into two halves, 
-              recursively sorts them, and then merges the sorted halves.
-            </Typography>
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
-              <Box sx={{ flex: '1 1 100%', minWidth: '300px', maxWidth: { xs: '100%', md: '45%' } }}>
-                <Typography variant="subtitle1" gutterBottom>Characteristics:</Typography>
-                <ul>
-                  <li>
-                    <Typography variant="body1">
-                      <strong>Time Complexity:</strong> O(n log n) in all cases
-                    </Typography>
-                  </li>
-                  <li>
-                    <Typography variant="body1">
-                      <strong>Space Complexity:</strong> O(n) - requires additional space
-                    </Typography>
-                  </li>
-                  <li>
-                    <Typography variant="body1">
-                      <strong>Stability:</strong> Stable sort algorithm
-                    </Typography>
-                  </li>
-                  <li>
-                    <Typography variant="body1">
-                      <strong>Divide and Conquer:</strong> Splits, sorts, and merges sub-arrays
-                    </Typography>
-                  </li>
-                </ul>
-                <Box sx={{ mt: 2 }}>
-                  <Typography variant="subtitle1" gutterBottom>Code Implementation:</Typography>
-                  <Paper sx={{ p: 2, bgcolor: 'background.paper' }}>
-                    <pre style={{ margin: 0, overflow: 'auto' }}>
-                      {`def merge_sort(arr):
-    if len(arr) <= 1:
-        return arr
-    
-    mid = len(arr) // 2
-    left = merge_sort(arr[:mid])
-    right = merge_sort(arr[mid:])
-    
-    return merge(left, right)
-
-def merge(left, right):
-    result = []
-    i = j = 0
-    
-    # Compare elements from both halves and add smaller one to result
-    while i < len(left) and j < len(right):
-        if left[i] <= right[j]:
-            result.append(left[i])
-            i += 1
-        else:
-            result.append(right[j])
-            j += 1
-    
-    # Add remaining elements
-    result.extend(left[i:])
-    result.extend(right[j:])
-    
-    return result`}
-                    </pre>
-                  </Paper>
-                </Box>
-              </Box>
-              <Box sx={{ flex: '1 1 100%', minWidth: '300px', maxWidth: { xs: '100%', md: '45%' } }}>
-                <Paper elevation={1} sx={{ p: 2, bgcolor: 'background.default' }}>
-                  <Typography variant="subtitle1" gutterBottom>Visualization</Typography>
-                  <Box sx={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'center', height: '200px', mt: 2 }}>
-                    {array.map((value, index) => (
-                      <Box 
-                        key={index}
-                        sx={{ 
-                          width: `${100 / array.length}%`,
-                          maxWidth: '30px',
-                          height: `${value * 2}px`,
-                          bgcolor: theme.palette.primary.main,
-                          mx: 0.5,
-                          borderRadius: '2px 2px 0 0'
-                        }}
-                      />
-                    ))}
-                  </Box>
-                  <Typography variant="body2" sx={{ mt: 3, fontStyle: 'italic', textAlign: 'center' }}>
-                    Merge sort will be animated in a future update.
-                  </Typography>
-                </Paper>
-              </Box>
-            </Box>
-          </Box>
-        </AccordionDetails>
-      </Accordion>
+      <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
+        <Typography variant="h6">Merge Sort</Typography>
+        <Typography variant="body1" sx={{ mb: 2 }}>
+          Merge sort is an efficient, stable, comparison-based, divide and conquer algorithm.
+          It divides the input array into two halves, recursively sorts them, and then merges the sorted halves.
+        </Typography>
+        <Typography variant="body2" paragraph>
+          <strong>Time Complexity:</strong> O(n log n)
+          <br />
+          <strong>Space Complexity:</strong> O(n)
+          <br />
+          <strong>Stable:</strong> Yes
+        </Typography>
+      </Paper>
       
       {/* Quick Sort Section */}
-      <Accordion defaultExpanded={sortingAlgorithm === 'quick'}>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography variant="h6">Quick Sort</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <Box>
-            <Typography variant="body1" paragraph>
-              Quick sort is a highly efficient sorting algorithm that uses a divide-and-conquer strategy with a pivot element to partition the array.
-            </Typography>
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
-              <Box sx={{ flex: '1 1 100%', minWidth: '300px', maxWidth: { xs: '100%', md: '45%' } }}>
-                <Typography variant="subtitle1" gutterBottom>Characteristics:</Typography>
-                <ul>
-                  <li>
-                    <Typography variant="body1">
-                      <strong>Time Complexity:</strong> O(n log n) average, O(n²) worst case
-                    </Typography>
-                  </li>
-                  <li>
-                    <Typography variant="body1">
-                      <strong>Space Complexity:</strong> O(log n) due to recursion stack
-                    </Typography>
-                  </li>
-                  <li>
-                    <Typography variant="body1">
-                      <strong>Stability:</strong> Not stable without modifications
-                    </Typography>
-                  </li>
-                  <li>
-                    <Typography variant="body1">
-                      <strong>In-place:</strong> Typically implemented as in-place sorting
-                    </Typography>
-                  </li>
-                </ul>
-                <Box sx={{ mt: 2 }}>
-                  <Typography variant="subtitle1" gutterBottom>Code Implementation:</Typography>
-                  <Paper sx={{ p: 2, bgcolor: 'background.paper' }}>
-                    <pre style={{ margin: 0, overflow: 'auto' }}>
-                      {`def quick_sort(arr, low=0, high=None):
-    if high is None:
-        high = len(arr) - 1
-        
-    if low < high:
-        pivot_index = partition(arr, low, high)
-        quick_sort(arr, low, pivot_index - 1)
-        quick_sort(arr, pivot_index + 1, high)
-    
-    return arr
-
-def partition(arr, low, high):
-    pivot = arr[high]
-    i = low - 1
-    
-    for j in range(low, high):
-        if arr[j] <= pivot:
-            i += 1
-            # Swap arr[i] and arr[j]
-            arr[i], arr[j] = arr[j], arr[i]
-    
-    # Swap pivot into its final sorted position
-    arr[i + 1], arr[high] = arr[high], arr[i + 1]
-    return i + 1`}
-                    </pre>
-                  </Paper>
-                </Box>
-              </Box>
-              <Box sx={{ flex: '1 1 100%', minWidth: '300px', maxWidth: { xs: '100%', md: '45%' } }}>
-                <Paper elevation={1} sx={{ p: 2, bgcolor: 'background.default' }}>
-                  <Typography variant="subtitle1" gutterBottom>Visualization</Typography>
-                  <Box sx={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'center', height: '200px', mt: 2 }}>
-                    {array.map((value, index) => (
-                      <Box 
-                        key={index}
-                        sx={{ 
-                          width: `${100 / array.length}%`,
-                          maxWidth: '30px',
-                          height: `${value * 2}px`,
-                          bgcolor: theme.palette.primary.main,
-                          mx: 0.5,
-                          borderRadius: '2px 2px 0 0'
-                        }}
-                      />
-                    ))}
-                  </Box>
-                  <Typography variant="body2" sx={{ mt: 3, fontStyle: 'italic', textAlign: 'center' }}>
-                    Quick sort will be animated in a future update.
-                  </Typography>
-                </Paper>
-              </Box>
-            </Box>
-          </Box>
-        </AccordionDetails>
-      </Accordion>
+      <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
+        <Typography variant="h6">Quick Sort</Typography>
+        <Typography variant="body1" sx={{ mb: 2 }}>
+          Quick sort is a highly efficient sorting algorithm that uses a divide-and-conquer strategy.
+          It works by selecting a 'pivot' element and partitioning the array around the pivot.
+        </Typography>
+        <Typography variant="body2" paragraph>
+          <strong>Time Complexity:</strong> O(n²) worst case, O(n log n) average case
+          <br />
+          <strong>Space Complexity:</strong> O(log n)
+          <br />
+          <strong>Stable:</strong> No
+        </Typography>
+      </Paper>
       
       {/* Bucket Sort Section */}
-      <Accordion defaultExpanded={sortingAlgorithm === 'bucket'}>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography variant="h6">Bucket Sort</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <Box>
-            <Typography variant="body1" paragraph>
-              Bucket sort divides the array into a number of buckets, sorts each bucket individually, and then concatenates the results.
-            </Typography>
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
-              <Box sx={{ flex: '1 1 100%', minWidth: '300px', maxWidth: { xs: '100%', md: '45%' } }}>
-                <Typography variant="subtitle1" gutterBottom>Characteristics:</Typography>
-                <ul>
-                  <li>
-                    <Typography variant="body1">
-                      <strong>Time Complexity:</strong> O(n + k) average case, O(n²) worst case
-                    </Typography>
-                  </li>
-                  <li>
-                    <Typography variant="body1">
-                      <strong>Space Complexity:</strong> O(n + k) for n elements and k buckets
-                    </Typography>
-                  </li>
-                  <li>
-                    <Typography variant="body1">
-                      <strong>Stability:</strong> Stable if the underlying sort is stable
-                    </Typography>
-                  </li>
-                  <li>
-                    <Typography variant="body1">
-                      <strong>Distribution:</strong> Works best with uniform distributions
-                    </Typography>
-                  </li>
-                </ul>
-                <Box sx={{ mt: 2 }}>
-                  <Typography variant="subtitle1" gutterBottom>Code Implementation:</Typography>
-                  <Paper sx={{ p: 2, bgcolor: 'background.paper' }}>
-                    <pre style={{ margin: 0, overflow: 'auto' }}>
-                      {`def bucket_sort(arr, bucket_count=5):
-    if len(arr) <= 1:
-        return arr
-    
-    # Create buckets
-    buckets = [[] for _ in range(bucket_count)]
-    
-    # Find min and max values
-    min_value = min(arr)
-    max_value = max(arr)
-    value_range = max_value - min_value
-    
-    # Distribute values into buckets
-    for num in arr:
-        # Handle edge case where all values are the same
-        if value_range == 0:
-            bucket_index = 0
-        else:
-            bucket_index = min(
-                int(((num - min_value) / value_range) * bucket_count),
-                bucket_count - 1
-            )
-        buckets[bucket_index].append(num)
-    
-    # Sort individual buckets and concatenate
-    result = []
-    for bucket in buckets:
-        result.extend(sorted(bucket))
-    
-    return result`}
-                    </pre>
-                  </Paper>
-                </Box>
-              </Box>
-              <Box sx={{ flex: '1 1 100%', minWidth: '300px', maxWidth: { xs: '100%', md: '45%' } }}>
-                <Paper elevation={1} sx={{ p: 2, bgcolor: 'background.default' }}>
-                  <Typography variant="subtitle1" gutterBottom>Visualization</Typography>
-                  <Box sx={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'center', height: '200px', mt: 2 }}>
-                    {array.map((value, index) => (
-                      <Box 
-                        key={index}
-                        sx={{ 
-                          width: `${100 / array.length}%`,
-                          maxWidth: '30px',
-                          height: `${value * 2}px`,
-                          bgcolor: theme.palette.primary.main,
-                          mx: 0.5,
-                          borderRadius: '2px 2px 0 0'
-                        }}
-                      />
-                    ))}
-                  </Box>
-                  <Typography variant="body2" sx={{ mt: 3, fontStyle: 'italic', textAlign: 'center' }}>
-                    Bucket sort will be animated in a future update.
-                  </Typography>
-                </Paper>
-              </Box>
-            </Box>
-          </Box>
-        </AccordionDetails>
-      </Accordion>
+      <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
+        <Typography variant="h6">Bucket Sort</Typography>
+        <Typography variant="body1" sx={{ mb: 2 }}>
+          Bucket sort is a distribution sort that distributes elements into buckets,
+          then sorts each bucket individually, either using a different sorting algorithm or by recursively applying bucket sort.
+        </Typography>
+        <Typography variant="body2" paragraph>
+          <strong>Time Complexity:</strong> O(n²) worst case, O(n+k) average case where k is the number of buckets
+          <br />
+          <strong>Space Complexity:</strong> O(n+k)
+          <br />
+          <strong>Stable:</strong> Yes
+        </Typography>
+      </Paper>
     </Box>
   );
 };
@@ -2184,7 +2321,165 @@ def partition(arr, low, high):
 // Binary Search Visualizer component
 const BinarySearchVisualizer: React.FC = () => {
   const theme = useTheme();
-  
+  const [array, setArray] = useState<number[]>([]);
+  const [searchValue, setSearchValue] = useState<number>(50);
+  const [isSearching, setIsSearching] = useState<boolean>(false);
+  const [searchStep, setSearchStep] = useState<number>(0);
+  const [foundIndex, setFoundIndex] = useState<number>(-1);
+  const [currentLow, setCurrentLow] = useState<number>(0);
+  const [currentHigh, setCurrentHigh] = useState<number>(0);
+  const [currentMid, setCurrentMid] = useState<number>(-1);
+  const [searchSteps, setSearchSteps] = useState<
+    Array<{
+      low: number;
+      high: number;
+      mid: number;
+      found?: boolean;
+      notFound?: boolean;
+    }>
+  >([]);
+  const searchTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Generate a sorted array on component mount
+  useEffect(() => {
+    generateSortedArray();
+    return () => {
+      if (searchTimerRef.current) {
+        clearTimeout(searchTimerRef.current);
+      }
+    };
+  }, []);
+
+  const generateSortedArray = () => {
+    const newArray = [];
+    for (let i = 0; i < 15; i++) {
+      newArray.push(Math.floor(Math.random() * 100));
+    }
+    // Sort the array for binary search
+    newArray.sort((a, b) => a - b);
+    setArray(newArray);
+    setFoundIndex(-1);
+    setSearchStep(0);
+    setSearchSteps([]);
+  };
+
+  const startSearch = () => {
+    if (isSearching) return;
+    
+    setIsSearching(true);
+    setFoundIndex(-1);
+    setSearchStep(0);
+    
+    // Generate all the search steps beforehand
+    const steps = [];
+    let low = 0;
+    let high = array.length - 1;
+    let found = false;
+    let notFound = false;
+    
+    while (low <= high && !found && !notFound) {
+      const mid = Math.floor((low + high) / 2);
+      
+      steps.push({ low, high, mid });
+      
+      if (array[mid] === searchValue) {
+        found = true;
+        steps.push({ low, high, mid, found: true });
+      } else if (array[mid] < searchValue) {
+        low = mid + 1;
+      } else {
+        high = mid - 1;
+      }
+      
+      // Check if value not found
+      if (low > high && !found) {
+        notFound = true;
+        steps.push({ low, high, mid: -1, notFound: true });
+      }
+    }
+    
+    setSearchSteps(steps);
+    setCurrentLow(0);
+    setCurrentHigh(array.length - 1);
+    
+    // Start the animation
+    animateSearch(steps, 0);
+  };
+
+  const animateSearch = (steps: any[], stepIndex: number) => {
+    if (stepIndex >= steps.length) {
+      setIsSearching(false);
+      return;
+    }
+    
+    const step = steps[stepIndex];
+    setCurrentLow(step.low);
+    setCurrentHigh(step.high);
+    setCurrentMid(step.mid);
+    
+    if (step.found) {
+      setFoundIndex(step.mid);
+    }
+    
+    setSearchStep(stepIndex);
+    
+    // Schedule next step
+    searchTimerRef.current = setTimeout(() => {
+      animateSearch(steps, stepIndex + 1);
+    }, 1000);
+  };
+
+  const stopSearch = () => {
+    setIsSearching(false);
+    if (searchTimerRef.current) {
+      clearTimeout(searchTimerRef.current);
+    }
+    setSearchStep(0);
+    setFoundIndex(-1);
+  };
+
+  const getBarColor = (index: number) => {
+    if (foundIndex === index) {
+      return theme.palette.success.main;
+    }
+    if (currentMid === index) {
+      return theme.palette.warning.main;
+    }
+    if (index >= currentLow && index <= currentHigh) {
+      return theme.palette.primary.main;
+    }
+    return theme.palette.grey[400];
+  };
+
+  const getStepDescription = () => {
+    if (searchSteps.length === 0 || searchStep >= searchSteps.length) {
+      return "Click 'Start Search' to begin";
+    }
+    
+    const step = searchSteps[searchStep];
+    
+    if (step.found) {
+      return `Found ${searchValue} at index ${step.mid}!`;
+    }
+    
+    if (step.notFound) {
+      return `Value ${searchValue} not found in the array`;
+    }
+    
+    if (step.mid !== -1) {
+      const comparisonResult = 
+        array[step.mid] === searchValue ? "equals" :
+        array[step.mid] < searchValue ? "less than" : "greater than";
+        
+      return `Step ${searchStep + 1}: Checking middle element at index ${step.mid} (value ${array[step.mid]}). 
+              It's ${comparisonResult} the search value ${searchValue}.
+              ${comparisonResult === "equals" ? "Found it!" : 
+                comparisonResult === "less than" ? "Search in right half" : "Search in left half"}`;
+    }
+    
+    return "Determining search area...";
+  };
+
   return (
     <Box>
       <Typography variant="h5" gutterBottom>Binary Search</Typography>
@@ -2192,142 +2487,138 @@ const BinarySearchVisualizer: React.FC = () => {
         Binary search is an efficient algorithm for finding a target value within a sorted array.
       </Typography>
       
-      <Accordion defaultExpanded>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography variant="h6">Search Array</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <Box>
-            <Typography variant="body1" paragraph>
-              Binary search works by repeatedly dividing the search interval in half, comparing the middle element with the target value.
-            </Typography>
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
-              <Box sx={{ flex: '1 1 100%', minWidth: '300px', maxWidth: { xs: '100%', md: '45%' } }}>
-                <Typography variant="subtitle1" gutterBottom>Characteristics:</Typography>
-                <ul>
-                  <li>
-                    <Typography variant="body1">
-                      <strong>Time Complexity:</strong> O(log n)
-                    </Typography>
-                  </li>
-                  <li>
-                    <Typography variant="body1">
-                      <strong>Space Complexity:</strong> O(1) for iterative implementation
-                    </Typography>
-                  </li>
-                  <li>
-                    <Typography variant="body1">
-                      <strong>Requires:</strong> Sorted array
-                    </Typography>
-                  </li>
-                  <li>
-                    <Typography variant="body1">
-                      <strong>Efficiency:</strong> Much faster than linear search for large datasets
-                    </Typography>
-                  </li>
-                </ul>
-                <Box sx={{ mt: 2 }}>
-                  <Typography variant="subtitle1" gutterBottom>Code Implementation:</Typography>
-                  <Paper sx={{ p: 2, bgcolor: 'background.paper' }}>
-                    <pre style={{ margin: 0, overflow: 'auto' }}>
-                      {`def binary_search(arr, target):
-    left = 0
-    right = len(arr) - 1
-    
-    while left <= right:
-        mid = (left + right) // 2
-        
-        if arr[mid] == target:
-            return mid  # Found target at index mid
-        
-        if arr[mid] < target:
-            left = mid + 1  # Target is in the right half
-        else:
-            right = mid - 1  # Target is in the left half
-    
-    return -1  # Target not found`}
-                    </pre>
-                  </Paper>
-                </Box>
-              </Box>
-              <Box sx={{ flex: '1 1 100%', minWidth: '300px', maxWidth: { xs: '100%', md: '45%' } }}>
-                <Paper elevation={1} sx={{ p: 2, bgcolor: 'background.default' }}>
-                  <Typography variant="subtitle1" gutterBottom>Visualization</Typography>
-                  <Typography variant="body1" sx={{ mt: 8, textAlign: 'center' }}>
-                    Binary Search Array visualization will be implemented in a future update.
-                  </Typography>
-                </Paper>
-              </Box>
-            </Box>
+      <Box sx={{ mb: 4 }}>
+        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, mb: 3 }}>
+          <Box sx={{ flex: { xs: '1', sm: '0 0 30%' }, mb: { xs: 2, sm: 0 } }}>
+            <Button 
+              variant="contained" 
+              startIcon={<RestartAltIcon />}
+              onClick={generateSortedArray}
+              disabled={isSearching}
+              sx={{ mr: 1 }}
+            >
+              New Array
+            </Button>
+            <Button 
+              variant="contained" 
+              color="primary" 
+              startIcon={<SearchIcon />}
+              onClick={startSearch}
+              disabled={isSearching}
+              sx={{ mr: 1 }}
+            >
+              Start Search
+            </Button>
+            <Button 
+              variant="contained" 
+              color="secondary" 
+              startIcon={<StopIcon />}
+              onClick={stopSearch}
+              disabled={!isSearching}
+            >
+              Stop
+            </Button>
           </Box>
-        </AccordionDetails>
-      </Accordion>
+          <Box sx={{ flex: { xs: '1', sm: '0 0 30%' }, mb: { xs: 2, sm: 0 } }}>
+            <Typography id="search-value-slider-label" gutterBottom>Search Value: {searchValue}</Typography>
+            <Slider
+              value={searchValue}
+              onChange={(e, newValue) => setSearchValue(newValue as number)}
+              aria-labelledby="search-value-slider-label"
+              min={0}
+              max={100}
+              disabled={isSearching}
+            />
+          </Box>
+        </Box>
+      </Box>
       
-      <Accordion>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography variant="h6">Search Range</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <Box>
-            <Typography variant="body1" paragraph>
-              Binary search can also be used to find the bounds of a range where a certain condition is met.
-            </Typography>
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
-              <Box sx={{ flex: '1 1 100%', minWidth: '300px', maxWidth: { xs: '100%', md: '45%' } }}>
-                <Typography variant="subtitle1" gutterBottom>Applications:</Typography>
-                <ul>
-                  <li>
-                    <Typography variant="body1">
-                      <strong>Lower Bound:</strong> Find first occurrence of a value
-                    </Typography>
-                  </li>
-                  <li>
-                    <Typography variant="body1">
-                      <strong>Upper Bound:</strong> Find last occurrence of a value
-                    </Typography>
-                  </li>
-                  <li>
-                    <Typography variant="body1">
-                      <strong>Search Space:</strong> Can be used on answer ranges, not just arrays
-                    </Typography>
-                  </li>
-                </ul>
-                <Box sx={{ mt: 2 }}>
-                  <Typography variant="subtitle1" gutterBottom>Code (Lower Bound):</Typography>
-                  <Paper sx={{ p: 2, bgcolor: 'background.paper' }}>
-                    <pre style={{ margin: 0, overflow: 'auto' }}>
-                      {`def lower_bound(arr, target):
-    left = 0
-    right = len(arr) - 1
-    result = -1
-    
-    while left <= right:
-        mid = (left + right) // 2
+      {/* Binary Search Visualization */}
+      <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
+        <Typography variant="h6" gutterBottom align="center">
+          Binary Search Visualization
+        </Typography>
         
-        if arr[mid] >= target:
-            if arr[mid] == target:
-                result = mid  # Potential result found
-            right = mid - 1  # Continue searching left
-        else:
-            left = mid + 1
-    
-    return result`}
-                    </pre>
-                  </Paper>
-                </Box>
-              </Box>
-              <Box sx={{ flex: '1 1 100%', minWidth: '300px', maxWidth: { xs: '100%', md: '45%' } }}>
-                <Paper elevation={1} sx={{ p: 2, bgcolor: 'background.default' }}>
-                  <Typography variant="subtitle1" gutterBottom>Visualization</Typography>
-                  <Typography variant="body1" sx={{ mt: 8, textAlign: 'center' }}>
-                    Binary Search Range visualization will be implemented in a future update.
-                  </Typography>
-                </Paper>
-              </Box>
+        {/* Animation Description */}
+        <Paper 
+          elevation={1} 
+          sx={{ 
+            p: 2, 
+            bgcolor: theme.palette.background.default, 
+            mb: 3,
+            minHeight: '60px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          <Typography variant="body1" align="center">
+            {getStepDescription()}
+          </Typography>
+        </Paper>
+        
+        {/* Array Visualization */}
+        <Box 
+          sx={{ 
+            display: 'flex', 
+            alignItems: 'flex-end', 
+            justifyContent: 'center', 
+            height: '240px', 
+            mt: 2,
+            mb: 3,
+            position: 'relative',
+            mx: 'auto',
+            width: '100%'
+          }}
+        >
+          {array.map((value, index) => (
+            <Box 
+              key={index}
+              sx={{ 
+                width: `${80 / array.length}%`,
+                maxWidth: '50px',
+                height: `${value * 2}px`,
+                bgcolor: getBarColor(index),
+                mx: 0.5,
+                borderRadius: '2px 2px 0 0',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'flex-end',
+                pb: 0.5,
+                color: 'white',
+                fontSize: array.length <= 15 ? '0.8rem' : '0',
+                fontWeight: 'bold',
+                transition: 'all 0.3s ease'
+              }}
+            >
+              {value}
+            </Box>
+          ))}
+        </Box>
+        
+        {/* Legend */}
+        <Box sx={{ mt: 2 }}>
+          <Typography variant="body2" sx={{ mb: 1 }}>Legend:</Typography>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, justifyContent: 'center' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Box sx={{ width: 20, height: 20, bgcolor: theme.palette.primary.main, mr: 1, borderRadius: '2px' }}></Box>
+              <Typography variant="body2">Current Search Range</Typography>
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Box sx={{ width: 20, height: 20, bgcolor: theme.palette.warning.main, mr: 1, borderRadius: '2px' }}></Box>
+              <Typography variant="body2">Mid Element (Being Compared)</Typography>
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Box sx={{ width: 20, height: 20, bgcolor: theme.palette.success.main, mr: 1, borderRadius: '2px' }}></Box>
+              <Typography variant="body2">Found Element</Typography>
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Box sx={{ width: 20, height: 20, bgcolor: theme.palette.grey[400], mr: 1, borderRadius: '2px' }}></Box>
+              <Typography variant="body2">Outside Search Range</Typography>
             </Box>
           </Box>
-        </AccordionDetails>
-      </Accordion>
+        </Box>
+      </Paper>
     </Box>
   );
 };
