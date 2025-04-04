@@ -30,6 +30,7 @@ import AssignmentIcon from '@mui/icons-material/Assignment';
 import authService, { User } from '../services/authService';
 import { useLoadingOnRouteChange } from '../utils/loadingUtils';
 import { useAppLoadingBar } from '../contexts/LoadingBarContext';
+import Footer from './Footer';
 
 // Drawer width for desktop view
 const drawerWidth = 240;
@@ -258,9 +259,15 @@ const Layout: React.FC = () => {
           p: 3, 
           width: { sm: `calc(100% - ${drawerWidth}px)` },
           marginTop: '64px', // AppBar height
+          display: 'flex',
+          flexDirection: 'column',
+          minHeight: 'calc(100vh - 64px)', // Viewport height minus AppBar
         }}
       >
-        <Outlet />
+        <Box sx={{ flexGrow: 1 }}>
+          <Outlet />
+        </Box>
+        <Footer />
       </Box>
     </Box>
   );
