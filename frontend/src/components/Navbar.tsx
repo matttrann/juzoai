@@ -13,7 +13,7 @@ const Navbar: React.FC = () => {
     <AppBar position="static" color="primary">
       <Toolbar>
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-          Flashcard App
+          Juzo.AI
         </Typography>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <Button color="inherit" component={RouterLink} to="/">

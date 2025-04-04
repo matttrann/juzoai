@@ -166,7 +166,7 @@ const Layout: React.FC = () => {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" noWrap component="div">
-            Flashcard App
+            Juzo.AI
           </Typography>
           {isLoggedIn && user && (
             <>
