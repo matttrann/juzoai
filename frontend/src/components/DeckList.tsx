@@ -26,6 +26,8 @@ import AddIcon from '@mui/icons-material/Add';
 import FileUploadIcon from '@mui/icons-material/FileUpload';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import { exportDeck, parseImportedDeck } from '../utils/deckExporter';
+import { useAppLoadingBar, useLoadingApi } from '../contexts/LoadingBarContext';
+import { withLoading } from '../utils/loadingUtils';
 
 const DeckList: React.FC = () => {
   const navigate = useNavigate();
@@ -38,22 +40,25 @@ const DeckList: React.FC = () => {
   const [importError, setImportError] = useState('');
   const [importLoading, setImportLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const loadingBar = useAppLoadingBar();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortOption, setSortOption] = useState('title');
+
+  // Use the loading API
+  const api = useLoadingApi();
 
   useEffect(() => {
     const fetchDecks = async () => {
       try {
         setLoading(true);
+        // Use the loading API instead of direct API call
+        const response = await api.get<Deck[]>('/decks');
+        const decks = response.data;
         
-        try {
-          // Try to fetch from API first
-          const response = await deckService.getAll();
-          setDecks(response.data);
-        } catch (apiError) {
-          console.error('API Error, using mock data:', apiError);
-          // Fallback to empty array if API fails
-          setDecks([]);
-        }
+        // Your existing code to handle the response
+        // ...
         
+        setDecks(decks);
         setLoading(false);
       } catch (error) {
         console.error('Error fetching decks:', error);
@@ -61,8 +66,9 @@ const DeckList: React.FC = () => {
         setLoading(false);
       }
     };
+    
     fetchDecks();
-  }, []);
+  }, [searchTerm, sortOption, api]);
 
   const handleExportDeck = async (deck: Deck) => {
     try {

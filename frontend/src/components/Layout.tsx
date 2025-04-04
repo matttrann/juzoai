@@ -27,6 +27,8 @@ import CodeIcon from '@mui/icons-material/Code';
 import LogoutIcon from '@mui/icons-material/Logout';
 import SettingsIcon from '@mui/icons-material/Settings';
 import authService, { User } from '../services/authService';
+import { useLoadingOnRouteChange } from '../utils/loadingUtils';
+import { useAppLoadingBar } from '../contexts/LoadingBarContext';
 
 // Drawer width for desktop view
 const drawerWidth = 240;
@@ -46,6 +48,12 @@ const Layout: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  
+  // Use the loading bar on route changes
+  useLoadingOnRouteChange();
+  
+  // Get the loading bar for manual control if needed
+  const loadingBar = useAppLoadingBar();
   
   // Check authentication status on component mount
   useEffect(() => {
@@ -94,7 +102,13 @@ const Layout: React.FC = () => {
   ];
 
   const handleNavigation = (path: string) => {
+    // Start loading bar animation
+    loadingBar.start();
+    
+    // Navigate to the path
     navigate(path);
+    
+    // Mobile drawer handling
     if (isMobile) {
       setMobileOpen(false);
     }

@@ -11,6 +11,7 @@ import FlashcardForm from './components/FlashcardForm';
 import PerformanceDashboard from './components/PerformanceDashboard';
 import DSAVisualizer from './components/DSAVisualizer';
 import { AuthProvider } from './contexts/AuthContext';
+import { LoadingBarProvider } from './contexts/LoadingBarContext';
 
 function App() {
   // Define dark theme
@@ -55,28 +56,30 @@ function App() {
   return (
     <AuthProvider>
       <ThemeProvider theme={darkTheme}>
-        <CssBaseline />
-        <Router>
-          <Routes>
-            {/* Main application routes */}
-            <Route path="/" element={<Layout />}>
-              <Route index element={<Home />} />
-              <Route path="decks" element={<DeckList />} />
-              <Route path="decks/new" element={<DeckForm />} />
-              <Route path="decks/:deckId/study" element={<FlashcardStudy />} />
-              <Route path="decks/:deckId/edit" element={<DeckForm />} />
-              <Route path="decks/:deckId/flashcards/new" element={<FlashcardForm />} />
-              <Route path="performance" element={<PerformanceDashboard />} />
-              <Route path="performance/deck/:deckId" element={<PerformanceDashboard />} />
-              <Route path="performance/:deckId" element={<PerformanceDashboard />} />
-              <Route path="dsa-visualizer" element={<DSAVisualizer />} />
-              
-              {/* Redirect login/register routes to home */}
-              <Route path="login" element={<Navigate replace to="/" />} />
-              <Route path="register" element={<Navigate replace to="/" />} />
-            </Route>
-          </Routes>
-        </Router>
+        <LoadingBarProvider>
+          <CssBaseline />
+          <Router>
+            <Routes>
+              {/* Main application routes */}
+              <Route path="/" element={<Layout />}>
+                <Route index element={<Home />} />
+                <Route path="decks" element={<DeckList />} />
+                <Route path="decks/new" element={<DeckForm />} />
+                <Route path="decks/:deckId/study" element={<FlashcardStudy />} />
+                <Route path="decks/:deckId/edit" element={<DeckForm />} />
+                <Route path="decks/:deckId/flashcards/new" element={<FlashcardForm />} />
+                <Route path="performance" element={<PerformanceDashboard />} />
+                <Route path="performance/deck/:deckId" element={<PerformanceDashboard />} />
+                <Route path="performance/:deckId" element={<PerformanceDashboard />} />
+                <Route path="dsa-visualizer" element={<DSAVisualizer />} />
+                
+                {/* Redirect login/register routes to home */}
+                <Route path="login" element={<Navigate replace to="/" />} />
+                <Route path="register" element={<Navigate replace to="/" />} />
+              </Route>
+            </Routes>
+          </Router>
+        </LoadingBarProvider>
       </ThemeProvider>
     </AuthProvider>
   );
