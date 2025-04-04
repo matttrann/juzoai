@@ -58,7 +58,7 @@ const Home: React.FC = () => {
           fontWeight="bold"
           gutterBottom
         >
-          Master Any Subject with Flashcards
+          Rote Learning and DSA Made Easy
         </Typography>
         
         <Typography 
@@ -67,9 +67,8 @@ const Home: React.FC = () => {
           paragraph
           sx={{ maxWidth: '800px', mx: 'auto', mb: 4 }}
         >
-          Our intelligent flashcard app helps you study more effectively with spaced repetition,
-          progress tracking, and interactive visualizations. Create your own decks, import from others,
-          and track your progress as you learn.
+          This open source app makes learning effortless by combining flashcards for rote memorisation with interactive coding challenges to reinforce your understanding. 
+          Quickly review key concepts, test yourself, and apply what you’ve learned with real coding problems — all in one place!
         </Typography>
         
         <Box sx={{ 
@@ -91,7 +90,7 @@ const Home: React.FC = () => {
             size="large"
             onClick={() => navigate('/dsa-visualizer')}
           >
-            Explore Visualizations
+            Explore Visualiations
           </Button>
         </Box>
         

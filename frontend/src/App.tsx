@@ -10,6 +10,8 @@ import DeckForm from './components/DeckForm';
 import FlashcardForm from './components/FlashcardForm';
 import PerformanceDashboard from './components/PerformanceDashboard';
 import DSAVisualizer from './components/DSAVisualizer';
+import Problems from './components/Problems';
+import ProblemDetail from './components/ProblemDetail';
 import { AuthProvider } from './contexts/AuthContext';
 import { LoadingBarProvider } from './contexts/LoadingBarContext';
 
@@ -72,6 +74,8 @@ function App() {
                 <Route path="performance/deck/:deckId" element={<PerformanceDashboard />} />
                 <Route path="performance/:deckId" element={<PerformanceDashboard />} />
                 <Route path="dsa-visualizer" element={<DSAVisualizer />} />
+                <Route path="problems" element={<Problems />} />
+                <Route path="problems/:problemId" element={<ProblemDetail />} />
                 
                 {/* Redirect login/register routes to home */}
                 <Route path="login" element={<Navigate replace to="/" />} />

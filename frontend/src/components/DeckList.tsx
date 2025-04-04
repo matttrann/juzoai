@@ -16,7 +16,8 @@ import {
   Alert,
   CircularProgress,
   TextField,
-  Tooltip
+  Tooltip,
+  IconButton
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import deckService, { Deck } from '../services/deckService';
@@ -221,8 +222,26 @@ const DeckList: React.FC = () => {
                 '&:hover': {
                   transform: 'translateY(-4px)',
                   boxShadow: theme.shadows[6]
-                }
+                },
+                position: 'relative'
               }}>
+                <Tooltip title="Edit Deck">
+                  <IconButton 
+                    size="small" 
+                    sx={{ 
+                      position: 'absolute', 
+                      top: 8, 
+                      right: 8,
+                      bgcolor: 'background.paper',
+                      '&:hover': {
+                        bgcolor: 'action.hover'
+                      }
+                    }}
+                    onClick={() => navigate(`/decks/${deck.id}/edit`)}
+                  >
+                    <EditIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
                 <CardContent sx={{ flexGrow: 1 }}>
                   <Typography variant="h6" component="h2" gutterBottom>
                     {deck.title}
@@ -249,14 +268,6 @@ const DeckList: React.FC = () => {
                     onClick={() => navigate(`/decks/${deck.id}/study`)}
                   >
                     Study
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    startIcon={<EditIcon />}
-                    onClick={() => navigate(`/decks/${deck.id}/edit`)}
-                  >
-                    Edit
                   </Button>
                   <Button
                     variant="outlined"
