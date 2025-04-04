@@ -1,14 +1,14 @@
 # FlashCard Study App
 
-A modern flashcard application designed to help users study and track their learning progress. This application allows you to create custom flashcard decks, study with an interactive interface, track your performance over time, and visualize algorithms and data structures.
+A modern flashcard application designed to help you study and track your learning progress. Create custom flashcard decks, study with an interactive interface, track your performance over time, and visualise algorithms and data structures.
 
 ## Features
 
-- **Flashcard Management**: Create, edit, and organize flashcards into decks
+- **Flashcard Management**: Create, edit, and organise flashcards into decks
 - **Study Mode**: Interactive study sessions with card flipping and progress tracking
 - **Performance Analytics**: Track study performance over time with detailed metrics
-- **Data Structure & Algorithm Visualizer**: Interactive visualizations for common DSA concepts
-- **Responsive Design**: Optimized for desktop, tablet, and mobile devices
+- **Data Structure & Algorithm Visualiser**: Interactive visualisations for common DSA concepts
+- **Responsive Design**: Optimised for desktop, tablet, and mobile devices
 - **Dark Mode**: Enhanced visual experience with dark mode support
 - **Import/Export**: Save and share your flashcard decks as JSON files
 - **Local Storage**: Performance data is stored locally, no account required
@@ -24,22 +24,20 @@ A modern flashcard application designed to help users study and track their lear
 - CSS for custom styling
 
 ### Backend
-The backend is implemented with Spring Boot:
-
 - Java 17
 - Spring Boot 3.2.3
 - Spring Security with JWT authentication
 - Spring Data JPA
-- PostgreSQL / H2 Database
+- H2 Database (development)
+- PostgreSQL (production)
 - Maven
 
 ## Getting Started
 
 ### Prerequisites
-- Node.js (v14 or higher) for running the frontend
-- Java 17 for running the Spring Boot backend
-- Maven for building the backend
-- PostgreSQL (v12 or higher)
+- Node.js (v14 or higher)
+- Java 17
+- Maven
 - Git
 
 ### Installation
@@ -50,50 +48,41 @@ git clone https://github.com/yourusername/flashcard-app.git
 cd flashcard-app
 ```
 
-2. Install dependencies
+2. Install frontend dependencies
 ```bash
-# Install frontend dependencies
 cd frontend
 npm install
 ```
 
 3. Environment Setup
 ```bash
-# Copy the example environment file in the backend directory
-cd ../backend
-cp .env.example .env
-
-# Copy the example environment file in the frontend directory
-cd ../frontend
-cp .env.example .env
-
-# Edit the .env files with your configuration settings
+# Frontend environment setup (only needed for API URL configuration)
+# The default settings should work for local development
+# Edit .env file if you need to change API URL
 ```
 
-4. Database Setup
-```bash
-# Create the database
-psql -U postgres -c "CREATE DATABASE flashcards_db;"
-```
+4. Start the application
 
-5. Start the application
+**Backend**:
 ```bash
-# Start the Spring Boot backend (from the backend directory)
 cd ../backend
+# Run with Maven
 mvn spring-boot:run
 
-# In Windows, you can also use the provided batch file
-# From the project root
+# Or on Windows, use the provided batch file from the project root
 ./start-backend.bat
+```
 
-# Start the frontend dev server (from the frontend directory)
+**Frontend**:
+```bash
 cd ../frontend
 npm start
 ```
 
-6. Access the application
+5. Access the application
 - Frontend: http://localhost:3000
 - Backend API: http://localhost:8080/api
+- H2 Database Console: http://localhost:8080/h2-console (credentials in application.properties)
 
 ## API Endpoints
 
@@ -129,7 +118,6 @@ npm start
 │   │   │       └── service/      # Business logic 
 │   │   └── main/resources/ # Application properties and resources
 │   ├── pom.xml             # Maven configuration
-│   └── .env                # Environment variables
 │
 ├── frontend/               # React frontend
 │   ├── public/             # Static files
@@ -149,7 +137,7 @@ npm start
 - **DeckForm**: Create and edit flashcard decks
 - **FlashcardStudy**: Interactive study session with flashcards
 - **PerformanceDashboard**: View study performance metrics and progress
-- **DSAVisualizer**: Visual representations of data structures and algorithms
+- **DSAVisualiser**: Visual representations of data structures and algorithms
 
 ## Local Storage
 
@@ -158,11 +146,17 @@ The application uses localStorage to persist:
 - Study performance data
 - Recently viewed decks
 
+## Development Notes
+
+- For development, the backend uses an H2 in-memory database
+- For production deployment, configure PostgreSQL in application-prod.properties
+- The application includes pre-configured JWT authentication
+- Default development credentials can be found in schema.sql and data.sql
+
 ## Security Considerations
 
-- Environment variables are used for all sensitive configuration
+- Default JWT secret should be changed in production
 - Password hashing is implemented with BCrypt
-- Spring Security provides robust authentication and authorization
 - HTTPS is recommended for production deployments
 
 ## License
