@@ -1,4 +1,5 @@
 # Juzo.AI
+![https://raw.githubusercontent.com/matttrann/juzoai/Screenshot.png](https://github.com/matttrann/juzoai/blob/main/Screenshot.png)
 
 A modern flashcard and coding practise application designed to help you study and track your learning progress. Create custom flashcard decks, study with an interactive interface, track your performance over time, and visualise and test yourself with algorithms and data structure coding questions!.
 
