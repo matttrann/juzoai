@@ -1,6 +1,6 @@
-# FlashCard Study App
+# Juzo.AI
 
-A modern flashcard application designed to help you study and track your learning progress. Create custom flashcard decks, study with an interactive interface, track your performance over time, and visualise algorithms and data structures.
+A modern flashcard and coding practise application designed to help you study and track your learning progress. Create custom flashcard decks, study with an interactive interface, track your performance over time, and visualise and test yourself with algorithms and data structure coding questions!.
 
 ## Features
 
