@@ -1,0 +1,68 @@
+# Dependencies
+node_modules/
+/.pnp
+.pnp.js
+
+# Build files
+/build/
+/dist/
+/frontend/build/
+/frontend/dist/
+
+# Environment variables - SECURITY CRITICAL
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+backend/.env
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Testing
+/coverage/
+
+# Editor directories and files
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Operating System Files
+.DS_Store
+Thumbs.db
+
+# PostgreSQL local data
+/data
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Debug
+.debugger/
+
+# Package lock files (optional, if you want to ignore them)
+# package-lock.json
+# yarn.lock
+
+# Production
+.vercel
+.netlify
+
+# Optional: Large media files that shouldn't be versioned
+*.mp4
+*.tiff
+*.avi
+*.flv
+*.mov
+*.wmv 
