@@ -1,48 +1,19 @@
 # Juzo.AI
-![https://raw.githubusercontent.com/matttrann/juzoai/Screenshot.png](https://github.com/matttrann/juzoai/blob/main/Screenshot.png)
+![https://github.com/matttrann/juzoai/blob/main/assets/Flashcard.png](https://github.com/matttrann/juzoai/blob/main/assets/Flashcard.png)
+![https://github.com/matttrann/juzoai/blob/main/assets/Roulette.png](https://github.com/matttrann/juzoai/blob/main/assets/Roulette.png)
+![https://github.com/matttrann/juzoai/blob/main/assets/DSA_Practise.png](https://github.com/matttrann/juzoai/blob/main/assets/DSA_Practise.png)
+![https://github.com/matttrann/juzoai/blob/main/assets/DSA_Visualizer.png](https://github.com/matttrann/juzoai/blob/main/assets/DSA_Visualizer.png)
 
 A modern flashcard and coding practise application designed to help you study and track your learning progress. Create custom flashcard decks, study with an interactive interface, track your performance over time, and visualise and test yourself with algorithms and data structure coding questions!
 
 ## Features
 
 ✅ **Flashcard System**
-- Create and manage custom flashcard decks
-- Interactive study mode with card flipping
-- Progress tracking and performance metrics
-- Import/Export decks as JSON files
-
-✅ **Coding Practice**
-- Blind 75 LeetCode questions collection
-- Problem categories: Arrays, Trees, Dynamic Programming, etc.
-- Interactive problem roulette for random practice
-- Python solutions with explanations
-
+✅ **Blind 75 Practice**
 ✅ **Study Tools**
-- Performance analytics and progress tracking
-- Visual progress indicators
-- Study session history
-- Self-assessment tools
-
-✅ **User Experience**
-- Responsive design for all devices
-- Dark/Light mode support
-- Intuitive navigation
-- Local storage for offline access
-
-✅ **Data Structure & Algorithm Features**
-- Interactive DSA visualizations
-- Common algorithm implementations
-- Step-by-step execution
-- Time/Space complexity analysis
-
+✅ **Roulette Gamification**
+✅ **Data Structure & Algorithm Visualization**
 ⬜ **MORE FEATURES COMING SOON**
-- AI-powered study recommendations/summariser/tutor
-- Spaced repetition system
-- Premade decks relevant to QUT IT Syllabus
-- Full code test suites
-- More practice problems
-- Advanced analytics
-- Further gamification of web app
 
 ## Tech Stack
 
