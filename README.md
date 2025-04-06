@@ -1,18 +1,48 @@
 # Juzo.AI
 ![https://raw.githubusercontent.com/matttrann/juzoai/Screenshot.png](https://github.com/matttrann/juzoai/blob/main/Screenshot.png)
 
-A modern flashcard and coding practise application designed to help you study and track your learning progress. Create custom flashcard decks, study with an interactive interface, track your performance over time, and visualise and test yourself with algorithms and data structure coding questions!.
+A modern flashcard and coding practise application designed to help you study and track your learning progress. Create custom flashcard decks, study with an interactive interface, track your performance over time, and visualise and test yourself with algorithms and data structure coding questions!
 
 ## Features
 
-- **Flashcard Management**: Create, edit, and organise flashcards into decks
-- **Study Mode**: Interactive study sessions with card flipping and progress tracking
-- **Performance Analytics**: Track study performance over time with detailed metrics
-- **Data Structure & Algorithm Visualiser**: Interactive visualisations for common DSA concepts
-- **Coding Practise**: Refine your leetcode skills with a range of Blind 75 Questions, with solutions in Python
-- **Responsive Design**: Optimised for desktop, tablet, and mobile devices
-- **Import/Export**: Save and share your flashcard decks as JSON files
-- **Local Storage**: Performance data is stored locally, no account required
+✅ **Flashcard System**
+- Create and manage custom flashcard decks
+- Interactive study mode with card flipping
+- Progress tracking and performance metrics
+- Import/Export decks as JSON files
+
+✅ **Coding Practice**
+- Blind 75 LeetCode questions collection
+- Problem categories: Arrays, Trees, Dynamic Programming, etc.
+- Interactive problem roulette for random practice
+- Python solutions with explanations
+
+✅ **Study Tools**
+- Performance analytics and progress tracking
+- Visual progress indicators
+- Study session history
+- Self-assessment tools
+
+✅ **User Experience**
+- Responsive design for all devices
+- Dark/Light mode support
+- Intuitive navigation
+- Local storage for offline access
+
+✅ **Data Structure & Algorithm Features**
+- Interactive DSA visualizations
+- Common algorithm implementations
+- Step-by-step execution
+- Time/Space complexity analysis
+
+⬜ **MORE FEATURES COMING SOON**
+- AI-powered study recommendations/summariser/tutor
+- Spaced repetition system
+- Premade decks relevant to QUT IT Syllabus
+- Full code test suites
+- More practice problems
+- Advanced analytics
+- Further gamification of web app
 
 ## Tech Stack
 
