@@ -330,7 +330,10 @@ const ProblemRoulette: React.FC = () => {
     // Calculate spin distance with more rotations for a longer spin
     const rotations = 12; // Increased for a stronger spin
     const basePosition = rotations * totalWidth;
-    const targetPosition = randomIndex * cardWidth;
+    
+    // Add a random offset to make it land at different positions within the card
+    const randomOffset = Math.floor(Math.random() * cardWidth * 0.8) - (cardWidth * 0.4);
+    const targetPosition = (randomIndex * cardWidth) + randomOffset;
     
     // Calculate final position based on current position
     // Use the actual current position to prevent resetting
@@ -341,12 +344,12 @@ const ProblemRoulette: React.FC = () => {
       if (wheelRef.current) {
         // Spin the wheel with a more dramatic animation
         // Using a custom cubic-bezier for a faster start and longer deceleration
-        wheelRef.current.style.transition = `transform 10s cubic-bezier(0.1, 0.7, 0, 1)`;
+        wheelRef.current.style.transition = `transform 10s cubic-bezier(0.05, 0.8, 0, 1)`;
         wheelRef.current.style.transform = `translate3d(-${finalPosition}px, 0px, 0px)`;
       }
     });
     
-    // After animation completes (increased to match new animation duration)
+    // After animation completes
     setTimeout(() => {
       if (!wheelRef.current) return;
       
@@ -388,7 +391,9 @@ const ProblemRoulette: React.FC = () => {
             const card = closestCard as HTMLElement;
             const cardRect = card.getBoundingClientRect();
             const selectorRect = selector.getBoundingClientRect();
-            const offset = cardRect.left - selectorRect.left + (cardRect.width - selectorRect.width) / 2;
+            
+            // Calculate the exact offset needed to center the card on the marker
+            const offset = cardRect.left - selectorRect.left + (cardRect.width / 2) - (selectorRect.width / 2);
             
             // Apply the centering adjustment
             const currentTransform = wheelRef.current.style.transform;
@@ -396,19 +401,19 @@ const ProblemRoulette: React.FC = () => {
               parseInt(currentTransform.match(/-?\d+/)?.[0] || '0') : 0;
             const adjustedPosition = currentPosition + offset;
             
-            // Apply the adjustment with a short animation
-            wheelRef.current.style.transition = 'transform 0.3s ease-out';
+            // Apply the adjustment with a short animation to center the card perfectly
+            wheelRef.current.style.transition = 'transform 0.5s ease-out';
             wheelRef.current.style.transform = `translate3d(-${adjustedPosition}px, 0px, 0px)`;
             
-            // Show the dialog without removing the highlight
-            setTimeout(() => setDialogOpen(true), 300);
+            // Show the dialog after the centering animation completes
+            setTimeout(() => setDialogOpen(true), 600);
           }
         }
       }
       
       // Only update spinning state
       setSpinning(false);
-    }, 10000); // Increased timeout to match new animation duration
+    }, 10000); // Matches the animation duration
   };
 
   const handleNavigate = () => {
