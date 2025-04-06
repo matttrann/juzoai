@@ -22,12 +22,13 @@ A modern flashcard and coding practise application designed to help you study an
 
 ## Features
 
-✅ **Flashcard System**
-✅ **Blind 75 Practice**
-✅ **Study Tools**
-✅ **Roulette Gamification**
-✅ **Data Structure & Algorithm Visualization**
-⬜ **MORE FEATURES COMING SOON**
+✅ **Flashcard System** <br>
+✅ **Blind 75 Practice** <br>
+✅ **Study Tools** <br>
+✅ **Roulette Gamification** <br>
+✅ **Data Structure & Algorithm Visualization** <br>
+⬜ **MORE FEATURES COMING SOON** <br>
+
 ![https://github.com/matttrann/juzoai/blob/main/assets/Flashcard.png](https://github.com/matttrann/juzoai/blob/main/assets/Flashcard.png)
 ![https://github.com/matttrann/juzoai/blob/main/assets/Roulette.png](https://github.com/matttrann/juzoai/blob/main/assets/Roulette.png)
 ![https://github.com/matttrann/juzoai/blob/main/assets/DSA_Practise.png](https://github.com/matttrann/juzoai/blob/main/assets/DSA_Practise.png)
