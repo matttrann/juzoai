@@ -27,6 +27,7 @@ import CodeIcon from '@mui/icons-material/Code';
 import LogoutIcon from '@mui/icons-material/Logout';
 import SettingsIcon from '@mui/icons-material/Settings';
 import AssignmentIcon from '@mui/icons-material/Assignment';
+import CasinoIcon from '@mui/icons-material/Casino';
 import authService, { User } from '../services/authService';
 import { useLoadingOnRouteChange } from '../utils/loadingUtils';
 import { useAppLoadingBar } from '../contexts/LoadingBarContext';
@@ -101,7 +102,8 @@ const Layout: React.FC = () => {
     { text: 'Decks', path: '/decks', icon: <StyleIcon /> },
     { text: 'Performance Dashboard', path: '/performance', icon: <EmojiEventsIcon /> },
     { text: 'DSA Visualizer', path: '/dsa-visualizer', icon: <CodeIcon /> },
-    { text: 'Coding Problems', path: '/problems', icon: <AssignmentIcon /> }
+    { text: 'Coding Problems', path: '/problems', icon: <AssignmentIcon /> },
+    { text: 'Problem Roulette', path: '/problem-roulette', icon: <CasinoIcon /> }
   ];
 
   const handleNavigation = (path: string) => {
@@ -124,7 +126,8 @@ const Layout: React.FC = () => {
       (item.path === '/decks' && location.pathname.startsWith('/decks')) ||
       (item.path === '/performance' && location.pathname.startsWith('/performance')) ||
       (item.path === '/dsa-visualizer' && location.pathname.startsWith('/dsa-visualizer')) ||
-      (item.path === '/problems' && location.pathname.startsWith('/problems'))
+      (item.path === '/problems' && location.pathname.startsWith('/problems')) ||
+      (item.path === '/problem-roulette' && location.pathname.startsWith('/problem-roulette'))
     );
   };
 

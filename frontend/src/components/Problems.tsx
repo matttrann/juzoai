@@ -26,6 +26,7 @@ import { useNavigate } from 'react-router-dom';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import SearchIcon from '@mui/icons-material/Search';
+import CasinoIcon from '@mui/icons-material/Casino';
 
 interface PracticeProblem {
   id: number;
@@ -176,6 +177,20 @@ const Problems: React.FC = () => {
         These are the most frequently asked coding interview problems at top tech companies like Google, Facebook, Amazon, and Microsoft.
         Practice these problems in Python and try to implement the most optimal solutions to prepare effectively for technical interviews.
       </Typography>
+
+      {/* Problem Roulette Link */}
+      <Box sx={{ mb: 4, display: 'flex', justifyContent: 'center' }}>
+        <Button 
+          variant="contained" 
+          color="primary" 
+          size="large" 
+          onClick={() => navigate('/problem-roulette')}
+          startIcon={<CasinoIcon />}
+          sx={{ py: 1.5, px: 3, borderRadius: 2 }}
+        >
+          Can't Decide? Try Problem Roulette!
+        </Button>
+      </Box>
 
       {/* Filters and Search */}
       <Box component={Paper} elevation={1} sx={{ p: 2, mb: 4 }}>
