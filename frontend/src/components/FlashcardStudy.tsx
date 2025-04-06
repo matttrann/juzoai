@@ -261,9 +261,15 @@ const FlashcardStudy: React.FC = () => {
   const toggleShuffleMode = () => {
     if (studyState.shuffleMode) {
       // Turn off shuffle - restore original order
-      const sortedCards = [...studyState.cards];
+      const sortedCards = new Array(studyState.cards.length);
       studyState.originalOrder.forEach((originalIndex, currentIndex) => {
-        sortedCards[originalIndex] = studyState.cards[currentIndex];
+        // Find the card with the matching original index
+        const card = studyState.cards.find((_, i) => 
+          studyState.originalOrder[i] === currentIndex
+        );
+        if (card) {
+          sortedCards[currentIndex] = card;
+        }
       });
       
       setStudyState(prev => ({
@@ -276,15 +282,20 @@ const FlashcardStudy: React.FC = () => {
     } else {
       // Turn on shuffle - randomize cards
       const shuffledCards = [...studyState.cards];
+      const newOriginalOrder = studyState.cards.map((_, index) => index);
+      
+      // Fisher-Yates shuffle algorithm
       for (let i = shuffledCards.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [shuffledCards[i], shuffledCards[j]] = [shuffledCards[j], shuffledCards[i]];
+        [newOriginalOrder[i], newOriginalOrder[j]] = [newOriginalOrder[j], newOriginalOrder[i]];
       }
       
       setStudyState(prev => ({
         ...prev,
         shuffleMode: true,
         cards: shuffledCards,
+        originalOrder: newOriginalOrder,
         currentIndex: 0,
         isFlipped: false
       }));
@@ -292,6 +303,20 @@ const FlashcardStudy: React.FC = () => {
   };
 
   const resetStudy = () => {
+    // If in shuffle mode, restore original order first
+    let resetCards = studyState.cards;
+    if (studyState.shuffleMode) {
+      resetCards = new Array(studyState.cards.length);
+      studyState.originalOrder.forEach((originalIndex, currentIndex) => {
+        const card = studyState.cards.find((_, i) => 
+          studyState.originalOrder[i] === currentIndex
+        );
+        if (card) {
+          resetCards[currentIndex] = card;
+        }
+      });
+    }
+    
     setStudyState(prev => ({
       ...prev,
       currentIndex: 0,
@@ -299,7 +324,10 @@ const FlashcardStudy: React.FC = () => {
       completed: false,
       progress: 0,
       cardsReviewed: 0,
-      correctAnswers: 0
+      correctAnswers: 0,
+      shuffleMode: false,
+      cards: resetCards,
+      originalOrder: resetCards.map((_, index) => index)
     }));
     setScoreSubmitted(false);
   };
@@ -507,7 +535,9 @@ const FlashcardStudy: React.FC = () => {
           
           <Box sx={{ 
             display: 'flex', 
-            justifyContent: 'space-between',
+            justifyContent: 'center',
+            alignItems: 'center',
+            gap: 2,
             mt: 2,
             mb: 1
           }}>
@@ -523,11 +553,7 @@ const FlashcardStudy: React.FC = () => {
             <Button
               variant="contained"
               onClick={handleFlip}
-              sx={{ 
-                mx: 'auto',
-                display: 'block',
-                width: 'fit-content'
-              }}
+              sx={{ minWidth: '120px' }}
             >
               {studyState.isFlipped ? 'Show Front' : 'Show Back'}
             </Button>
