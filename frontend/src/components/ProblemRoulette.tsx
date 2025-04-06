@@ -170,7 +170,8 @@ const ProblemRoulette: React.FC = () => {
         display: flex;
         align-items: center;
         height: 100%;
-        left: 0;
+        left: 50%;
+        transform: translateX(-50%);
         will-change: transform;
       }
       .row {
@@ -202,20 +203,7 @@ const ProblemRoulette: React.FC = () => {
       }
       .card.highlighted {
         transform: scale(1.1);
-        box-shadow: 0 0 20px rgba(255,255,255,0.9);
         z-index: 5;
-        animation: pulse 1s infinite;
-      }
-      @keyframes pulse {
-        0% {
-          box-shadow: 0 0 20px rgba(255,255,255,0.9);
-        }
-        50% {
-          box-shadow: 0 0 30px rgba(255,255,255,1);
-        }
-        100% {
-          box-shadow: 0 0 20px rgba(255,255,255,0.9);
-        }
       }
     `;
     document.head.appendChild(style);
@@ -232,7 +220,7 @@ const ProblemRoulette: React.FC = () => {
     
     // Store current position and highlighted card ID before clearing
     const currentTransform = wheelRef.current.style.transform;
-    const currentPosition = currentTransform ? 
+    let currentPosition = currentTransform ? 
       parseInt(currentTransform.match(/-?\d+/)?.[0] || '0') : 0;
     
     let highlightedCardId: number | null = null;
@@ -247,8 +235,10 @@ const ProblemRoulette: React.FC = () => {
     // Calculate how many repeats we need to fill the viewport plus extra for smooth spinning
     const cardWidth = 81; // 75px + 6px margins
     const viewportWidth = window.innerWidth;
-    const cardsNeededForViewport = Math.ceil((viewportWidth * 3) / cardWidth); // Multiply by 3 for extra coverage
-    const minimumRepeats = Math.max(5, Math.ceil(cardsNeededForViewport / filteredProblems.length));
+    const rotations = 8; // Match the number of rotations in spinWheel
+    const totalSpinDistance = rotations * filteredProblems.length * cardWidth;
+    const cardsNeededForSpin = Math.ceil(totalSpinDistance / cardWidth);
+    const minimumRepeats = Math.max(20, Math.ceil(cardsNeededForSpin / filteredProblems.length));
     
     // Create the initial row with all problems
     const createRow = () => {
@@ -268,12 +258,27 @@ const ProblemRoulette: React.FC = () => {
       return row;
     };
     
-    // Add enough rows to ensure continuous display
+    // Add enough rows to ensure continuous display during the entire spin
     for (let i = 0; i < minimumRepeats; i++) {
       wheelRef.current.appendChild(createRow());
     }
     
-    // Restore the previous position if it exists
+    // If there was a highlighted card, ensure it stays centered
+    if (highlightedCardId !== null) {
+      // Find the first instance of the highlighted card
+      const highlightedCard = wheelRef.current.querySelector(`[data-id="${highlightedCardId}"]`);
+      const selector = document.querySelector('.selector');
+      
+      if (highlightedCard && selector) {
+        // Calculate the position needed to center this card
+        const cardRect = highlightedCard.getBoundingClientRect();
+        const selectorRect = selector.getBoundingClientRect();
+        const offset = cardRect.left - selectorRect.left + (cardRect.width - selectorRect.width) / 2;
+        currentPosition = offset;
+      }
+    }
+    
+    // Apply the position
     if (wheelRef.current && currentPosition !== 0) {
       wheelRef.current.style.transition = 'none';
       wheelRef.current.style.transform = `translate3d(-${currentPosition}px, 0px, 0px)`;
@@ -289,11 +294,10 @@ const ProblemRoulette: React.FC = () => {
   // Handle filter changes separately
   useEffect(() => {
     if (wheelRef.current) {
-      // Only reinitialize if there's no current transform or highlighted card
-      const hasTransform = wheelRef.current.style.transform !== '';
       const hasHighlight = wheelRef.current.querySelector('.highlighted') !== null;
       
-      if (!hasTransform && !hasHighlight) {
+      // Only reinitialize if there's no highlighted card
+      if (!hasHighlight) {
         initWheel();
       }
     }
@@ -316,29 +320,33 @@ const ProblemRoulette: React.FC = () => {
     
     // Calculate card width (including margins)
     const cardWidth = 81; // 75px + 6px margins
+    const totalWidth = cardWidth * filteredProblems.length;
     
     // Get current position
     const currentTransform = wheelRef.current.style.transform;
-    const currentPosition = currentTransform ? 
+    let currentPosition = currentTransform ? 
       parseInt(currentTransform.match(/-?\d+/)?.[0] || '0') : 0;
     
-    // Calculate total distance to spin from current position
-    const totalProblems = filteredProblems.length;
-    const rotations = 3; // Number of complete rotations
-    const basePosition = currentPosition + (rotations * totalProblems * cardWidth);
+    // Calculate spin distance with more rotations for a longer spin
+    const rotations = 12; // Increased for a stronger spin
+    const basePosition = rotations * totalWidth;
     const targetPosition = randomIndex * cardWidth;
-    const finalPosition = basePosition + targetPosition;
     
-    // Start the animation from current position
+    // Calculate final position based on current position
+    // Use the actual current position to prevent resetting
+    const finalPosition = currentPosition + basePosition + targetPosition;
+    
+    // Start the animation
     requestAnimationFrame(() => {
       if (wheelRef.current) {
-        // Use a slower easing at the end for a more dramatic finish
-        wheelRef.current.style.transition = `transform 5s cubic-bezier(0.25, 0.1, 0.1, 1)`;
+        // Spin the wheel with a more dramatic animation
+        // Using a custom cubic-bezier for a faster start and longer deceleration
+        wheelRef.current.style.transition = `transform 10s cubic-bezier(0.1, 0.7, 0, 1)`;
         wheelRef.current.style.transform = `translate3d(-${finalPosition}px, 0px, 0px)`;
       }
     });
     
-    // After animation completes
+    // After animation completes (increased to match new animation duration)
     setTimeout(() => {
       if (!wheelRef.current) return;
       
@@ -365,7 +373,7 @@ const ProblemRoulette: React.FC = () => {
         });
         
         if (closestCard) {
-          // Add a more noticeable highlight effect
+          // Add highlight without illumination
           (closestCard as HTMLElement).classList.add('highlighted');
           
           // Get the problem ID from the card
@@ -375,25 +383,38 @@ const ProblemRoulette: React.FC = () => {
           const matchingProblem = filteredProblems.find(p => p.id === cardId);
           if (matchingProblem) {
             setSelectedProblem(matchingProblem);
+            
+            // Adjust position to center the card perfectly
+            const card = closestCard as HTMLElement;
+            const cardRect = card.getBoundingClientRect();
+            const selectorRect = selector.getBoundingClientRect();
+            const offset = cardRect.left - selectorRect.left + (cardRect.width - selectorRect.width) / 2;
+            
+            // Apply the centering adjustment
+            const currentTransform = wheelRef.current.style.transform;
+            const currentPosition = currentTransform ? 
+              parseInt(currentTransform.match(/-?\d+/)?.[0] || '0') : 0;
+            const adjustedPosition = currentPosition + offset;
+            
+            // Apply the adjustment with a short animation
+            wheelRef.current.style.transition = 'transform 0.3s ease-out';
+            wheelRef.current.style.transform = `translate3d(-${adjustedPosition}px, 0px, 0px)`;
+            
             // Show the dialog without removing the highlight
-            setDialogOpen(true);
+            setTimeout(() => setDialogOpen(true), 300);
           }
         }
       }
       
       // Only update spinning state
       setSpinning(false);
-    }, 5000);
+    }, 10000); // Increased timeout to match new animation duration
   };
 
   const handleNavigate = () => {
     if (selectedProblem) {
       navigate(`/${selectedProblem.path}`);
     }
-    setDialogOpen(false);
-  };
-
-  const handleClose = () => {
     setDialogOpen(false);
   };
 
@@ -513,8 +534,9 @@ const ProblemRoulette: React.FC = () => {
       {/* Result Dialog */}
       <Dialog
         open={dialogOpen}
-        onClose={handleClose}
+        onClose={() => {}} // Prevent closing on backdrop click or escape key
         aria-labelledby="roulette-result-dialog"
+        disableEscapeKeyDown
       >
         <DialogTitle id="roulette-result-dialog">
           Your Random Problem
@@ -540,8 +562,7 @@ const ProblemRoulette: React.FC = () => {
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose}>Cancel</Button>
-          <Button onClick={handleNavigate} color="primary" variant="contained">
+          <Button onClick={handleNavigate} color="primary" variant="contained" fullWidth>
             Solve Problem
           </Button>
         </DialogActions>
