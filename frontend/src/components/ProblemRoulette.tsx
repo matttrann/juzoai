@@ -37,19 +37,17 @@ interface PracticeProblem {
 const ProblemRoulette: React.FC = () => {
   const theme = useTheme();
   const navigate = useNavigate();
-  const [spinning, setSpinning] = useState(false);
-  const [difficultyFilter, setDifficultyFilter] = useState('All');
-  const [categoryFilter, setCategoryFilter] = useState('All');
   const [blind75Only, setBlind75Only] = useState(false);
   const [selectedProblem, setSelectedProblem] = useState<PracticeProblem | null>(null);
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [spinning, setSpinning] = useState(false);
+  const [showWheel, setShowWheel] = useState(true);
   const wheelRef = useRef<HTMLDivElement>(null);
   const selectorRef = useRef<HTMLDivElement>(null);
   const rouletteWrapperRef = useRef<HTMLDivElement>(null);
-  // Use a ref to track if this is the first render
   const isFirstRender = useRef(true);
-  // Store the last selected problem ID to prevent the wheel from resetting
   const lastSelectedProblemRef = useRef<number | null>(null);
+  const [difficultyFilter, setDifficultyFilter] = useState('All');
+  const [categoryFilter, setCategoryFilter] = useState('All');
 
   // Blind 75 Problems List (same as in Problems.tsx)
   const practiceProblems: PracticeProblem[] = [
@@ -140,6 +138,33 @@ const ProblemRoulette: React.FC = () => {
         margin-bottom: 20px;
         display: flex;
         justify-content: center;
+        opacity: 1;
+        transition: opacity 0.3s ease-out;
+      }
+      .roulette-wrapper.hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+      .roulette-section {
+        transition: all 0.3s ease-out;
+        opacity: 1;
+        transform: translateY(0);
+      }
+      .roulette-section.hidden {
+        opacity: 0;
+        transform: translateY(20px);
+        pointer-events: none;
+        position: absolute;
+        left: -9999px;
+      }
+      .selected-problem {
+        opacity: 0;
+        transform: translateY(20px);
+        transition: all 0.3s ease-out;
+      }
+      .selected-problem.visible {
+        opacity: 1;
+        transform: translateY(0);
       }
       .selector {
         position: absolute;
@@ -365,6 +390,23 @@ const ProblemRoulette: React.FC = () => {
 
   // Initialize wheel only on mount with position persistence
   useEffect(() => {
+    // Define a one-time setup function
+    const setupWheel = () => {
+      // Clear any existing transform first
+      if (wheelRef.current) {
+        wheelRef.current.style.transition = 'none';
+        wheelRef.current.style.transform = '';
+        void wheelRef.current.offsetWidth;
+      }
+      
+      // Run initial setup
+      initWheel();
+      isFirstRender.current = false;
+    };
+    
+    // Run setup with a small delay to ensure DOM is ready
+    const setupTimeout = setTimeout(setupWheel, 50);
+    
     // Add global event listener to watch for position resets
     const wheelPositionWatcher = () => {
       // If the wheel exists but has no transform, restore from global storage
@@ -382,22 +424,34 @@ const ProblemRoulette: React.FC = () => {
       }
     };
     
-    // Run initial setup
-    initWheel();
-    isFirstRender.current = false;
-    
     // Add watcher at frequent intervals
     const watchInterval = setInterval(wheelPositionWatcher, 100);
     
+    // Add a resize handler to prevent glitches on window resize
+    const handleResize = () => {
+      if (!spinning) {
+        // Reinitialize wheel on resize, but wait for resize to complete
+        clearTimeout((window as any).__resizeTimeout);
+        (window as any).__resizeTimeout = setTimeout(() => {
+          initWheel();
+        }, 300);
+      }
+    };
+    
+    window.addEventListener('resize', handleResize);
+    
     // Cleanup on unmount
     return () => {
+      clearTimeout(setupTimeout);
       clearInterval(watchInterval);
+      clearTimeout((window as any).__resizeTimeout);
+      window.removeEventListener('resize', handleResize);
     };
   }, []); // Only run on mount
 
   // Add a dedicated effect to handle when the dialog opens/closes
   useEffect(() => {
-    if (dialogOpen) {
+    if (selectedProblem) {
       // When dialog opens, make sure we preserve the wheel position
       if (wheelRef.current && (window as any).__wheelPosition) {
         // Ensure wheel position is maintained
@@ -414,282 +468,247 @@ const ProblemRoulette: React.FC = () => {
         }, 50);
       }
     }
-  }, [dialogOpen]);
+  }, [selectedProblem]);
   
-  // Handle filter changes separately
+  // Handle filter changes separately with better stability
   useEffect(() => {
-    if (!isFirstRender.current) {
-      // When filters change, initialize wheel but preserve position
-      const savedPosition = (window as any).__wheelFinalPosition || 
-                           (window as any).__wheelPosition;
+    if (!isFirstRender.current && !spinning) {
+      // Capture last position from wheel if it exists
+      let lastPosition = null;
+      let lastCardId = null;
+      
+      if (wheelRef.current) {
+        const transform = wheelRef.current.style.transform;
+        if (transform) {
+          lastPosition = parseInt(transform.match(/-?\d+/)?.[0] || '0');
+        }
+        
+        const highlightedCard = wheelRef.current.querySelector('.highlighted');
+        if (highlightedCard) {
+          lastCardId = parseInt((highlightedCard as HTMLElement).getAttribute('data-id') || '0');
+        }
+      }
+      
+      // Store the captured position
+      const savedPosition = lastPosition;
+      const savedCardId = lastCardId || lastSelectedProblemRef.current;
+      
+      // Remember this data for after reinitializing
+      const filterChangeData = {
+        position: savedPosition,
+        cardId: savedCardId
+      };
       
       // Initialize wheel with new filters
       initWheel();
       
-      // Restore position if available
+      // If we had a position, and the wheel now exists, restore it with a delay
       if (savedPosition && wheelRef.current) {
         setTimeout(() => {
           if (wheelRef.current) {
+            // Find if our previous card still exists in the new filtered problems
+            const cardStillExists = filteredProblems.some(p => p.id === savedCardId);
+            
+            if (cardStillExists && savedCardId) {
+              // Find the first matching card element
+              const matchingCard = wheelRef.current.querySelector(`[data-id="${savedCardId}"]`);
+              if (matchingCard) {
+                // Highlight it
+                matchingCard.classList.add('highlighted');
+                lastSelectedProblemRef.current = savedCardId;
+                
+                // Find the matching problem
+                const matchingProblem = filteredProblems.find(p => p.id === savedCardId);
+                if (matchingProblem) {
+                  setSelectedProblem(matchingProblem);
+                }
+              }
+            }
+            
+            // Apply saved position, slightly delayed to ensure all measurements are ready
             wheelRef.current.style.transition = 'none';
             wheelRef.current.style.transform = `translate3d(-${savedPosition}px, 0px, 0px)`;
             void wheelRef.current.offsetWidth;
           }
-        }, 50);
+        }, 100);
       }
     }
-  }, [filteredProblems, initWheel]);
+  }, [filteredProblems, initWheel, spinning]);
+  
+  // Cleanup function to prevent memory leaks and glitches
+  useEffect(() => {
+    // Cleanup function that runs when component unmounts
+    return () => {
+      // Clear any running timeouts or intervals
+      const highestId = window.setTimeout(() => {}, 0);
+      for (let i = 0; i < highestId; i++) {
+        window.clearTimeout(i);
+      }
+      
+      // Save final wheel position to localStorage
+      if (wheelRef.current) {
+        const currentTransform = wheelRef.current.style.transform;
+        const position = currentTransform ? 
+          parseInt(currentTransform.match(/-?\d+/)?.[0] || '0') : 0;
+          
+        if (position && lastSelectedProblemRef.current) {
+          const positionData = {
+            position: position,
+            problemId: lastSelectedProblemRef.current,
+            timestamp: new Date().getTime()
+          };
+          localStorage.setItem('wheelPosition', JSON.stringify(positionData));
+        }
+        
+        // Stop any transitions
+        wheelRef.current.style.transition = 'none';
+      }
+    };
+  }, []);
+
+  // Add refresh on navigation
+  useEffect(() => {
+    // Check if this is a fresh navigation (not a refresh)
+    const isRefresh = window.performance
+      .getEntriesByType('navigation')
+      .some((nav) => (nav as PerformanceNavigationTiming).type === 'reload');
+
+    // Only refresh if we're not already coming from a refresh
+    if (!isRefresh && window.location.pathname === '/problem-roulette') {
+      window.location.reload();
+    }
+  }, []);
+
+  // Add effect to reset hasSpun when returning to the page
+  useEffect(() => {
+    // Reset hasSpun when component mounts
+    setShowWheel(true);
+    setSelectedProblem(null);
+  }, []);
 
   const spinWheel = () => {
     if (spinning || !wheelRef.current || filteredProblems.length === 0) {
       return;
     }
-    
+
     setSpinning(true);
-    
+    setSelectedProblem(null);
+
     // Remove any previously highlighted cards
     const highlightedCards = wheelRef.current.querySelectorAll('.highlighted');
     highlightedCards.forEach(card => card.classList.remove('highlighted'));
-    
+
     // Select a random problem from the filtered list
     const randomIndex = Math.floor(Math.random() * filteredProblems.length);
     const selectedProblem = filteredProblems[randomIndex];
-    
+
     // Calculate card width (including margins)
     const cardWidth = 81; // 75px + 6px margins
     const totalWidth = cardWidth * filteredProblems.length;
-    
+
     // Get current position
     const currentTransform = wheelRef.current.style.transform;
     let currentPosition = currentTransform ? 
       parseInt(currentTransform.match(/-?\d+/)?.[0] || '0') : 0;
+
+    // Reset position if it's too large to prevent performance issues
+    if (Math.abs(currentPosition) > totalWidth * 2) {
+      currentPosition = currentPosition % totalWidth;
+      wheelRef.current.style.transform = `translate3d(-${currentPosition}px, 0px, 0px)`;
+      void wheelRef.current.offsetWidth;
+    }
+
+    // Calculate spin distance
+    const rotations = 8; // Reduced number of rotations for more stability
+    const baseSpinDistance = rotations * totalWidth;
     
-    // Calculate spin distance with more rotations for a longer spin
-    const rotations = 12; // Increased for a stronger spin
-    const basePosition = rotations * totalWidth;
-    
-    // Add a random offset to make it land at different positions within the card
-    const randomOffset = Math.floor(Math.random() * cardWidth * 0.8) - (cardWidth * 0.4);
+    // Add random offset within the card width
+    const randomOffset = Math.floor(Math.random() * (cardWidth * 0.6)) - (cardWidth * 0.3);
     const targetPosition = (randomIndex * cardWidth) + randomOffset;
     
-    // Calculate final position based on current position
-    // Use the actual current position to prevent resetting
-    const finalPosition = currentPosition + basePosition + targetPosition;
-    
-    // Store starting position to persist globally
+    // Calculate final position
+    const finalPosition = currentPosition + baseSpinDistance + targetPosition;
+
+    // Store starting position
     (window as any).__wheelStartPosition = currentPosition;
-    
+
     // Start the animation
     requestAnimationFrame(() => {
       if (wheelRef.current) {
-        // Spin the wheel with a more dramatic animation
-        // Using a custom cubic-bezier for a faster start and longer deceleration
-        wheelRef.current.style.transition = `transform 10s cubic-bezier(0.05, 0.8, 0, 1)`;
+        wheelRef.current.style.transition = 'transform 8s cubic-bezier(0.2, 0.5, 0.1, 1)';
         wheelRef.current.style.transform = `translate3d(-${finalPosition}px, 0px, 0px)`;
-        
-        // Store the target position 
-        (window as any).__wheelTargetPosition = finalPosition;
       }
     });
-    
+
     // After animation completes
-    setTimeout(() => {
+    const animationTimeout = setTimeout(() => {
       if (!wheelRef.current) return;
-      
+
       // Check if animation completed properly
       const currentTransform = wheelRef.current.style.transform;
       const actualPosition = currentTransform ? 
         parseInt(currentTransform.match(/-?\d+/)?.[0] || '0') : 0;
-        
-      // If the position isn't close to the target position, something went wrong
-      if (Math.abs(actualPosition - finalPosition) > 100) {
-        // Restore the intended position without animation
+
+      // If position is wrong, fix it
+      if (Math.abs(actualPosition - finalPosition) > 10) {
         wheelRef.current.style.transition = 'none';
         wheelRef.current.style.transform = `translate3d(-${finalPosition}px, 0px, 0px)`;
         void wheelRef.current.offsetWidth;
       }
-      
+
       // Find the card that's closest to the selector
       const selector = document.querySelector('.selector');
       if (selector) {
         const selectorRect = selector.getBoundingClientRect();
         const selectorCenter = selectorRect.left + (selectorRect.width / 2);
-        
+
         // Get all cards
         const allCards = wheelRef.current.querySelectorAll('.card');
         let closestCard: Element | null = null;
         let minDistance = Infinity;
-        
+
         allCards.forEach(card => {
-          // Skip hidden cards
-          if ((card as HTMLElement).style.visibility === 'hidden') return;
-          
           const rect = card.getBoundingClientRect();
           const cardCenter = rect.left + (rect.width / 2);
           const distance = Math.abs(cardCenter - selectorCenter);
-          
+
           if (distance < minDistance) {
             minDistance = distance;
             closestCard = card;
           }
         });
-        
+
         if (closestCard) {
-          // Add highlight without illumination
           (closestCard as HTMLElement).classList.add('highlighted');
           
-          // Get the problem ID from the card
           const cardId = parseInt((closestCard as HTMLElement).getAttribute('data-id') || '0');
-          // Store the selected problem ID
           lastSelectedProblemRef.current = cardId;
           
-          // Find the matching problem and update the selected problem state
           const matchingProblem = filteredProblems.find(p => p.id === cardId);
           if (matchingProblem) {
-            setSelectedProblem(matchingProblem);
+            // Add the hidden class to start the fade out
+            if (rouletteWrapperRef.current) {
+              rouletteWrapperRef.current.classList.add('hidden');
+            }
             
-            // Adjust position to center the card perfectly
-            const card = closestCard as HTMLElement;
-            const cardRect = card.getBoundingClientRect();
-            const selectorRect = selector.getBoundingClientRect();
-            
-            // Calculate the exact offset needed to center the card on the marker
-            const offset = cardRect.left - selectorRect.left + (cardRect.width / 2) - (selectorRect.width / 2);
-            
-            // Apply the centering adjustment
-            const currentTransform = wheelRef.current.style.transform;
-            const currentPosition = currentTransform ? 
-              parseInt(currentTransform.match(/-?\d+/)?.[0] || '0') : 0;
-            const adjustedPosition = currentPosition + offset;
-            
-            // Apply the adjustment with a short animation to center the card perfectly
-            wheelRef.current.style.transition = 'transform 0.5s ease-out';
-            wheelRef.current.style.transform = `translate3d(-${adjustedPosition}px, 0px, 0px)`;
-            
-            // Force a reflow to ensure the transition is applied
-            void wheelRef.current.offsetWidth;
-            
-            // Store final position globally
-            (window as any).__wheelFinalPosition = adjustedPosition;
-            
-            // Save the position to localStorage AFTER applying the adjusted position
-            // Include the selected problem ID to ensure we can verify it's still valid
-            const positionData = {
-              position: adjustedPosition,
-              problemId: cardId,
-              timestamp: new Date().getTime()
-            };
-            localStorage.setItem('wheelPosition', JSON.stringify(positionData));
-            
-            // Also set it as a data attribute for easier retrieval
-            wheelRef.current.setAttribute('data-persisted-position', adjustedPosition.toString());
-            wheelRef.current.setAttribute('data-persisted-card-id', cardId.toString());
-            
-            // Show the dialog after the centering animation completes
-            // BUT preserve the wheel position
+            // Set the selected problem after a short delay to allow for fade out
             setTimeout(() => {
-              // Store the wheel transform before opening dialog
-              (window as any).__wheelPosition = wheelRef.current?.style.transform || '';
-              
-              // Set dialog open without modifying the wheel position
-              openDialog();
-            }, 600);
+              setSelectedProblem(matchingProblem);
+            }, 300);
           }
         }
       }
       
-      // Only update spinning state
       setSpinning(false);
-    }, 10000); // Matches the animation duration
+    }, 10000);
+
+    (window as any).__spinAnimationTimeout = animationTimeout;
   };
 
-  // Define custom dialog open function to prevent position reset
-  const openDialog = useCallback(() => {
-    // Store the wheel position in a global variable to ensure it's not affected
-    (window as any).__wheelPosition = wheelRef.current?.style.transform || '';
-    
-    // Now we can safely set the dialog open state
-    setDialogOpen(true);
-  }, []);
-
-  // Define custom dialog close function that preserves wheel position
-  const closeDialog = useCallback(() => {
-    // Just close the dialog without touching the wheel
-    setDialogOpen(false);
-    
-    // Force a reflow then restore wheel position from global storage 
-    setTimeout(() => {
-      if (wheelRef.current && (window as any).__wheelPosition) {
-        wheelRef.current.style.transition = 'none';
-        wheelRef.current.style.transform = (window as any).__wheelPosition;
-      }
-    }, 10);
-  }, []);
-
-  // Special handler for dialog navigation
-  const handleNavigate = useCallback(() => {
-    if (selectedProblem) {
-      // Store current position before navigation
-      const currentTransform = wheelRef.current?.style.transform || '';
-      (window as any).__wheelPosition = currentTransform;
-      
-      // Close dialog first
-      setDialogOpen(false);
-      
-      // Then navigate after a delay to ensure position is preserved
-      setTimeout(() => {
-        navigate(`/${selectedProblem.path}`);
-      }, 50);
-    } else {
-      closeDialog();
-    }
-  }, [selectedProblem, navigate, closeDialog]);
-
-  // Completely isolated dialog that doesn't affect wheel position
-  const ResultDialog = () => (
-    <Dialog
-      open={dialogOpen}
-      onClose={() => {}} // Prevent closing on backdrop click or escape key
-      aria-labelledby="roulette-result-dialog"
-      disableEscapeKeyDown
-      style={{ position: 'fixed' }} // Use fixed to avoid affecting layout
-      BackdropProps={{
-        style: { position: 'fixed' } // Ensure backdrop doesn't shift layout
-      }}
-      // Use lower z-index to avoid covering wheel
-      classes={{
-        root: 'roulette-dialog-root'
-      }}
-    >
-      <DialogTitle id="roulette-result-dialog">
-        Your Random Problem
-      </DialogTitle>
-      <DialogContent>
-        {selectedProblem && (
-          <>
-            <Typography variant="h6" gutterBottom>
-              {selectedProblem.title}
-            </Typography>
-            <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
-              <Chip 
-                label={selectedProblem.difficulty} 
-                sx={{ bgcolor: getDifficultyColor(selectedProblem.difficulty), color: 'white' }} 
-              />
-              <Chip label={selectedProblem.category} />
-              {selectedProblem.isBlind75 && <Chip label="Blind 75" color="primary" />}
-            </Box>
-            <Typography variant="body1">
-              Ready to solve this problem? Click "Solve Problem" to get started!
-            </Typography>
-          </>
-        )}
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={handleNavigate} color="primary" variant="contained" fullWidth>
-          Solve Problem
-        </Button>
-      </DialogActions>
-    </Dialog>
-  );
+  const handleTryAgain = () => {
+    setShowWheel(true);
+    setSelectedProblem(null);
+  };
 
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 8 }}>
@@ -697,115 +716,148 @@ const ProblemRoulette: React.FC = () => {
         Problem Roulette
       </Typography>
       
-      <Typography variant="body1" paragraph sx={{ mb: 4 }}>
-        Can't decide which coding problem to tackle next? Let the roulette decide for you!
-        Spin the wheel to get a random problem based on your filters.
-      </Typography>
+      <div className={`roulette-section ${selectedProblem ? 'hidden' : ''}`}>
+        <Typography variant="body1" paragraph sx={{ mb: 4 }}>
+          Can't decide which coding problem to tackle next? Let the roulette decide for you!
+          Spin the wheel to get a random problem based on your filters.
+        </Typography>
 
-      {/* Filters */}
-      <Box component={Paper} elevation={1} sx={{ p: 2, mb: 4 }}>
-        <Grid container spacing={2}>
-          <Grid sx={{ gridColumn: {xs: 'span 12', sm: 'span 4'} }}>
-            <FormControl fullWidth>
-              <InputLabel>Difficulty</InputLabel>
-              <Select
-                value={difficultyFilter}
-                label="Difficulty"
-                onChange={handleDifficultyChange}
-              >
-                <MenuItem value="All">All Difficulties</MenuItem>
-                <MenuItem value="Easy">Easy</MenuItem>
-                <MenuItem value="Medium">Medium</MenuItem>
-                <MenuItem value="Hard">Hard</MenuItem>
-              </Select>
-            </FormControl>
+        {/* Filters */}
+        <Box component={Paper} elevation={1} sx={{ p: 2, mb: 4 }}>
+          <Grid container spacing={2}>
+            <Grid sx={{ gridColumn: {xs: 'span 12', sm: 'span 4'} }}>
+              <FormControl fullWidth>
+                <InputLabel>Difficulty</InputLabel>
+                <Select
+                  value={difficultyFilter}
+                  label="Difficulty"
+                  onChange={handleDifficultyChange}
+                >
+                  <MenuItem value="All">All Difficulties</MenuItem>
+                  <MenuItem value="Easy">Easy</MenuItem>
+                  <MenuItem value="Medium">Medium</MenuItem>
+                  <MenuItem value="Hard">Hard</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid sx={{ gridColumn: {xs: 'span 12', sm: 'span 4'} }}>
+              <FormControl fullWidth>
+                <InputLabel>Category</InputLabel>
+                <Select
+                  value={categoryFilter}
+                  label="Category"
+                  onChange={handleCategoryChange}
+                >
+                  {categories.map(category => (
+                    <MenuItem key={category} value={category}>{category}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid sx={{ gridColumn: {xs: 'span 12', sm: 'span 4'} }}>
+              <FormControl fullWidth>
+                <InputLabel>Problem Set</InputLabel>
+                <Select
+                  value={blind75Only ? 'true' : 'false'}
+                  label="Problem Set"
+                  onChange={handleBlind75FilterChange}
+                >
+                  <MenuItem value="false">All Problems</MenuItem>
+                  <MenuItem value="true">Blind 75 Only</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
           </Grid>
-          <Grid sx={{ gridColumn: {xs: 'span 12', sm: 'span 4'} }}>
-            <FormControl fullWidth>
-              <InputLabel>Category</InputLabel>
-              <Select
-                value={categoryFilter}
-                label="Category"
-                onChange={handleCategoryChange}
-              >
-                {categories.map(category => (
-                  <MenuItem key={category} value={category}>{category}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid sx={{ gridColumn: {xs: 'span 12', sm: 'span 4'} }}>
-            <FormControl fullWidth>
-              <InputLabel>Problem Set</InputLabel>
-              <Select
-                value={blind75Only ? 'true' : 'false'}
-                label="Problem Set"
-                onChange={handleBlind75FilterChange}
-              >
-                <MenuItem value="false">All Problems</MenuItem>
-                <MenuItem value="true">Blind 75 Only</MenuItem>
-              </Select>
-            </FormControl>
-          </Grid>
-        </Grid>
-      </Box>
+        </Box>
 
-      {/* Roulette Section */}
-      <Box sx={{ mb: 4 }}>
-        <div className="roulette-wrapper" ref={rouletteWrapperRef}>
-          <div className="selector" ref={selectorRef}></div>
-          <div className="wheel" ref={wheelRef}></div>
-        </div>
+        {/* Roulette Section */}
+        <Box sx={{ mb: 4 }}>
+          <div className={`roulette-wrapper`} ref={rouletteWrapperRef}>
+            <div className="selector" ref={selectorRef}></div>
+            <div className="wheel" ref={wheelRef}></div>
+          </div>
 
-        <Box sx={{ textAlign: 'center', mt: 3 }}>
+          <Box sx={{ textAlign: 'center', mt: 3 }}>
+            <Button
+              variant="contained"
+              color="primary"
+              size="large"
+              startIcon={<CasinoIcon />}
+              onClick={spinWheel}
+              disabled={spinning || filteredProblems.length === 0}
+              sx={{ minWidth: '180px' }}
+            >
+              {spinning ? 'Spinning...' : 'Spin the Wheel'}
+            </Button>
+
+            {filteredProblems.length === 0 && (
+              <Typography variant="body1" color="error" sx={{ textAlign: 'center', mt: 2 }}>
+                No problems match the selected filters. Please adjust your filters to continue.
+              </Typography>
+            )}
+          </Box>
+        </Box>
+
+        {/* Available Problems */}
+        <Box component={Paper} elevation={1} sx={{ p: 2 }}>
+          <Typography variant="h6" gutterBottom>
+            Available Problems ({filteredProblems.length})
+          </Typography>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+            {filteredProblems.map((problem, index) => (
+              <Chip
+                key={problem.id}
+                label={`${problem.id}. ${problem.title}`}
+                onClick={() => navigate(`/${problem.path}`)}
+                sx={{
+                  bgcolor: getCheckerStyle(index),
+                  color: 'white',
+                  ':hover': {
+                    bgcolor: theme.palette.mode === 'dark' 
+                      ? `${getCheckerStyle(index)}80` 
+                      : `${getCheckerStyle(index)}d0`,
+                    cursor: 'pointer'
+                  }
+                }}
+              />
+            ))}
+          </Box>
+        </Box>
+      </div>
+
+      {/* Selected Problem Section */}
+      {selectedProblem && (
+        <Box 
+          component={Paper} 
+          elevation={3} 
+          className={`selected-problem ${selectedProblem ? 'visible' : ''}`}
+          sx={{ p: 4, maxWidth: 600, mx: 'auto', textAlign: 'center' }}
+        >
+          <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', color: 'primary.main' }}>
+            Selected Problem
+          </Typography>
+          <Typography variant="h6" gutterBottom>
+            {selectedProblem.title}
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center', mb: 3 }}>
+            <Chip 
+              label={selectedProblem.difficulty} 
+              sx={{ bgcolor: getDifficultyColor(selectedProblem.difficulty), color: 'white' }} 
+            />
+            <Chip label={selectedProblem.category} />
+            {selectedProblem.isBlind75 && <Chip label="Blind 75" color="primary" />}
+          </Box>
           <Button
             variant="contained"
             color="primary"
             size="large"
-            startIcon={<CasinoIcon />}
-            onClick={spinWheel}
-            disabled={spinning || filteredProblems.length === 0}
-            sx={{ minWidth: '180px' }}
+            onClick={() => navigate(`/${selectedProblem.path}`)}
+            sx={{ minWidth: '200px' }}
           >
-            {spinning ? 'Spinning...' : 'Spin the Wheel'}
+            Go to Question
           </Button>
         </Box>
-
-        {filteredProblems.length === 0 && (
-          <Typography variant="body1" color="error" sx={{ textAlign: 'center', mt: 2 }}>
-            No problems match the selected filters. Please adjust your filters to continue.
-          </Typography>
-        )}
-      </Box>
-
-      {/* Available Problems */}
-      <Box component={Paper} elevation={1} sx={{ p: 2 }}>
-        <Typography variant="h6" gutterBottom>
-          Available Problems ({filteredProblems.length})
-        </Typography>
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-          {filteredProblems.map((problem, index) => (
-            <Chip
-              key={problem.id}
-              label={`${problem.id}. ${problem.title}`}
-              onClick={() => navigate(`/${problem.path}`)}
-              sx={{
-                bgcolor: getCheckerStyle(index),
-                color: 'white',
-                ':hover': {
-                  bgcolor: theme.palette.mode === 'dark' 
-                    ? `${getCheckerStyle(index)}80` 
-                    : `${getCheckerStyle(index)}d0`,
-                  cursor: 'pointer'
-                }
-              }}
-            />
-          ))}
-        </Box>
-      </Box>
-
-      {/* Result Dialog */}
-      <ResultDialog />
+      )}
     </Container>
   );
 };
