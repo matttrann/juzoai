@@ -92,6 +92,11 @@ const ProblemRoulette: React.FC = () => {
     }
   };
 
+  // Function to determine if a problem should use the 'even' or 'odd' style
+  const getCheckerStyle = (index: number): string => {
+    return index % 2 === 0 ? '#90caf9' : '#424242';
+  };
+
   const handleDifficultyChange = (event: SelectChangeEvent) => {
     setDifficultyFilter(event.target.value);
   };
@@ -115,60 +120,11 @@ const ProblemRoulette: React.FC = () => {
     return matchesDifficulty && matchesCategory && matchesBlind75 && problem.implemented === true;
   });
 
-  // Define initWheel as a useCallback to fix the dependency warning
-  const initWheel = useCallback(() => {
-    if (!wheelRef.current) return;
-    
-    // Clear existing content
-    wheelRef.current.innerHTML = '';
-    
-    // Create row with problem cards
-    const row = document.createElement('div');
-    row.className = 'roulette-row';
-    
-    // Add each problem as a card
-    filteredProblems.forEach(problem => {
-      const card = document.createElement('div');
-      card.className = `roulette-card ${problem.difficulty === 'Easy' ? 'green' : problem.difficulty === 'Medium' ? 'black' : 'red'}`;
-      card.setAttribute('data-id', problem.id.toString());
-      card.textContent = problem.id.toString();
-      row.appendChild(card);
-    });
-    
-    // Add multiple rows for better visual effect
-    for (let i = 0; i < 20; i++) {
-      wheelRef.current.appendChild(row.cloneNode(true));
-    }
-  }, [filteredProblems]);
-
-  // Initialize wheel with problem cards
-  useEffect(() => {
-    initWheel();
-  }, [filteredProblems, initWheel]);
-
   // Add CSS to document head
   useEffect(() => {
     // Create style element
     const style = document.createElement('style');
     style.innerHTML = `
-      .roulette-row {
-        display: flex;
-      }
-      .roulette-card {
-        height: 75px;
-        width: 75px;
-        margin: 3px;
-        border-radius: 8px;
-        border-bottom: 3px solid rgba(0,0,0,0.3);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-weight: bold;
-        font-size: 1.5em;
-        box-shadow: 0 3px 5px rgba(0,0,0,0.2);
-        transition: transform 0.2s;
-      }
       .roulette-wrapper {
         position: relative;
         overflow: hidden;
@@ -178,6 +134,8 @@ const ProblemRoulette: React.FC = () => {
         border-radius: 8px;
         box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
         margin-bottom: 20px;
+        display: flex;
+        justify-content: center;
       }
       .selector {
         position: absolute;
@@ -185,10 +143,9 @@ const ProblemRoulette: React.FC = () => {
         left: 50%;
         height: 100%;
         width: 4px;
-        background: #90caf9;
+        background: white;
         transform: translateX(-50%);
-        z-index: 10;
-        box-shadow: 0 0 10px rgba(144, 202, 249, 0.6), 0 0 20px rgba(144, 202, 249, 0.4);
+        z-index: 2;
       }
       .selector::before, .selector::after {
         content: '';
@@ -202,41 +159,63 @@ const ProblemRoulette: React.FC = () => {
       }
       .selector::before {
         top: 0;
-        border-top: 8px solid #90caf9;
+        border-top: 8px solid white;
       }
       .selector::after {
         bottom: 0;
-        border-bottom: 8px solid #90caf9;
+        border-bottom: 8px solid white;
       }
-      .roulette-card.red {
-        background: #f48fb1;
+      .wheel {
+        position: absolute;
+        display: flex;
+        align-items: center;
+        height: 100%;
+        left: 0;
+        will-change: transform;
       }
-      .roulette-card.black {
-        background: #ffb74d;
+      .row {
+        display: flex;
+        height: 100%;
+        align-items: center;
       }
-      .roulette-card.green {
+      .card {
+        height: 75px;
+        width: 75px;
+        margin: 3px;
+        border-radius: 8px;
+        border-bottom: 3px solid rgba(0,0,0,0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        font-size: 1.5em;
+        box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+        flex-shrink: 0;
+        transition: transform 0.3s ease;
+      }
+      .card.even {
         background: #90caf9;
       }
-      .roulette-card.highlighted {
-        transform: scale(1.05);
-        box-shadow: 0 0 15px rgba(144, 202, 249, 0.8);
+      .card.odd {
+        background: #424242;
+      }
+      .card.highlighted {
+        transform: scale(1.1);
+        box-shadow: 0 0 20px rgba(255,255,255,0.9);
         z-index: 5;
+        animation: pulse 1s infinite;
       }
-      @keyframes spin-glow {
-        0%, 100% { box-shadow: 0 0 8px rgba(144, 202, 249, 0.6); }
-        50% { box-shadow: 0 0 15px rgba(144, 202, 249, 0.9); }
-      }
-      .spin-active .selector {
-        animation: spin-glow 0.5s infinite;
-      }
-      @keyframes bounce {
-        0%, 100% { transform: translateX(-50%); }
-        25% { transform: translateX(-47%); }
-        50% { transform: translateX(-50%); }
-        75% { transform: translateX(-53%); }
-      }
-      .landing-bounce .selector {
-        animation: bounce 0.6s ease-in-out;
+      @keyframes pulse {
+        0% {
+          box-shadow: 0 0 20px rgba(255,255,255,0.9);
+        }
+        50% {
+          box-shadow: 0 0 30px rgba(255,255,255,1);
+        }
+        100% {
+          box-shadow: 0 0 20px rgba(255,255,255,0.9);
+        }
       }
     `;
     document.head.appendChild(style);
@@ -247,69 +226,164 @@ const ProblemRoulette: React.FC = () => {
     };
   }, []);
 
+  // Define initWheel as a useCallback to fix the dependency warning
+  const initWheel = useCallback(() => {
+    if (!wheelRef.current || filteredProblems.length === 0) return;
+    
+    // Store current position and highlighted card ID before clearing
+    const currentTransform = wheelRef.current.style.transform;
+    const currentPosition = currentTransform ? 
+      parseInt(currentTransform.match(/-?\d+/)?.[0] || '0') : 0;
+    
+    let highlightedCardId: number | null = null;
+    const highlightedCard = wheelRef.current.querySelector('.highlighted');
+    if (highlightedCard) {
+      highlightedCardId = parseInt((highlightedCard as HTMLElement).getAttribute('data-id') || '0');
+    }
+    
+    // Clear existing content
+    wheelRef.current.innerHTML = '';
+    
+    // Calculate how many repeats we need to fill the viewport plus extra for smooth spinning
+    const cardWidth = 81; // 75px + 6px margins
+    const viewportWidth = window.innerWidth;
+    const cardsNeededForViewport = Math.ceil((viewportWidth * 3) / cardWidth); // Multiply by 3 for extra coverage
+    const minimumRepeats = Math.max(5, Math.ceil(cardsNeededForViewport / filteredProblems.length));
+    
+    // Create the initial row with all problems
+    const createRow = () => {
+      const row = document.createElement('div');
+      row.className = 'row';
+      filteredProblems.forEach((problem, index) => {
+        const card = document.createElement('div');
+        card.className = `card ${index % 2 === 0 ? 'even' : 'odd'}`;
+        card.setAttribute('data-id', problem.id.toString());
+        card.textContent = problem.id.toString();
+        // Restore highlight if this is the previously highlighted card
+        if (problem.id === highlightedCardId) {
+          card.classList.add('highlighted');
+        }
+        row.appendChild(card);
+      });
+      return row;
+    };
+    
+    // Add enough rows to ensure continuous display
+    for (let i = 0; i < minimumRepeats; i++) {
+      wheelRef.current.appendChild(createRow());
+    }
+    
+    // Restore the previous position if it exists
+    if (wheelRef.current && currentPosition !== 0) {
+      wheelRef.current.style.transition = 'none';
+      wheelRef.current.style.transform = `translate3d(-${currentPosition}px, 0px, 0px)`;
+      void wheelRef.current.offsetWidth;
+    }
+  }, [filteredProblems]);
+
+  // Initialize wheel only on mount
+  useEffect(() => {
+    initWheel();
+  }, []); // Remove filteredProblems dependency
+
+  // Handle filter changes separately
+  useEffect(() => {
+    if (wheelRef.current) {
+      // Only reinitialize if there's no current transform or highlighted card
+      const hasTransform = wheelRef.current.style.transform !== '';
+      const hasHighlight = wheelRef.current.querySelector('.highlighted') !== null;
+      
+      if (!hasTransform && !hasHighlight) {
+        initWheel();
+      }
+    }
+  }, [filteredProblems, initWheel]);
+
   const spinWheel = () => {
-    if (spinning || !wheelRef.current || filteredProblems.length === 0) return;
+    if (spinning || !wheelRef.current || filteredProblems.length === 0) {
+      return;
+    }
     
     setSpinning(true);
     
-    // Add spin-active class to the wrapper for glow effect
-    if (rouletteWrapperRef.current) {
-      rouletteWrapperRef.current.classList.add('spin-active');
-    }
+    // Remove any previously highlighted cards
+    const highlightedCards = wheelRef.current.querySelectorAll('.highlighted');
+    highlightedCards.forEach(card => card.classList.remove('highlighted'));
     
-    // Randomly select a problem
+    // Select a random problem from the filtered list
     const randomIndex = Math.floor(Math.random() * filteredProblems.length);
     const selectedProblem = filteredProblems[randomIndex];
     
-    // Calculate landing position
-    const cardWidth = 75 + 6; // card width + margin
-    const totalSpins = 4; // Complete spins before landing
+    // Calculate card width (including margins)
+    const cardWidth = 81; // 75px + 6px margins
     
-    // Find the position of the problem in the array
-    const problemIndex = filteredProblems.findIndex(p => p.id === selectedProblem.id);
+    // Get current position
+    const currentTransform = wheelRef.current.style.transform;
+    const currentPosition = currentTransform ? 
+      parseInt(currentTransform.match(/-?\d+/)?.[0] || '0') : 0;
     
-    // Calculate landing position - center the selected card exactly
-    // Total width of all cards * number of spins + position of the selected card
-    const landingPosition = (filteredProblems.length * cardWidth * totalSpins) + (problemIndex * cardWidth);
+    // Calculate total distance to spin from current position
+    const totalProblems = filteredProblems.length;
+    const rotations = 3; // Number of complete rotations
+    const basePosition = currentPosition + (rotations * totalProblems * cardWidth);
+    const targetPosition = randomIndex * cardWidth;
+    const finalPosition = basePosition + targetPosition;
     
-    // Add some randomness to the landing position (smaller range for more accurate landing)
-    const randomize = Math.floor(Math.random() * (cardWidth / 4)) - (cardWidth / 8);
-    
-    // Apply animation with easing for a more realistic spin - with a bounce at the end
-    wheelRef.current.style.transition = 'transform 8s cubic-bezier(0.2, 0.1, 0.1, 1.0)';
-    wheelRef.current.style.transform = `translate3d(-${landingPosition + randomize}px, 0px, 0px)`;
-    
-    // Save selected problem
-    setSelectedProblem(selectedProblem);
-    
-    // Add bounce effect to the selector when landing
-    setTimeout(() => {
-      if (rouletteWrapperRef.current) {
-        rouletteWrapperRef.current.classList.remove('spin-active');
-        rouletteWrapperRef.current.classList.add('landing-bounce');
-      }
-    }, 7800); // Just before the animation finishes
-    
-    // Highlight the selected card after it lands
-    setTimeout(() => {
+    // Start the animation from current position
+    requestAnimationFrame(() => {
       if (wheelRef.current) {
-        const selectedCards = wheelRef.current.querySelectorAll(`[data-id="${selectedProblem.id}"]`);
-        selectedCards.forEach(card => {
-          card.classList.add('highlighted');
+        // Use a slower easing at the end for a more dramatic finish
+        wheelRef.current.style.transition = `transform 5s cubic-bezier(0.25, 0.1, 0.1, 1)`;
+        wheelRef.current.style.transform = `translate3d(-${finalPosition}px, 0px, 0px)`;
+      }
+    });
+    
+    // After animation completes
+    setTimeout(() => {
+      if (!wheelRef.current) return;
+      
+      // Find the card that's closest to the selector
+      const selector = document.querySelector('.selector');
+      if (selector) {
+        const selectorRect = selector.getBoundingClientRect();
+        const selectorCenter = selectorRect.left + (selectorRect.width / 2);
+        
+        // Get all cards
+        const allCards = wheelRef.current.querySelectorAll('.card');
+        let closestCard: Element | null = null;
+        let minDistance = Infinity;
+        
+        allCards.forEach(card => {
+          const rect = card.getBoundingClientRect();
+          const cardCenter = rect.left + (rect.width / 2);
+          const distance = Math.abs(cardCenter - selectorCenter);
+          
+          if (distance < minDistance) {
+            minDistance = distance;
+            closestCard = card;
+          }
         });
+        
+        if (closestCard) {
+          // Add a more noticeable highlight effect
+          (closestCard as HTMLElement).classList.add('highlighted');
+          
+          // Get the problem ID from the card
+          const cardId = parseInt((closestCard as HTMLElement).getAttribute('data-id') || '0');
+          
+          // Find the matching problem and update the selected problem state
+          const matchingProblem = filteredProblems.find(p => p.id === cardId);
+          if (matchingProblem) {
+            setSelectedProblem(matchingProblem);
+            // Show the dialog without removing the highlight
+            setDialogOpen(true);
+          }
+        }
       }
       
-      if (rouletteWrapperRef.current) {
-        rouletteWrapperRef.current.classList.remove('landing-bounce');
-      }
-      
+      // Only update spinning state
       setSpinning(false);
-      
-      // Show dialog after a short delay
-      setTimeout(() => {
-        setDialogOpen(true);
-      }, 500);
-    }, 8000); // Match the transition duration
+    }, 5000);
   };
 
   const handleNavigate = () => {
@@ -384,20 +458,9 @@ const ProblemRoulette: React.FC = () => {
 
       {/* Roulette Section */}
       <Box sx={{ mb: 4 }}>
-        <div 
-          ref={rouletteWrapperRef}
-          className="roulette-wrapper"
-        >
+        <div className="roulette-wrapper" ref={rouletteWrapperRef}>
           <div className="selector" ref={selectorRef}></div>
-          <div 
-            ref={wheelRef}
-            style={{
-              display: 'flex',
-              position: 'absolute',
-              left: '50%',
-              transform: 'translateX(-50%)'
-            }}
-          ></div>
+          <div className="wheel" ref={wheelRef}></div>
         </div>
 
         <Box sx={{ textAlign: 'center', mt: 3 }}>
@@ -427,18 +490,18 @@ const ProblemRoulette: React.FC = () => {
           Available Problems ({filteredProblems.length})
         </Typography>
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-          {filteredProblems.map(problem => (
+          {filteredProblems.map((problem, index) => (
             <Chip
               key={problem.id}
               label={`${problem.id}. ${problem.title}`}
               onClick={() => navigate(`/${problem.path}`)}
               sx={{
-                bgcolor: getDifficultyColor(problem.difficulty),
+                bgcolor: getCheckerStyle(index),
                 color: 'white',
                 ':hover': {
                   bgcolor: theme.palette.mode === 'dark' 
-                    ? `${getDifficultyColor(problem.difficulty)}80` 
-                    : `${getDifficultyColor(problem.difficulty)}d0`,
+                    ? `${getCheckerStyle(index)}80` 
+                    : `${getCheckerStyle(index)}d0`,
                   cursor: 'pointer'
                 }
               }}
