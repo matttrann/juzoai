@@ -1,6 +1,7 @@
-# FlashCard Study App
+# Juzo.AI
+![https://raw.githubusercontent.com/matttrann/juzoai/Screenshot.png](https://github.com/matttrann/juzoai/blob/main/Screenshot.png)
 
-A modern flashcard application designed to help you study and track your learning progress. Create custom flashcard decks, study with an interactive interface, track your performance over time, and visualise algorithms and data structures.
+A modern flashcard and coding practise application designed to help you study and track your learning progress. Create custom flashcard decks, study with an interactive interface, track your performance over time, and visualise and test yourself with algorithms and data structure coding questions!.
 
 ## Features
 
@@ -8,8 +9,8 @@ A modern flashcard application designed to help you study and track your learnin
 - **Study Mode**: Interactive study sessions with card flipping and progress tracking
 - **Performance Analytics**: Track study performance over time with detailed metrics
 - **Data Structure & Algorithm Visualiser**: Interactive visualisations for common DSA concepts
+- **Coding Practise**: Refine your leetcode skills with a range of Blind 75 Questions, with solutions in Python
 - **Responsive Design**: Optimised for desktop, tablet, and mobile devices
-- **Dark Mode**: Enhanced visual experience with dark mode support
 - **Import/Export**: Save and share your flashcard decks as JSON files
 - **Local Storage**: Performance data is stored locally, no account required
 
