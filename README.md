@@ -1,19 +1,5 @@
 # Juzo.AI
-![https://github.com/matttrann/juzoai/blob/main/assets/Flashcard.png](https://github.com/matttrann/juzoai/blob/main/assets/Flashcard.png)
-![https://github.com/matttrann/juzoai/blob/main/assets/Roulette.png](https://github.com/matttrann/juzoai/blob/main/assets/Roulette.png)
-![https://github.com/matttrann/juzoai/blob/main/assets/DSA_Practise.png](https://github.com/matttrann/juzoai/blob/main/assets/DSA_Practise.png)
-![https://github.com/matttrann/juzoai/blob/main/assets/DSA_Visualizer.png](https://github.com/matttrann/juzoai/blob/main/assets/DSA_Visualizer.png)
-
 A modern flashcard and coding practise application designed to help you study and track your learning progress. Create custom flashcard decks, study with an interactive interface, track your performance over time, and visualise and test yourself with algorithms and data structure coding questions!
-
-## Features
-
-✅ **Flashcard System**
-✅ **Blind 75 Practice**
-✅ **Study Tools**
-✅ **Roulette Gamification**
-✅ **Data Structure & Algorithm Visualization**
-⬜ **MORE FEATURES COMING SOON**
 
 ## Tech Stack
 
@@ -33,6 +19,19 @@ A modern flashcard and coding practise application designed to help you study an
 - H2 Database (development)
 - PostgreSQL (production)
 - Maven
+
+## Features
+
+✅ **Flashcard System**
+✅ **Blind 75 Practice**
+✅ **Study Tools**
+✅ **Roulette Gamification**
+✅ **Data Structure & Algorithm Visualization**
+⬜ **MORE FEATURES COMING SOON**
+![https://github.com/matttrann/juzoai/blob/main/assets/Flashcard.png](https://github.com/matttrann/juzoai/blob/main/assets/Flashcard.png)
+![https://github.com/matttrann/juzoai/blob/main/assets/Roulette.png](https://github.com/matttrann/juzoai/blob/main/assets/Roulette.png)
+![https://github.com/matttrann/juzoai/blob/main/assets/DSA_Practise.png](https://github.com/matttrann/juzoai/blob/main/assets/DSA_Practise.png)
+![https://github.com/matttrann/juzoai/blob/main/assets/DSA_Visualizer.png](https://github.com/matttrann/juzoai/blob/main/assets/DSA_Visualizer.png)
 
 ## Getting Started
 
