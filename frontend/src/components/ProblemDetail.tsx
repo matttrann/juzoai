@@ -451,6 +451,669 @@ const fetchProblem = async (problemId: string): Promise<ProblemData> => {
         'When you encounter a closing bracket, check if it matches the top element on the stack.',
         'The string is valid if all brackets are matched and the stack is empty at the end.'
       ]
+    },
+    'reverse-linked-list': {
+      id: 30,
+      title: 'Reverse Linked List',
+      difficulty: 'Easy',
+      category: 'Linked List',
+      description: 'Given the head of a singly linked list, reverse the list, and return the reversed list.\n\nA linked list can be reversed either iteratively or recursively. Could you implement both?',
+      examples: [
+        {
+          input: 'head = [1,2,3,4,5]',
+          output: '[5,4,3,2,1]'
+        },
+        {
+          input: 'head = [1,2]',
+          output: '[2,1]'
+        },
+        {
+          input: 'head = []',
+          output: '[]'
+        }
+      ],
+      constraints: [
+        'The number of nodes in the list is the range [0, 5000].',
+        '-5000 <= Node.val <= 5000'
+      ],
+      starterCode: `# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution:
+    def reverseList(self, head):
+        """
+        :type head: ListNode
+        :rtype: ListNode
+        """
+        # Your code here
+        `,
+      solution: `# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution:
+    def reverseList(self, head):
+        """
+        :type head: ListNode
+        :rtype: ListNode
+        """
+        # Iterative solution
+        prev = None
+        current = head
+        
+        while current:
+            next_temp = current.next  # Store next
+            current.next = prev       # Reverse the link
+            prev = current            # Move prev forward
+            current = next_temp       # Move current forward
+        
+        return prev  # New head is the last node we processed
+        
+        # Recursive solution
+        """
+        if not head or not head.next:
+            return head
+            
+        new_head = self.reverseList(head.next)
+        head.next.next = head
+        head.next = None
+        
+        return new_head
+        """`,
+      hints: [
+        'Try to think about the problem in terms of changing the next pointers.',
+        'You can use a temporary variable to keep track of the next node while you\'re modifying the current node.',
+        'For the recursive approach, consider what the base case would be.',
+        'In the recursive approach, you assume the rest of the list is already reversed.'
+      ]
+    },
+    'merge-two-lists': {
+      id: 31,
+      title: 'Merge Two Sorted Lists',
+      difficulty: 'Easy',
+      category: 'Linked List',
+      description: 'You are given the heads of two sorted linked lists list1 and list2.\n\nMerge the two lists in a one sorted list. The list should be made by splicing together the nodes of the first two lists.\n\nReturn the head of the merged linked list.',
+      examples: [
+        {
+          input: 'list1 = [1,2,4], list2 = [1,3,4]',
+          output: '[1,1,2,3,4,4]'
+        },
+        {
+          input: 'list1 = [], list2 = []',
+          output: '[]'
+        },
+        {
+          input: 'list1 = [], list2 = [0]',
+          output: '[0]'
+        }
+      ],
+      constraints: [
+        'The number of nodes in both lists is in the range [0, 50].',
+        '-100 <= Node.val <= 100',
+        'Both list1 and list2 are sorted in non-decreasing order.'
+      ],
+      starterCode: `# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution:
+    def mergeTwoLists(self, list1, list2):
+        """
+        :type list1: ListNode
+        :type list2: ListNode
+        :rtype: ListNode
+        """
+        # Your code here
+        `,
+      solution: `# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution:
+    def mergeTwoLists(self, list1, list2):
+        """
+        :type list1: ListNode
+        :type list2: ListNode
+        :rtype: ListNode
+        """
+        # Create a dummy head to simplify edge cases
+        dummy = ListNode(-1)
+        current = dummy
+        
+        # Traverse both lists and compare values
+        while list1 and list2:
+            if list1.val <= list2.val:
+                current.next = list1
+                list1 = list1.next
+            else:
+                current.next = list2
+                list2 = list2.next
+            current = current.next
+        
+        # Attach remaining nodes (if any)
+        if list1:
+            current.next = list1
+        if list2:
+            current.next = list2
+            
+        return dummy.next  # Return the merged list (skip the dummy head)`,
+      hints: [
+        'Think about merging two sorted arrays, but with linked lists.',
+        'Use a dummy head node to simplify handling the start of the merged list.',
+        'Compare the current nodes of both lists and add the smaller one to the result.',
+        'Remember to account for the case where one list might be empty or shorter than the other.'
+      ]
+    },
+    'invert-binary-tree': {
+      id: 34,
+      title: 'Invert Binary Tree',
+      difficulty: 'Easy',
+      category: 'Trees',
+      description: 'Given the root of a binary tree, invert the tree, and return its root.\n\nTo invert a binary tree, swap the left and right children for each node in the tree.',
+      examples: [
+        {
+          input: 'root = [4,2,7,1,3,6,9]',
+          output: '[4,7,2,9,6,3,1]'
+        },
+        {
+          input: 'root = [2,1,3]',
+          output: '[2,3,1]'
+        },
+        {
+          input: 'root = []',
+          output: '[]'
+        }
+      ],
+      constraints: [
+        'The number of nodes in the tree is in the range [0, 100].',
+        '-100 <= Node.val <= 100'
+      ],
+      starterCode: `# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def invertTree(self, root):
+        """
+        :type root: TreeNode
+        :rtype: TreeNode
+        """
+        # Your code here
+        `,
+      solution: `# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def invertTree(self, root):
+        """
+        :type root: TreeNode
+        :rtype: TreeNode
+        """
+        # Base case: if the root is None, return None
+        if not root:
+            return None
+        
+        # Swap the left and right subtrees
+        root.left, root.right = root.right, root.left
+        
+        # Recursively invert the left and right subtrees
+        self.invertTree(root.left)
+        self.invertTree(root.right)
+        
+        # Return the root of the inverted tree
+        return root
+        
+        # Iterative solution using a queue
+        """
+        if not root:
+            return None
+            
+        queue = [root]
+        while queue:
+            node = queue.pop(0)
+            # Swap children
+            node.left, node.right = node.right, node.left
+            
+            # Add children to queue
+            if node.left:
+                queue.append(node.left)
+            if node.right:
+                queue.append(node.right)
+                
+        return root
+        """`,
+      hints: [
+        'Think about the problem recursively. What is the base case?',
+        'For each node, you need to invert its left and right subtrees and then swap them.',
+        'You can also solve this iteratively using a queue or stack to traverse the tree.',
+        'Remember to handle the case where the root is None.'
+      ]
+    },
+    'max-depth-binary-tree': {
+      id: 35,
+      title: 'Maximum Depth of Binary Tree',
+      difficulty: 'Easy',
+      category: 'Trees',
+      description: 'Given the root of a binary tree, return its maximum depth.\n\nA binary tree\'s maximum depth is the number of nodes along the longest path from the root node down to the farthest leaf node.',
+      examples: [
+        {
+          input: 'root = [3,9,20,null,null,15,7]',
+          output: '3'
+        },
+        {
+          input: 'root = [1,null,2]',
+          output: '2'
+        }
+      ],
+      constraints: [
+        'The number of nodes in the tree is in the range [0, 10^4].',
+        '-100 <= Node.val <= 100'
+      ],
+      starterCode: `# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def maxDepth(self, root):
+        """
+        :type root: TreeNode
+        :rtype: int
+        """
+        # Your code here
+        `,
+      solution: `# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def maxDepth(self, root):
+        """
+        :type root: TreeNode
+        :rtype: int
+        """
+        # Base case: if root is None, depth is 0
+        if not root:
+            return 0
+        
+        # Recursive case: depth is 1 (current node) + max of left and right subtree depths
+        return 1 + max(self.maxDepth(root.left), self.maxDepth(root.right))
+        
+        # Iterative solution using BFS
+        """
+        if not root:
+            return 0
+            
+        queue = [(root, 1)]  # (node, depth)
+        max_depth = 0
+        
+        while queue:
+            node, depth = queue.pop(0)
+            max_depth = max(max_depth, depth)
+            
+            if node.left:
+                queue.append((node.left, depth + 1))
+            if node.right:
+                queue.append((node.right, depth + 1))
+                
+        return max_depth
+        """`,
+      hints: [
+        'The maximum depth of a binary tree is the maximum number of steps from the root to a leaf node.',
+        'Think recursively: the depth of a tree is 1 (for the root) plus the maximum depth of its subtrees.',
+        'An empty tree has a depth of 0.',
+        'You can also use BFS (level order traversal) to solve this iteratively.'
+      ]
+    },
+    'same-tree': {
+      id: 36,
+      title: 'Same Tree',
+      difficulty: 'Easy',
+      category: 'Trees',
+      description: 'Given the roots of two binary trees p and q, write a function to check if they are the same or not.\n\nTwo binary trees are considered the same if they are structurally identical, and the nodes have the same value.',
+      examples: [
+        {
+          input: 'p = [1,2,3], q = [1,2,3]',
+          output: 'true'
+        },
+        {
+          input: 'p = [1,2], q = [1,null,2]',
+          output: 'false'
+        },
+        {
+          input: 'p = [1,2,1], q = [1,1,2]',
+          output: 'false'
+        }
+      ],
+      constraints: [
+        'The number of nodes in both trees is in the range [0, 100].',
+        '-10^4 <= Node.val <= 10^4'
+      ],
+      starterCode: `# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def isSameTree(self, p, q):
+        """
+        :type p: TreeNode
+        :type q: TreeNode
+        :rtype: bool
+        """
+        # Your code here
+        `,
+      solution: `# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def isSameTree(self, p, q):
+        """
+        :type p: TreeNode
+        :type q: TreeNode
+        :rtype: bool
+        """
+        # If both nodes are None, trees are the same at this point
+        if p is None and q is None:
+            return True
+            
+        # If one is None but the other isn't, trees are different
+        if p is None or q is None:
+            return False
+            
+        # If current node values don't match, trees are different
+        if p.val != q.val:
+            return False
+            
+        # Recursively check left and right subtrees
+        return self.isSameTree(p.left, q.left) and self.isSameTree(p.right, q.right)
+        
+        # Iterative solution using a queue
+        """
+        from collections import deque
+        
+        # Queue to store pairs of nodes to compare
+        queue = deque([(p, q)])
+        
+        while queue:
+            node1, node2 = queue.popleft()
+            
+            # If both are None, continue to the next pair
+            if node1 is None and node2 is None:
+                continue
+                
+            # If one is None or values don't match, trees are different
+            if node1 is None or node2 is None or node1.val != node2.val:
+                return False
+                
+            # Add left and right children to the queue
+            queue.append((node1.left, node2.left))
+            queue.append((node1.right, node2.right))
+            
+        return True
+        """`,
+      hints: [
+        'Consider the base cases: empty trees are the same, and a tree cannot be the same as an empty tree.',
+        'Check node values at each step in your traversal.',
+        'You need to check both structure (presence of nodes) and values.',
+        'Can be solved elegantly with recursion, but an iterative approach using a queue is also possible.'
+      ]
+    },
+    'palindrome-number': {
+      id: 39,
+      title: 'Palindrome Number',
+      difficulty: 'Easy',
+      category: 'Math',
+      description: 'Given an integer x, return true if x is a palindrome, and false otherwise.\n\nAn integer is a palindrome when it reads the same backward as forward.\n\nFor example, 121 is a palindrome while 123 is not.',
+      examples: [
+        {
+          input: 'x = 121',
+          output: 'true'
+        },
+        {
+          input: 'x = -121',
+          output: 'false'
+        },
+        {
+          input: 'x = 10',
+          output: 'false'
+        }
+      ],
+      constraints: [
+        '-2^31 <= x <= 2^31 - 1'
+      ],
+      starterCode: `class Solution:
+    def isPalindrome(self, x):
+        """
+        :type x: int
+        :rtype: bool
+        """
+        # Your code here
+        `,
+      solution: `class Solution:
+    def isPalindrome(self, x):
+        """
+        :type x: int
+        :rtype: bool
+        """
+        # Negative numbers are not palindromes
+        if x < 0:
+            return False
+            
+        # Convert to string approach
+        # return str(x) == str(x)[::-1]
+        
+        # Without converting to string (mathematical approach)
+        original = x
+        reversed_num = 0
+        
+        while x > 0:
+            digit = x % 10  # Get the last digit
+            reversed_num = reversed_num * 10 + digit  # Add digit to reversed number
+            x //= 10  # Remove the last digit
+            
+        return original == reversed_num`,
+      hints: [
+        'Consider edge cases: negative numbers cannot be palindromes.',
+        'There are two approaches: convert to string and check, or reverse the number mathematically.',
+        'If converting to string, compare the original string with its reverse.',
+        'For the mathematical approach, extract digits from right to left and build a new number.'
+      ]
+    },
+    'fizz-buzz': {
+      id: 40,
+      title: 'Fizz Buzz',
+      difficulty: 'Easy',
+      category: 'Math',
+      description: 'Given an integer n, return a string array answer (1-indexed) where:\n\n- answer[i] == "FizzBuzz" if i is divisible by 3 and 5.\n- answer[i] == "Fizz" if i is divisible by 3.\n- answer[i] == "Buzz" if i is divisible by 5.\n- answer[i] == i (as a string) if none of the above conditions are true.',
+      examples: [
+        {
+          input: 'n = 3',
+          output: '["1","2","Fizz"]'
+        },
+        {
+          input: 'n = 5',
+          output: '["1","2","Fizz","4","Buzz"]'
+        },
+        {
+          input: 'n = 15',
+          output: '["1","2","Fizz","4","Buzz","Fizz","7","8","Fizz","Buzz","11","Fizz","13","14","FizzBuzz"]'
+        }
+      ],
+      constraints: [
+        '1 <= n <= 10^4'
+      ],
+      starterCode: `class Solution:
+    def fizzBuzz(self, n):
+        """
+        :type n: int
+        :rtype: List[str]
+        """
+        # Your code here
+        `,
+      solution: `class Solution:
+    def fizzBuzz(self, n):
+        """
+        :type n: int
+        :rtype: List[str]
+        """
+        result = []
+        
+        for i in range(1, n + 1):
+            if i % 3 == 0 and i % 5 == 0:
+                result.append("FizzBuzz")
+            elif i % 3 == 0:
+                result.append("Fizz")
+            elif i % 5 == 0:
+                result.append("Buzz")
+            else:
+                result.append(str(i))
+                
+        return result
+        
+        # Alternative solution with fewer conditionals
+        """
+        result = []
+        
+        for i in range(1, n + 1):
+            curr = ""
+            
+            if i % 3 == 0:
+                curr += "Fizz"
+            if i % 5 == 0:
+                curr += "Buzz"
+                
+            if not curr:
+                curr = str(i)
+                
+            result.append(curr)
+            
+        return result
+        """`,
+      hints: [
+        'Use modulo operator (%) to check divisibility.',
+        'Consider the order of your conditions - check for FizzBuzz first, then Fizz, then Buzz.',
+        'Remember to convert integers to strings when adding them to the result.',
+        'An alternative approach is to build the string incrementally, adding "Fizz" and/or "Buzz" as needed.'
+      ]
+    },
+    'roman-to-integer': {
+      id: 41,
+      title: 'Roman to Integer',
+      difficulty: 'Easy',
+      category: 'Math',
+      description: 'Roman numerals are represented by seven different symbols: I, V, X, L, C, D and M.\n\nSymbol       Value\nI            1\nV            5\nX            10\nL            50\nC            100\nD            500\nM            1000\n\nFor example, 2 is written as II in Roman numeral, just two ones added together. 12 is written as XII, which is simply X + II. The number 27 is written as XXVII, which is XX + V + II.\n\nRoman numerals are usually written largest to smallest from left to right. However, the numeral for four is not IIII. Instead, the number four is written as IV. Because the one is before the five we subtract it making four. The same principle applies to the number nine, which is written as IX.\n\nThere are six instances where subtraction is used:\n- I can be placed before V (5) and X (10) to make 4 and 9. \n- X can be placed before L (50) and C (100) to make 40 and 90. \n- C can be placed before D (500) and M (1000) to make 400 and 900.\n\nGiven a roman numeral, convert it to an integer.',
+      examples: [
+        {
+          input: 's = "III"',
+          output: '3'
+        },
+        {
+          input: 's = "LVIII"',
+          output: '58'
+        },
+        {
+          input: 's = "MCMXCIV"',
+          output: '1994'
+        }
+      ],
+      constraints: [
+        '1 <= s.length <= 15',
+        's contains only the characters ("I", "V", "X", "L", "C", "D", "M").',
+        'It is guaranteed that s is a valid roman numeral in the range [1, 3999].'
+      ],
+      starterCode: `class Solution:
+    def romanToInt(self, s):
+        """
+        :type s: str
+        :rtype: int
+        """
+        # Your code here
+        `,
+      solution: `class Solution:
+    def romanToInt(self, s):
+        """
+        :type s: str
+        :rtype: int
+        """
+        # Create a mapping of Roman numerals to integers
+        values = {
+            'I': 1,
+            'V': 5,
+            'X': 10,
+            'L': 50,
+            'C': 100,
+            'D': 500,
+            'M': 1000
+        }
+        
+        total = 0
+        i = 0
+        
+        while i < len(s):
+            # If current value is less than next value, subtract current from next
+            if i + 1 < len(s) and values[s[i]] < values[s[i + 1]]:
+                total += values[s[i + 1]] - values[s[i]]
+                i += 2  # Skip the next character as well
+            else:
+                total += values[s[i]]
+                i += 1
+                
+        return total
+        
+        # Alternative solution (simpler approach)
+        """
+        values = {
+            'I': 1,
+            'V': 5,
+            'X': 10,
+            'L': 50,
+            'C': 100,
+            'D': 500,
+            'M': 1000
+        }
+        
+        total = 0
+        prev_value = 0
+        
+        # Iterate through the string in reverse order
+        for char in reversed(s):
+            value = values[char]
+            
+            # If current value is greater than or equal to previous, add it
+            # Otherwise, subtract it (handles cases like IV, IX, etc.)
+            if value >= prev_value:
+                total += value
+            else:
+                total -= value
+                
+            prev_value = value
+            
+        return total
+        """`,
+      hints: [
+        'Create a mapping of Roman numerals to their integer values.',
+        'Consider the special cases where subtraction is used (e.g., IV, IX, XL, etc.).',
+        'One approach is to compare each symbol with the next and determine whether to add or subtract.',
+        'Another approach is to scan from right to left, comparing each value with the previous one.'
+      ]
     }
   };
   
@@ -459,7 +1122,7 @@ const fetchProblem = async (problemId: string): Promise<ProblemData> => {
   }
   
   // For unimplemented problems, throw a more specific error
-  throw new Error(`This problem (${problemId}) is not yet implemented. Please try the 'two-sum', 'contains-duplicate', 'valid-anagram', 'valid-palindrome', 'best-time-to-buy-sell-stock', 'binary-search', or 'valid-parentheses' problems which are fully functional.`);
+  throw new Error(`This problem (${problemId}) is not yet implemented. Please try the 'two-sum', 'contains-duplicate', 'valid-anagram', 'valid-palindrome', 'best-time-to-buy-sell-stock', 'binary-search', 'valid-parentheses', 'reverse-linked-list', 'merge-two-lists', 'invert-binary-tree', 'max-depth-binary-tree', 'same-tree', 'palindrome-number', 'fizz-buzz', or 'roman-to-integer' problems which are fully functional.`);
 };
 
 // Mock submission evaluator
@@ -738,6 +1401,227 @@ const evaluateSubmission = async (code: string, problemId: string): Promise<{suc
           {testCase: 's = "{[]}"', expected: 'true', actual: 'Not executed due to previous error', passed: false}
         ],
         error: 'Your solution is missing essential components for checking valid parentheses. Make sure to use a stack to track opening brackets and match them with closing brackets.'
+      };
+    }
+  } else if (problemId === 'reverse-linked-list') {
+    const hasPrev = code.includes('prev');
+    const hasNext = code.includes('next');
+    const hasLoop = code.includes('while') || code.includes('for');
+    const hasReturn = code.includes('return');
+    const hasRecursion = hasReturn && code.includes('def reverseList') && code.includes('reverseList(');
+    
+    if ((hasPrev && hasNext && hasLoop && hasReturn) || hasRecursion) {
+      return {
+        success: true,
+        results: [
+          {testCase: 'head = [1,2,3,4,5]', expected: '[5,4,3,2,1]', actual: '[5,4,3,2,1]', passed: true},
+          {testCase: 'head = [1,2]', expected: '[2,1]', actual: '[2,1]', passed: true},
+          {testCase: 'head = []', expected: '[]', actual: '[]', passed: true}
+        ]
+      };
+    } else if (hasLoop && hasReturn) {
+      return {
+        success: false,
+        results: [
+          {testCase: 'head = [1,2,3,4,5]', expected: '[5,4,3,2,1]', actual: '[5,4,3,2]', passed: false},
+          {testCase: 'head = [1,2]', expected: '[2,1]', actual: '[2,1]', passed: true},
+          {testCase: 'head = []', expected: '[]', actual: '[]', passed: true}
+        ],
+        error: 'Your solution appears to have an issue with the pointer reassignment. Make sure you\'re correctly updating prev, current, and next pointers in each iteration.'
+      };
+    } else {
+      return {
+        success: false,
+        results: [
+          {testCase: 'head = [1,2,3,4,5]', expected: '[5,4,3,2,1]', actual: 'Runtime Error: Incomplete implementation', passed: false},
+          {testCase: 'head = [1,2]', expected: '[2,1]', actual: 'Not executed due to previous error', passed: false},
+          {testCase: 'head = []', expected: '[]', actual: 'Not executed due to previous error', passed: false}
+        ],
+        error: 'Your solution is missing essential components for reversing a linked list. Make sure to handle the prev, current, and next pointers correctly.'
+      };
+    }
+  } else if (problemId === 'merge-two-lists') {
+    const hasDummy = code.includes('dummy') || code.includes('ListNode(-1)') || code.includes('ListNode(0)');
+    const hasLoop = code.includes('while');
+    const hasComparison = code.includes('<=') || code.includes('>=') || (code.includes('<') && code.includes('>'));
+    const hasReturn = code.includes('return');
+    
+    if (hasDummy && hasLoop && hasComparison && hasReturn) {
+      return {
+        success: true,
+        results: [
+          {testCase: 'list1 = [1,2,4], list2 = [1,3,4]', expected: '[1,1,2,3,4,4]', actual: '[1,1,2,3,4,4]', passed: true},
+          {testCase: 'list1 = [], list2 = []', expected: '[]', actual: '[]', passed: true},
+          {testCase: 'list1 = [], list2 = [0]', expected: '[0]', actual: '[0]', passed: true}
+        ]
+      };
+    } else if (hasLoop && hasReturn) {
+      return {
+        success: false,
+        results: [
+          {testCase: 'list1 = [1,2,4], list2 = [1,3,4]', expected: '[1,1,2,3,4,4]', actual: '[1,1,2,3,4]', passed: false},
+          {testCase: 'list1 = [], list2 = []', expected: '[]', actual: '[]', passed: true},
+          {testCase: 'list1 = [], list2 = [0]', expected: '[0]', actual: '[0]', passed: true}
+        ],
+        error: 'Your solution might not be handling all cases correctly. Make sure to properly merge the two lists and attach any remaining nodes.'
+      };
+    } else {
+      return {
+        success: false,
+        results: [
+          {testCase: 'list1 = [1,2,4], list2 = [1,3,4]', expected: '[1,1,2,3,4,4]', actual: 'Runtime Error: Incomplete implementation', passed: false},
+          {testCase: 'list1 = [], list2 = []', expected: '[]', actual: 'Not executed due to previous error', passed: false},
+          {testCase: 'list1 = [], list2 = [0]', expected: '[0]', actual: 'Not executed due to previous error', passed: false}
+        ],
+        error: 'Your solution is missing essential components for merging two sorted linked lists. Make sure to properly handle the comparison and linking of nodes.'
+      };
+    }
+  } else if (problemId === 'invert-binary-tree') {
+    const hasSwap = code.includes('left, right = right, left') || 
+                   (code.includes('temp') && code.includes('left') && code.includes('right'));
+    const hasRecursion = code.includes('invertTree') && code.includes('root.left') && code.includes('root.right');
+    const hasIterative = code.includes('queue') || code.includes('stack') || code.includes('while');
+    const hasReturn = code.includes('return root');
+    
+    if ((hasSwap && hasRecursion && hasReturn) || (hasSwap && hasIterative && hasReturn)) {
+      return {
+        success: true,
+        results: [
+          {testCase: 'root = [4,2,7,1,3,6,9]', expected: '[4,7,2,9,6,3,1]', actual: '[4,7,2,9,6,3,1]', passed: true},
+          {testCase: 'root = [2,1,3]', expected: '[2,3,1]', actual: '[2,3,1]', passed: true},
+          {testCase: 'root = []', expected: '[]', actual: '[]', passed: true}
+        ]
+      };
+    } else if (hasSwap && hasReturn) {
+      return {
+        success: false,
+        results: [
+          {testCase: 'root = [4,2,7,1,3,6,9]', expected: '[4,7,2,9,6,3,1]', actual: '[4,7,2,null,null,null,null]', passed: false},
+          {testCase: 'root = [2,1,3]', expected: '[2,3,1]', actual: '[2,3,1]', passed: true},
+          {testCase: 'root = []', expected: '[]', actual: '[]', passed: true}
+        ],
+        error: 'Your solution correctly swaps the left and right children of the root, but it does not handle swapping the entire subtrees correctly.'
+      };
+    } else {
+      return {
+        success: false,
+        results: [
+          {testCase: 'root = [4,2,7,1,3,6,9]', expected: '[4,7,2,9,6,3,1]', actual: 'Runtime Error: Incomplete implementation', passed: false},
+          {testCase: 'root = [2,1,3]', expected: '[2,3,1]', actual: 'Not executed due to previous error', passed: false},
+          {testCase: 'root = []', expected: '[]', actual: 'Not executed due to previous error', passed: false}
+        ],
+        error: 'Your solution is missing essential components for inverting a binary tree. Make sure to swap the left and right children for each node in the tree.'
+      };
+    }
+  } else if (problemId === 'max-depth-binary-tree') {
+    const hasRecursion = code.includes('maxDepth') && code.includes('root.left') && code.includes('root.right');
+    const hasBaseCase = code.includes('if not root') || code.includes('if root is None');
+    const hasMax = code.includes('max(');
+    const hasReturn = code.includes('return');
+    const hasIterative = code.includes('queue') || code.includes('while');
+    
+    if ((hasRecursion && hasBaseCase && hasMax && hasReturn) || (hasIterative && hasBaseCase && hasReturn)) {
+      return {
+        success: true,
+        results: [
+          {testCase: 'root = [3,9,20,null,null,15,7]', expected: '3', actual: '3', passed: true},
+          {testCase: 'root = [1,null,2]', expected: '2', actual: '2', passed: true},
+          {testCase: 'root = []', expected: '0', actual: '0', passed: true}
+        ]
+      };
+    } else if (hasBaseCase && hasReturn) {
+      return {
+        success: false,
+        results: [
+          {testCase: 'root = [3,9,20,null,null,15,7]', expected: '3', actual: '2', passed: false},
+          {testCase: 'root = [1,null,2]', expected: '2', actual: '2', passed: true},
+          {testCase: 'root = []', expected: '0', actual: '0', passed: true}
+        ],
+        error: 'Your solution might not be calculating the maximum depth correctly. Make sure to consider both left and right subtrees.'
+      };
+    } else {
+      return {
+        success: false,
+        results: [
+          {testCase: 'root = [3,9,20,null,null,15,7]', expected: '3', actual: 'Runtime Error: Incomplete implementation', passed: false},
+          {testCase: 'root = [1,null,2]', expected: '2', actual: 'Not executed due to previous error', passed: false},
+          {testCase: 'root = []', expected: '0', actual: 'Not executed due to previous error', passed: false}
+        ],
+        error: 'Your solution is missing essential components for calculating the maximum depth of a binary tree. Make sure to handle the base case and properly calculate the depth.'
+      };
+    }
+  } else if (problemId === 'same-tree') {
+    const hasBaseCase = code.includes('None') && code.includes('return');
+    const hasRecursion = code.includes('isSameTree') && code.includes('left') && code.includes('right');
+    const hasComparison = code.includes('!=') || code.includes('==') || code.includes('is None');
+    const hasReturn = code.includes('return');
+    const hasIterative = code.includes('queue') || code.includes('while');
+    
+    if ((hasBaseCase && hasRecursion && hasComparison && hasReturn) || (hasBaseCase && hasIterative && hasComparison && hasReturn)) {
+      return {
+        success: true,
+        results: [
+          {testCase: 'p = [1,2,3], q = [1,2,3]', expected: 'true', actual: 'true', passed: true},
+          {testCase: 'p = [1,2], q = [1,null,2]', expected: 'false', actual: 'false', passed: true},
+          {testCase: 'p = [1,2,1], q = [1,1,2]', expected: 'false', actual: 'false', passed: true}
+        ]
+      };
+    } else if (hasComparison && hasReturn) {
+      return {
+        success: false,
+        results: [
+          {testCase: 'p = [1,2,3], q = [1,2,3]', expected: 'true', actual: 'false', passed: false},
+          {testCase: 'p = [1,2], q = [1,null,2]', expected: 'false', actual: 'false', passed: true},
+          {testCase: 'p = [1,2,1], q = [1,1,2]', expected: 'false', actual: 'false', passed: true}
+        ],
+        error: 'Your solution is checking some cases correctly but failing on identical trees. Make sure you\'re handling all base cases and recursive calls properly.'
+      };
+    } else {
+      return {
+        success: false,
+        results: [
+          {testCase: 'p = [1,2,3], q = [1,2,3]', expected: 'true', actual: 'Runtime Error: Incomplete implementation', passed: false},
+          {testCase: 'p = [1,2], q = [1,null,2]', expected: 'false', actual: 'Not executed due to previous error', passed: false},
+          {testCase: 'p = [1,2,1], q = [1,1,2]', expected: 'false', actual: 'Not executed due to previous error', passed: false}
+        ],
+        error: 'Your solution is missing essential components for comparing two binary trees. Make sure to check both structure and node values.'
+      };
+    }
+  } else if (problemId === 'palindrome-number') {
+    const hasComparison = code.includes('==');
+    const hasNegativeCheck = code.includes('< 0') || code.includes('negative');
+    const hasReverse = code.includes('[::-1]') || code.includes('reverse') || 
+                       (code.includes('%') && code.includes('//='));
+    const hasReturn = code.includes('return');
+    
+    if (hasNegativeCheck && hasReverse && hasComparison && hasReturn) {
+      return {
+        success: true,
+        results: [
+          {testCase: 'x = 121', expected: 'true', actual: 'true', passed: true},
+          {testCase: 'x = -121', expected: 'false', actual: 'false', passed: true},
+          {testCase: 'x = 10', expected: 'false', actual: 'false', passed: true}
+        ]
+      };
+    } else if (hasReverse && hasReturn) {
+      return {
+        success: false,
+        results: [
+          {testCase: 'x = 121', expected: 'true', actual: 'true', passed: true},
+          {testCase: 'x = -121', expected: 'false', actual: 'ERROR', passed: false},
+          {testCase: 'x = 10', expected: 'false', actual: 'false', passed: true}
+        ],
+        error: 'Your solution works for positive numbers but fails for negative numbers. Make sure to handle negative numbers as a special case.'
+      };
+    } else {
+      return {
+        success: false,
+        results: [
+          {testCase: 'x = 121', expected: 'true', actual: 'Runtime Error: Incomplete implementation', passed: false},
+          {testCase: 'x = -121', expected: 'false', actual: 'Not executed due to previous error', passed: false},
+          {testCase: 'x = 10', expected: 'false', actual: 'Not executed due to previous error', passed: false}
+        ],
+        error: 'Your solution is missing essential components for checking if a number is a palindrome. Consider either converting to a string or reversing the number mathematically.'
       };
     }
   }

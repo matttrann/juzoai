@@ -51,63 +51,63 @@ const Problems: React.FC = () => {
   // Blind 75 Problems List
   const practiceProblems: PracticeProblem[] = [
     // Arrays & Hashing
-    { id: 1, title: 'Two Sum', difficulty: 'Easy', submissions: 35100, successRate: 100, likes: 98, path: '/problems/two-sum', category: 'Arrays & Hashing', isBlind75: true, implemented: true },
-    { id: 2, title: 'Contains Duplicate', difficulty: 'Easy', submissions: 16700, successRate: 99, likes: 97, path: '/problems/contains-duplicate', category: 'Arrays & Hashing', isBlind75: true, implemented: true },
-    { id: 3, title: 'Valid Anagram', difficulty: 'Easy', submissions: 14700, successRate: 99, likes: 99, path: '/problems/valid-anagram', category: 'Arrays & Hashing', isBlind75: true, implemented: true },
-    { id: 4, title: 'Group Anagrams', difficulty: 'Medium', submissions: 4200, successRate: 96, likes: 95, path: '/problems/group-anagrams', category: 'Arrays & Hashing', isBlind75: true, implemented: false },
-    { id: 5, title: 'Top K Frequent Elements', difficulty: 'Medium', submissions: 5400, successRate: 96, likes: 94, path: '/problems/top-k-frequent', category: 'Arrays & Hashing', isBlind75: true, implemented: false },
-    { id: 6, title: 'Product of Array Except Self', difficulty: 'Medium', submissions: 6100, successRate: 98, likes: 97, path: '/problems/product-except-self', category: 'Arrays & Hashing', isBlind75: true, implemented: false },
-    { id: 7, title: 'Valid Sudoku', difficulty: 'Medium', submissions: 1300, successRate: 100, likes: 95, path: '/problems/valid-sudoku', category: 'Arrays & Hashing', isBlind75: true, implemented: false },
-    { id: 8, title: 'Encode and Decode Strings', difficulty: 'Medium', submissions: 5400, successRate: 96, likes: 94, path: '/problems/encode-decode-strings', category: 'Arrays & Hashing', isBlind75: true, implemented: false },
-    { id: 9, title: 'Longest Consecutive Sequence', difficulty: 'Medium', submissions: 6100, successRate: 98, likes: 97, path: '/problems/longest-consecutive', category: 'Arrays & Hashing', isBlind75: true, implemented: false },
+    { id: 1, title: 'Two Sum', difficulty: 'Easy', submissions: 35100, successRate: 100, likes: 98, path: 'two-sum', category: 'Arrays & Hashing', isBlind75: true, implemented: true },
+    { id: 2, title: 'Contains Duplicate', difficulty: 'Easy', submissions: 16700, successRate: 99, likes: 97, path: 'contains-duplicate', category: 'Arrays & Hashing', isBlind75: true, implemented: true },
+    { id: 3, title: 'Valid Anagram', difficulty: 'Easy', submissions: 14700, successRate: 99, likes: 99, path: 'valid-anagram', category: 'Arrays & Hashing', isBlind75: true, implemented: true },
+    { id: 4, title: 'Group Anagrams', difficulty: 'Medium', submissions: 4200, successRate: 96, likes: 95, path: 'group-anagrams', category: 'Arrays & Hashing', isBlind75: true, implemented: false },
+    { id: 5, title: 'Top K Frequent Elements', difficulty: 'Medium', submissions: 5400, successRate: 96, likes: 94, path: 'top-k-frequent', category: 'Arrays & Hashing', isBlind75: true, implemented: false },
+    { id: 6, title: 'Product of Array Except Self', difficulty: 'Medium', submissions: 6100, successRate: 98, likes: 97, path: 'product-except-self', category: 'Arrays & Hashing', isBlind75: true, implemented: false },
+    { id: 7, title: 'Valid Sudoku', difficulty: 'Medium', submissions: 1300, successRate: 100, likes: 95, path: 'valid-sudoku', category: 'Arrays & Hashing', isBlind75: true, implemented: false },
+    { id: 8, title: 'Encode and Decode Strings', difficulty: 'Medium', submissions: 5400, successRate: 96, likes: 94, path: 'encode-decode-strings', category: 'Arrays & Hashing', isBlind75: true, implemented: false },
+    { id: 9, title: 'Longest Consecutive Sequence', difficulty: 'Medium', submissions: 6100, successRate: 98, likes: 97, path: 'longest-consecutive', category: 'Arrays & Hashing', isBlind75: true, implemented: false },
     
     // Two Pointers
-    { id: 10, title: 'Valid Palindrome', difficulty: 'Easy', submissions: 6100, successRate: 100, likes: 96, path: '/problems/valid-palindrome', category: 'Two Pointers', isBlind75: true, implemented: true },
-    { id: 11, title: 'Two Sum II', difficulty: 'Medium', submissions: 751, successRate: 100, likes: 94, path: '/problems/two-sum-ii', category: 'Two Pointers', isBlind75: true, implemented: false },
-    { id: 12, title: '3Sum', difficulty: 'Medium', submissions: 4900, successRate: 98, likes: 97, path: '/problems/3sum', category: 'Two Pointers', isBlind75: true, implemented: false },
-    { id: 13, title: 'Container With Most Water', difficulty: 'Medium', submissions: 4300, successRate: 99, likes: 95, path: '/problems/container-with-most-water', category: 'Two Pointers', isBlind75: true, implemented: false },
-    { id: 14, title: 'Trapping Rain Water', difficulty: 'Hard', submissions: 1200, successRate: 82, likes: 96, path: '/problems/trapping-rain-water', category: 'Two Pointers', isBlind75: true, implemented: false },
+    { id: 10, title: 'Valid Palindrome', difficulty: 'Easy', submissions: 6100, successRate: 100, likes: 96, path: 'valid-palindrome', category: 'Two Pointers', isBlind75: true, implemented: true },
+    { id: 11, title: 'Two Sum II', difficulty: 'Medium', submissions: 751, successRate: 100, likes: 94, path: 'two-sum-ii', category: 'Two Pointers', isBlind75: true, implemented: false },
+    { id: 12, title: '3Sum', difficulty: 'Medium', submissions: 4900, successRate: 98, likes: 97, path: '3sum', category: 'Two Pointers', isBlind75: true, implemented: false },
+    { id: 13, title: 'Container With Most Water', difficulty: 'Medium', submissions: 4300, successRate: 99, likes: 95, path: 'container-with-most-water', category: 'Two Pointers', isBlind75: true, implemented: false },
+    { id: 14, title: 'Trapping Rain Water', difficulty: 'Hard', submissions: 1200, successRate: 82, likes: 96, path: 'trapping-rain-water', category: 'Two Pointers', isBlind75: true, implemented: false },
     
     // Sliding Window
-    { id: 15, title: 'Best Time to Buy and Sell Stock', difficulty: 'Easy', submissions: 5100, successRate: 100, likes: 98, path: '/problems/best-time-to-buy-sell-stock', category: 'Sliding Window', isBlind75: true, implemented: true },
-    { id: 16, title: 'Longest Substring Without Repeating Characters', difficulty: 'Medium', submissions: 3400, successRate: 100, likes: 99, path: '/problems/longest-substring', category: 'Sliding Window', isBlind75: true, implemented: false },
-    { id: 17, title: 'Longest Repeating Character Replacement', difficulty: 'Medium', submissions: 2700, successRate: 96, likes: 95, path: '/problems/longest-repeating-character', category: 'Sliding Window', isBlind75: true, implemented: false },
-    { id: 18, title: 'Minimum Window Substring', difficulty: 'Hard', submissions: 2300, successRate: 98, likes: 97, path: '/problems/minimum-window-substring', category: 'Sliding Window', isBlind75: true, implemented: false },
+    { id: 15, title: 'Best Time to Buy and Sell Stock', difficulty: 'Easy', submissions: 5100, successRate: 100, likes: 98, path: 'best-time-to-buy-sell-stock', category: 'Sliding Window', isBlind75: true, implemented: true },
+    { id: 16, title: 'Longest Substring Without Repeating Characters', difficulty: 'Medium', submissions: 3400, successRate: 100, likes: 99, path: 'longest-substring', category: 'Sliding Window', isBlind75: true, implemented: false },
+    { id: 17, title: 'Longest Repeating Character Replacement', difficulty: 'Medium', submissions: 2700, successRate: 96, likes: 95, path: 'longest-repeating-character', category: 'Sliding Window', isBlind75: true, implemented: false },
+    { id: 18, title: 'Minimum Window Substring', difficulty: 'Hard', submissions: 2300, successRate: 98, likes: 97, path: 'minimum-window-substring', category: 'Sliding Window', isBlind75: true, implemented: false },
     
     // Stack
-    { id: 19, title: 'Valid Parentheses', difficulty: 'Easy', submissions: 4000, successRate: 100, likes: 99, path: '/problems/valid-parentheses', category: 'Stack', isBlind75: true, implemented: true },
-    { id: 20, title: 'Min Stack', difficulty: 'Medium', submissions: 2100, successRate: 95, likes: 93, path: '/problems/min-stack', category: 'Stack', isBlind75: true, implemented: false },
-    { id: 21, title: 'Evaluate Reverse Polish Notation', difficulty: 'Medium', submissions: 1800, successRate: 92, likes: 91, path: '/problems/evaluate-rpn', category: 'Stack', isBlind75: true, implemented: false },
-    { id: 22, title: 'Generate Parentheses', difficulty: 'Medium', submissions: 2500, successRate: 94, likes: 96, path: '/problems/generate-parentheses', category: 'Stack', isBlind75: true, implemented: false },
-    { id: 23, title: 'Daily Temperatures', difficulty: 'Medium', submissions: 475, successRate: 100, likes: 97, path: '/problems/daily-temperatures', category: 'Stack', isBlind75: true, implemented: false },
-    { id: 24, title: 'Car Fleet', difficulty: 'Medium', submissions: 396, successRate: 100, likes: 92, path: '/problems/car-fleet', category: 'Stack', isBlind75: true, implemented: false },
-    { id: 25, title: 'Largest Rectangle in Histogram', difficulty: 'Hard', submissions: 950, successRate: 85, likes: 94, path: '/problems/largest-rectangle', category: 'Stack', isBlind75: true, implemented: false },
+    { id: 19, title: 'Valid Parentheses', difficulty: 'Easy', submissions: 4000, successRate: 100, likes: 99, path: 'valid-parentheses', category: 'Stack', isBlind75: true, implemented: true },
+    { id: 20, title: 'Min Stack', difficulty: 'Medium', submissions: 2100, successRate: 95, likes: 93, path: 'min-stack', category: 'Stack', isBlind75: true, implemented: false },
+    { id: 21, title: 'Evaluate Reverse Polish Notation', difficulty: 'Medium', submissions: 1800, successRate: 92, likes: 91, path: 'evaluate-rpn', category: 'Stack', isBlind75: true, implemented: false },
+    { id: 22, title: 'Generate Parentheses', difficulty: 'Medium', submissions: 2500, successRate: 94, likes: 96, path: 'generate-parentheses', category: 'Stack', isBlind75: true, implemented: false },
+    { id: 23, title: 'Daily Temperatures', difficulty: 'Medium', submissions: 475, successRate: 100, likes: 97, path: 'daily-temperatures', category: 'Stack', isBlind75: true, implemented: false },
+    { id: 24, title: 'Car Fleet', difficulty: 'Medium', submissions: 396, successRate: 100, likes: 92, path: 'car-fleet', category: 'Stack', isBlind75: true, implemented: false },
+    { id: 25, title: 'Largest Rectangle in Histogram', difficulty: 'Hard', submissions: 950, successRate: 85, likes: 94, path: 'largest-rectangle', category: 'Stack', isBlind75: true, implemented: false },
     
     // Binary Search
-    { id: 26, title: 'Binary Search', difficulty: 'Easy', submissions: 7900, successRate: 99, likes: 98, path: '/problems/binary-search', category: 'Binary Search', isBlind75: true, implemented: true },
-    { id: 27, title: 'Search a 2D Matrix', difficulty: 'Medium', submissions: 3100, successRate: 97, likes: 95, path: '/problems/search-2d-matrix', category: 'Binary Search', isBlind75: true, implemented: false },
-    { id: 28, title: 'Koko Eating Bananas', difficulty: 'Medium', submissions: 809, successRate: 100, likes: 96, path: '/problems/koko-eating-bananas', category: 'Binary Search', isBlind75: true, implemented: false },
-    { id: 29, title: 'Search in Rotated Sorted Array', difficulty: 'Medium', submissions: 2400, successRate: 95, likes: 97, path: '/problems/search-rotated-array', category: 'Binary Search', isBlind75: true, implemented: false },
+    { id: 26, title: 'Binary Search', difficulty: 'Easy', submissions: 7900, successRate: 99, likes: 98, path: 'binary-search', category: 'Binary Search', isBlind75: true, implemented: true },
+    { id: 27, title: 'Search a 2D Matrix', difficulty: 'Medium', submissions: 3100, successRate: 97, likes: 95, path: 'search-2d-matrix', category: 'Binary Search', isBlind75: true, implemented: false },
+    { id: 28, title: 'Koko Eating Bananas', difficulty: 'Medium', submissions: 809, successRate: 100, likes: 96, path: 'koko-eating-bananas', category: 'Binary Search', isBlind75: true, implemented: false },
+    { id: 29, title: 'Search in Rotated Sorted Array', difficulty: 'Medium', submissions: 2400, successRate: 95, likes: 97, path: 'search-rotated-array', category: 'Binary Search', isBlind75: true, implemented: false },
     
     // Linked List
-    { id: 30, title: 'Reverse Linked List', difficulty: 'Easy', submissions: 8700, successRate: 98, likes: 99, path: '/problems/reverse-linked-list', category: 'Linked List', isBlind75: true, implemented: false },
-    { id: 31, title: 'Merge Two Sorted Lists', difficulty: 'Easy', submissions: 2500, successRate: 100, likes: 98, path: '/problems/merge-two-lists', category: 'Linked List', isBlind75: true, implemented: false },
-    { id: 32, title: 'Reorder List', difficulty: 'Medium', submissions: 1800, successRate: 100, likes: 96, path: '/problems/reorder-list', category: 'Linked List', isBlind75: true, implemented: false },
-    { id: 33, title: 'Remove Nth Node From End of List', difficulty: 'Medium', submissions: 1700, successRate: 98, likes: 95, path: '/problems/remove-nth-node', category: 'Linked List', isBlind75: true, implemented: false },
+    { id: 30, title: 'Reverse Linked List', difficulty: 'Easy', submissions: 8700, successRate: 98, likes: 99, path: 'reverse-linked-list', category: 'Linked List', isBlind75: true, implemented: true },
+    { id: 31, title: 'Merge Two Sorted Lists', difficulty: 'Easy', submissions: 2500, successRate: 100, likes: 98, path: 'merge-two-lists', category: 'Linked List', isBlind75: true, implemented: true },
+    { id: 32, title: 'Reorder List', difficulty: 'Medium', submissions: 1800, successRate: 100, likes: 96, path: 'reorder-list', category: 'Linked List', isBlind75: true, implemented: false },
+    { id: 33, title: 'Remove Nth Node From End of List', difficulty: 'Medium', submissions: 1700, successRate: 98, likes: 95, path: 'remove-nth-node', category: 'Linked List', isBlind75: true, implemented: false },
     
     // Trees
-    { id: 34, title: 'Invert Binary Tree', difficulty: 'Easy', submissions: 2700, successRate: 99, likes: 98, path: '/problems/invert-binary-tree', category: 'Trees', isBlind75: true, implemented: false },
-    { id: 35, title: 'Maximum Depth of Binary Tree', difficulty: 'Easy', submissions: 1900, successRate: 100, likes: 97, path: '/problems/max-depth-binary-tree', category: 'Trees', isBlind75: true, implemented: false },
-    { id: 36, title: 'Same Tree', difficulty: 'Easy', submissions: 1900, successRate: 100, likes: 96, path: '/problems/same-tree', category: 'Trees', isBlind75: true, implemented: false },
-    { id: 37, title: 'Binary Tree Level Order Traversal', difficulty: 'Medium', submissions: 1500, successRate: 98, likes: 96, path: '/problems/level-order-traversal', category: 'Trees', isBlind75: true, implemented: false },
-    { id: 38, title: 'Validate Binary Search Tree', difficulty: 'Medium', submissions: 2000, successRate: 91, likes: 93, path: '/problems/validate-bst', category: 'Trees', isBlind75: true, implemented: false },
+    { id: 34, title: 'Invert Binary Tree', difficulty: 'Easy', submissions: 9800, successRate: 99, likes: 100, path: 'invert-binary-tree', category: 'Trees', isBlind75: true, implemented: true },
+    { id: 35, title: 'Maximum Depth of Binary Tree', difficulty: 'Easy', submissions: 9500, successRate: 100, likes: 99, path: 'max-depth-binary-tree', category: 'Trees', isBlind75: true, implemented: true },
+    { id: 36, title: 'Same Tree', difficulty: 'Easy', submissions: 1900, successRate: 100, likes: 96, path: 'same-tree', category: 'Trees', isBlind75: true, implemented: true },
+    { id: 37, title: 'Binary Tree Level Order Traversal', difficulty: 'Medium', submissions: 1500, successRate: 98, likes: 96, path: 'level-order-traversal', category: 'Trees', isBlind75: true, implemented: false },
+    { id: 38, title: 'Validate Binary Search Tree', difficulty: 'Medium', submissions: 2000, successRate: 91, likes: 93, path: 'validate-bst', category: 'Trees', isBlind75: true, implemented: false },
     
     // Non-Blind 75 problems for variety
-    { id: 39, title: 'Palindrome Number', difficulty: 'Easy', submissions: 9500, successRate: 99, likes: 96, path: '/problems/palindrome-number', category: 'Math', isBlind75: false, implemented: false },
-    { id: 40, title: 'Fizz Buzz', difficulty: 'Easy', submissions: 7600, successRate: 100, likes: 91, path: '/problems/fizz-buzz', category: 'Math', isBlind75: false, implemented: false },
-    { id: 41, title: 'Roman to Integer', difficulty: 'Easy', submissions: 8400, successRate: 98, likes: 94, path: '/problems/roman-to-integer', category: 'Math', isBlind75: false, implemented: false },
-    { id: 42, title: 'Count Primes', difficulty: 'Medium', submissions: 3800, successRate: 89, likes: 90, path: '/problems/count-primes', category: 'Math', isBlind75: false, implemented: false },
-    { id: 43, title: 'Pow(x, n)', difficulty: 'Medium', submissions: 2900, successRate: 85, likes: 89, path: '/problems/pow-x-n', category: 'Math', isBlind75: false, implemented: false }
+    { id: 39, title: 'Palindrome Number', difficulty: 'Easy', submissions: 1600, successRate: 97, likes: 92, path: 'palindrome-number', category: 'Math', isBlind75: false, implemented: true },
+    { id: 40, title: 'Fizz Buzz', difficulty: 'Easy', submissions: 1400, successRate: 98, likes: 91, path: 'fizz-buzz', category: 'Math', isBlind75: false, implemented: true },
+    { id: 41, title: 'Roman to Integer', difficulty: 'Easy', submissions: 1100, successRate: 95, likes: 90, path: 'roman-to-integer', category: 'Math', isBlind75: false, implemented: true },
+    { id: 42, title: 'Count Primes', difficulty: 'Medium', submissions: 3800, successRate: 89, likes: 90, path: 'count-primes', category: 'Math', isBlind75: false, implemented: false },
+    { id: 43, title: 'Pow(x, n)', difficulty: 'Medium', submissions: 2900, successRate: 85, likes: 89, path: 'pow-x-n', category: 'Math', isBlind75: false, implemented: false }
   ];
 
   const getDifficultyColor = (difficulty: string): string => {
