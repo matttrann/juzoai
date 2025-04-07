@@ -4,22 +4,17 @@ import {
   Typography,
   Box,
   Button,
-  Card,
-  CardContent,
-  CardActions,
-  Grid,
   useTheme,
   useMediaQuery,
-  Paper,
-  Divider,
-  IconButton
+  Stack,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import StyleIcon from '@mui/icons-material/Style';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
-import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
-import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import CodeIcon from '@mui/icons-material/Code';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import CasinoIcon from '@mui/icons-material/Casino';
+import StarIcon from '@mui/icons-material/Star';
 import authService from '../services/authService';
 
 const Home: React.FC = () => {
@@ -33,15 +28,44 @@ const Home: React.FC = () => {
     setIsLoggedIn(authService.isAuthenticated());
   }, []);
 
-  interface Feature {
-    title: string;
-    description: string;
-    icon: React.ReactNode;
-    action: () => void;
-  }
-
-  const features: Feature[] = [
-    // Features removed as requested
+  // Define routes and their corresponding icons
+  const routes = [
+    {
+      name: isLoggedIn ? 'My Decks' : 'Flashcard Decks',
+      path: '/decks',
+      icon: <StyleIcon />,
+      primary: true
+    },
+    {
+      name: 'DSA Visualizer',
+      path: '/dsa-visualizer',
+      icon: <CodeIcon />,
+      primary: false
+    },
+    {
+      name: 'Coding Problems',
+      path: '/problems',
+      icon: <AssignmentIcon />,
+      primary: true
+    },
+    {
+      name: 'Problem Roulette',
+      path: '/problem-roulette',
+      icon: <CasinoIcon />,
+      primary: false
+    },
+    {
+      name: 'Performance Dashboard',
+      path: '/performance',
+      icon: <EmojiEventsIcon />,
+      primary: true
+    },
+    {
+      name: 'XP Booster',
+      path: '/xp-booster',
+      icon: <StarIcon />,
+      primary: false
+    }
   ];
 
   return (
@@ -68,65 +92,30 @@ const Home: React.FC = () => {
           sx={{ maxWidth: '800px', mx: 'auto', mb: 4 }}
         >
           This open source app makes learning effortless by combining flashcards for rote memorisation with interactive coding challenges to reinforce your understanding. 
-          Quickly review key concepts, test yourself, and apply what you’ve learned with real coding problems — all in one place!
+          Quickly review key concepts, test yourself, and apply what you've learned with real coding problems — all in one place!
         </Typography>
         
-        <Box sx={{ 
-          display: 'flex',
-          flexDirection: { xs: 'column', sm: 'row' },
-          gap: 2,
-          justifyContent: 'center',
-          mb: 6
-        }}>
-          <Button 
-            variant="contained" 
-            size="large"
-            onClick={() => navigate('/decks')}
-          >
-            {isLoggedIn ? 'My Decks' : 'Explore App'}
-          </Button>
-          <Button 
-            variant="outlined" 
-            size="large"
-            onClick={() => navigate('/dsa-visualizer')}
-          >
-            Explore Visualiations
-          </Button>
-        </Box>
-        
-        <Grid container spacing={4} sx={{ mt: 2 }}>
-          {features.map((feature, index) => (
-            <Grid component="div" sx={{ gridColumn: {xs: 'span 12', sm: 'span 6', md: 'span 3'} }} key={index}>
-              <Card 
-                sx={{ 
-                  height: '100%',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  transition: 'transform 0.2s, box-shadow 0.2s',
-                  '&:hover': {
-                    transform: 'translateY(-4px)',
-                    boxShadow: theme.shadows[6]
-                  }
-                }}
-              >
-                <CardContent sx={{ flexGrow: 1, textAlign: 'center', pt: 4 }}>
-                  <Box sx={{ mb: 2 }}>
-                    {feature.icon}
-                  </Box>
-                  <Typography gutterBottom variant="h5" component="h2">
-                    {feature.title}
-                  </Typography>
-                  <Typography color="text.secondary">
-                    {feature.description}
-                  </Typography>
-                </CardContent>
-                <CardActions sx={{ justifyContent: 'center', pb: 3 }}>
-                  <Button size="small" onClick={feature.action}>Learn More</Button>
-                </CardActions>
-              </Card>
-            </Grid>
+        <Stack 
+          direction={{ xs: 'column', sm: 'row' }}
+          spacing={2}
+          useFlexGap
+          flexWrap="wrap"
+          justifyContent="center"
+          sx={{ mb: 6, gap: 2 }}
+        >
+          {routes.map((route, index) => (
+            <Button 
+              key={index}
+              variant={route.primary ? "contained" : "outlined"}
+              size="large"
+              onClick={() => navigate(route.path)}
+              startIcon={route.icon}
+              sx={{ minWidth: '200px' }}
+            >
+              {route.name}
+            </Button>
           ))}
-        </Grid>
+        </Stack>
       </Box>
     </Container>
   );

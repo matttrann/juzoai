@@ -96,6 +96,10 @@ const playBinLandSound = (multiplier: number) => {
   }
 };
 
+// Add these constants at the top of the file, after other constants
+const XP_PER_LEVEL = 50; // Match the value from ProblemProgressContext
+const MAX_XP_BOOST_PERCENTAGE = 0.8; // Maximum 80% of XP needed for a level up
+
 const PlinkoGame: React.FC = () => {
   const theme = useTheme();
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -112,6 +116,23 @@ const PlinkoGame: React.FC = () => {
   const [rows, setRows] = useState<number>(DEFAULT_ROWS);
   const [betAmount] = useState<number>(10); // Fixed bet amount, removed setter
   const [riskLevel] = useState<'Low' | 'Medium' | 'High'>('Medium'); // Fixed risk level, removed setter
+  
+  // Function to calculate XP boost for a given multiplier
+  const calculateXpBoost = useCallback((multiplier: number): number => {
+    const maxXpForNoLevelUp = Math.floor(XP_PER_LEVEL * MAX_XP_BOOST_PERCENTAGE);
+    const baseXpBoost = level * 5; // Base value scales with player level
+    let finalXpBoost = Math.floor(baseXpBoost * multiplier);
+    
+    // Only cap the actual awarded XP to prevent level-up, not the displayed values
+    // This allows for variable displays but controlled rewards
+    return finalXpBoost;
+  }, [level]);
+  
+  // Apply cap only when actually awarding XP, not when displaying values
+  const applyBoostCap = useCallback((xpBoost: number): number => {
+    const maxXpForNoLevelUp = Math.floor(XP_PER_LEVEL * MAX_XP_BOOST_PERCENTAGE);
+    return Math.min(xpBoost, maxXpForNoLevelUp);
+  }, []);
   
   // Physics engine refs
   const engineRef = useRef<Matter.Engine | null>(null);
@@ -368,9 +389,8 @@ const PlinkoGame: React.FC = () => {
               // Get the multiplier for this bin
               const multiplier = binBody.multiplier || 1;
               
-              // Calculate the XP boost - fixed formula of level * 10 * multiplier
-              const baseXpBoost = level * 10;
-              const finalXpBoost = Math.floor(baseXpBoost * multiplier);
+              // Calculate the XP boost 
+              const xpBoost = calculateXpBoost(multiplier);
               
               // Play bin landing sound
               playBinLandSound(multiplier);
@@ -411,7 +431,7 @@ const PlinkoGame: React.FC = () => {
               // Create result object
               const resultObj = {
                 multiplier,
-                xpBoost: finalXpBoost
+                xpBoost: xpBoost // Keep this uncapped for display
               };
               
               // Make the ball slowly disappear into the bin
@@ -447,7 +467,7 @@ const PlinkoGame: React.FC = () => {
                     setGameState('ended');
                     
                     // Add the XP
-                    addXp(finalXpBoost, getRiskAsDifficulty(riskLevel));
+                    addXp(applyBoostCap(xpBoost), getRiskAsDifficulty(riskLevel));
                     
                     // Player can't play again until next level
                     setCanPlay(false);
@@ -483,10 +503,13 @@ const PlinkoGame: React.FC = () => {
               const binX = i * binWidth + binWidth/2;
               const binY = BOARD_HEIGHT - binHeight/2;
               
+              // Calculate the XP boost to display
+              const xpBoost = calculateXpBoost(mult);
+              
               // Save context state
               ctx.save();
               
-              // Draw multiplier with high contrast text
+              // Draw XP text with high contrast
               ctx.font = 'bold 16px Arial';
               ctx.textAlign = 'center';
               ctx.textBaseline = 'middle';
@@ -500,12 +523,12 @@ const PlinkoGame: React.FC = () => {
               // White text with black outline for maximum visibility
               ctx.strokeStyle = '#000000';
               ctx.lineWidth = 3;
-              ctx.strokeText(`${mult}×`, binX, binY);
+              ctx.strokeText(`+${xpBoost}`, binX, binY);
               
               // Remove shadow for the fill to make it crisp
               ctx.shadowColor = 'transparent';
               ctx.fillStyle = '#ffffff';
-              ctx.fillText(`${mult}×`, binX, binY);
+              ctx.fillText(`+${xpBoost}`, binX, binY);
               
               // Restore context state
               ctx.restore();
@@ -520,7 +543,7 @@ const PlinkoGame: React.FC = () => {
       console.error('Error initializing physics engine:', error);
       renderFallbackGame();
     }
-  }, [theme, getMultiplierColor, level, addXp, rows, MULTIPLIERS, riskLevel]);
+  }, [theme, getMultiplierColor, level, addXp, rows, MULTIPLIERS, riskLevel, calculateXpBoost, applyBoostCap]);
   
   // Fallback visualization
   const renderFallbackGame = useCallback(() => {
@@ -575,6 +598,9 @@ const PlinkoGame: React.FC = () => {
       const binColor = '#90caf9'; // Consistent blue color
       const cornerRadius = 8;
       
+      // Calculate the XP boost to display
+      const xpBoost = calculateXpBoost(MULTIPLIERS[i]);
+      
       // Save the current context state
       ctx.save();
       
@@ -607,7 +633,7 @@ const PlinkoGame: React.FC = () => {
       ctx.lineWidth = 2;
       ctx.stroke();
       
-      // Add multiplier text directly on the bin
+      // Add XP text directly on the bin
       const centerX = binX + binWidth / 2;
       const centerY = binY + binHeight / 2;
       
@@ -618,14 +644,14 @@ const PlinkoGame: React.FC = () => {
       ctx.textBaseline = 'middle';
       ctx.strokeStyle = '#000000';
       ctx.lineWidth = 3;
-      ctx.strokeText(`${MULTIPLIERS[i]}×`, centerX, centerY);
+      ctx.strokeText(`+${xpBoost}`, centerX, centerY);
       ctx.fillStyle = '#ffffff';
-      ctx.fillText(`${MULTIPLIERS[i]}×`, centerX, centerY);
+      ctx.fillText(`+${xpBoost}`, centerX, centerY);
       
       // Restore the context state
       ctx.restore();
     }
-  }, [theme, getMultiplierColor, rows, MULTIPLIERS]);
+  }, [theme, getMultiplierColor, rows, MULTIPLIERS, level, calculateXpBoost]);
   
   // Map risk level to difficulty for addXp function
   const getRiskAsDifficulty = useCallback((risk: 'Low' | 'Medium' | 'High'): 'Easy' | 'Medium' | 'Hard' => {
@@ -750,6 +776,14 @@ const PlinkoGame: React.FC = () => {
               );
               multiplier = MULTIPLIERS[binIndex];
               
+              // Calculate XP boost using the utility function
+              const finalXpBoost = calculateXpBoost(multiplier);
+              
+              const resultObj = {
+                multiplier,
+                xpBoost: finalXpBoost // Uncapped for display
+              };
+              
               // Redraw the board before starting the shrink animation
               ctx.clearRect(0, 0, BOARD_WIDTH, BOARD_HEIGHT);
               renderFallbackGame();
@@ -839,11 +873,11 @@ const PlinkoGame: React.FC = () => {
                 ctx.textBaseline = 'middle';
                 ctx.strokeStyle = '#000000';
                 ctx.lineWidth = 3;
-                ctx.strokeText(`${multiplier}×`, centerX, centerY);
+                ctx.strokeText(`+${finalXpBoost}`, centerX, centerY);
                 
                 ctx.shadowColor = 'transparent';
                 ctx.fillStyle = '#ffffff';
-                ctx.fillText(`${multiplier}×`, centerX, centerY);
+                ctx.fillText(`+${finalXpBoost}`, centerX, centerY);
                 
                 // Draw the ball
                 ctx.fillStyle = theme.palette.mode === 'dark' ? '#bbdefb' : '#e3f2fd';
@@ -890,16 +924,13 @@ const PlinkoGame: React.FC = () => {
                   requestAnimationFrame(shrinkBall);
                 } else {
                   // Ball has disappeared, finish the game
-                  const baseXpBoost = level * 10;
-                  const finalXpBoost = Math.floor(baseXpBoost * multiplier);
-                  
                   const resultObj = {
                     multiplier,
                     xpBoost: finalXpBoost
                   };
                   
-                  // Add XP and show result
-                  addXp(finalXpBoost, getRiskAsDifficulty('Medium'));
+                  // Add XP and show result (apply cap here)
+                  addXp(applyBoostCap(finalXpBoost), getRiskAsDifficulty('Medium'));
                   
                   setTimeout(() => {
                     setResult(resultObj);
@@ -955,7 +986,7 @@ const PlinkoGame: React.FC = () => {
     Matter.World.add(worldRef.current, ball);
     ballsRef.current.push(ball as PlinkoBody);
     activeBallsRef.current.add(ball as PlinkoBody);
-  }, [worldRef, gameState, theme, level, addXp, canPlay, getRiskAsDifficulty, setBinLandingProcessed]);
+  }, [worldRef, gameState, theme, level, addXp, canPlay, getRiskAsDifficulty, setBinLandingProcessed, calculateXpBoost, applyBoostCap]);
   
   // Reset function - just for visual reset, doesn't allow replaying
   const reset = useCallback(() => {
@@ -1088,16 +1119,6 @@ const PlinkoGame: React.FC = () => {
                   sx={{ fontWeight: 'bold' }}
                 >
                   Try Problem Roulette
-                </Button>
-                
-                <Button 
-                  variant="outlined" 
-                  color="inherit"
-                  onClick={reset}
-                  size="medium"
-                  sx={{ mt: 1 }}
-                >
-                  Clear Board
                 </Button>
               </Stack>
             </Paper>
