@@ -855,12 +855,7 @@ const PlinkoGame: React.FC = () => {
         )}
       </Paper>
       
-      {/* Footer credit - for visual similarity */}
-      <Box sx={{ mt: 3, textAlign: 'center', opacity: 0.7 }}>
-        <Typography variant="body2">
-          Juzo Learning © {new Date().getFullYear()}
-        </Typography>
-      </Box>
+
     </Container>
   );
 };
