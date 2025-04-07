@@ -23,10 +23,10 @@ A modern flashcard and coding practise application designed to help you study an
 ## Features
 
 ✅ **Flashcard System** <br>
-✅ **Blind 75 Practice** <br>
+✅ **Blind 75 Practice** (Work in progress)<br>
 ✅ **Study Tools** <br>
 ✅ **Roulette Gamification** <br>
-✅ **Data Structure & Algorithm Visualization** <br>
+✅ **Data Structure & Algorithm Visualization** (Work in progress)<br>
 ⬜ **MORE FEATURES COMING SOON** <br>
 
 ![https://github.com/matttrann/juzoai/blob/main/assets/Flashcard.png](https://github.com/matttrann/juzoai/blob/main/assets/Flashcard.png)
