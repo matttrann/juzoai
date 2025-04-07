@@ -23,7 +23,9 @@ import {
   Tooltip,
   Divider,
   LinearProgress,
-  Grid
+  Grid,
+  Button,
+  Snackbar
 } from '@mui/material';
 import DateRangeIcon from '@mui/icons-material/DateRange';
 import TimerIcon from '@mui/icons-material/Timer';
@@ -32,8 +34,12 @@ import SchoolIcon from '@mui/icons-material/School';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import EqualizerIcon from '@mui/icons-material/Equalizer';
 import CalendarViewMonthIcon from '@mui/icons-material/CalendarViewMonth';
+import StarIcon from '@mui/icons-material/Star';
+import DeleteIcon from '@mui/icons-material/Delete';
 import performanceService, { PerformanceEntry, PerformanceStats } from '../services/performanceService';
 import deckService from '../services/deckService';
+import { useProblemProgress } from '../contexts/ProblemProgressContext';
+import { styled } from '@mui/material/styles';
 
 // Helper function to format date
 const formatDate = (dateString?: string): string => {
@@ -103,6 +109,39 @@ const generateMockSessions = (deckId?: number): StudySession[] => {
   return [];
 };
 
+// Create styled components to replace Grid
+const GridContainer = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  flexWrap: 'wrap',
+  margin: theme.spacing(-1.5),
+  width: 'calc(100% + 24px)',
+}));
+
+const GridItem = styled(Box)(({ theme }) => ({
+  padding: theme.spacing(1.5),
+  flexGrow: 0,
+  maxWidth: '100%',
+  flexBasis: '100%',
+  [theme.breakpoints.up('md')]: {
+    flexBasis: '50%',
+    maxWidth: '50%',
+  },
+}));
+
+const GridItemFull = styled(Box)(({ theme }) => ({
+  padding: theme.spacing(1.5),
+  flexGrow: 0,
+  maxWidth: '100%',
+  flexBasis: '100%',
+}));
+
+const GridItemThird = styled(Box)(({ theme }) => ({
+  padding: theme.spacing(0.5),
+  flexGrow: 0,
+  maxWidth: '33.33%',
+  flexBasis: '33.33%',
+}));
+
 const PerformanceDashboard: React.FC = () => {
   // Access parameters from the URL - handles both /performance/:deckId and /performance/deck/:deckId
   const params = useParams<{ deckId?: string }>();
@@ -124,6 +163,24 @@ const PerformanceDashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [deckTitle, setDeckTitle] = useState('');
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: '',
+    severity: 'info' as 'success' | 'error' | 'info' | 'warning'
+  });
+
+  // Get problem progress data
+  const { 
+    level, 
+    rank, 
+    xp, 
+    totalSolved, 
+    easySolved, 
+    mediumSolved, 
+    hardSolved,
+    getCurrentLevelProgress,
+    resetProgress
+  } = useProblemProgress();
 
   useEffect(() => {
     const fetchPerformanceData = async () => {
@@ -216,6 +273,13 @@ const PerformanceDashboard: React.FC = () => {
         }
         
         setLoading(false);
+        
+        // Show snackbar message about local storage on first load
+        setSnackbar({
+          open: true,
+          message: 'Your progress is saved in your browser local storage',
+          severity: 'info'
+        });
       } catch (error) {
         console.error('Error fetching performance data:', error);
         setError('Failed to load performance data. Please try again later.');
@@ -228,6 +292,10 @@ const PerformanceDashboard: React.FC = () => {
   
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
+  };
+  
+  const handleSnackbarClose = () => {
+    setSnackbar(prev => ({ ...prev, open: false }));
   };
   
   if (loading) {
@@ -284,6 +352,23 @@ const PerformanceDashboard: React.FC = () => {
 
   return (
     <Container maxWidth="lg" sx={{ pt: { xs: 2, sm: 4 } }}>
+      {/* Snackbar for notifications */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={5000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert 
+          onClose={handleSnackbarClose} 
+          severity={snackbar.severity} 
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+      
       <Typography 
         variant={isMobile ? "h5" : "h4"} 
         component="h1"
@@ -367,21 +452,13 @@ const PerformanceDashboard: React.FC = () => {
             value={tabValue} 
             onChange={handleTabChange} 
             aria-label="performance tabs"
-            centered
-            variant={isMobile ? "fullWidth" : "standard"}
+            variant={isMobile ? 'scrollable' : 'fullWidth'}
+            scrollButtons={isMobile ? 'auto' : false}
           >
-            <Tab 
-              label="Study History" 
-              icon={<DateRangeIcon />} 
-              iconPosition="start"
-              {...a11yProps(0)} 
-            />
-            <Tab 
-              label="Analytics" 
-              icon={<EqualizerIcon />} 
-              iconPosition="start"
-              {...a11yProps(1)} 
-            />
+            <Tab label="Overview" {...a11yProps(0)} />
+            <Tab label="Flashcard Stats" {...a11yProps(1)} />
+            <Tab label="Coding Stats" {...a11yProps(2)} />
+            <Tab label="History" {...a11yProps(3)} />
           </Tabs>
         </Box>
         
@@ -489,8 +566,8 @@ const PerformanceDashboard: React.FC = () => {
         <TabPanel value={tabValue} index={1}>
           {sessions.length > 0 ? (
             <Box>
-              <Grid container spacing={3}>
-                <Grid component="div" size={{ xs: 12, md: 6 }}>
+              <GridContainer>
+                <GridItem>
                   <Card sx={{ height: '100%' }}>
                     <CardContent>
                       <Typography variant="h6" gutterBottom>
@@ -511,9 +588,9 @@ const PerformanceDashboard: React.FC = () => {
                       </Box>
                     </CardContent>
                   </Card>
-                </Grid>
+                </GridItem>
                 
-                <Grid component="div" size={{ xs: 12, md: 6 }}>
+                <GridItem>
                   <Card sx={{ height: '100%' }}>
                     <CardContent>
                       <Typography variant="h6" gutterBottom>
@@ -537,9 +614,9 @@ const PerformanceDashboard: React.FC = () => {
                       </Box>
                     </CardContent>
                   </Card>
-                </Grid>
+                </GridItem>
                 
-                <Grid component="div" size={{ xs: 12, md: 12 }} sx={{ mt: 3 }}>
+                <GridItemFull sx={{ mt: 3 }}>
                   <Card>
                     <CardContent>
                       <Typography variant="h6" gutterBottom>
@@ -592,8 +669,8 @@ const PerformanceDashboard: React.FC = () => {
                       </Box>
                     </CardContent>
                   </Card>
-                </Grid>
-              </Grid>
+                </GridItemFull>
+              </GridContainer>
             </Box>
           ) : (
             <Box sx={{ textAlign: 'center', py: 4 }}>
@@ -605,6 +682,333 @@ const PerformanceDashboard: React.FC = () => {
               
               <Typography sx={{ mt: 4 }}>
                 Your personal statistics and progress will appear here once you've completed studying some decks.
+              </Typography>
+            </Box>
+          )}
+        </TabPanel>
+        
+        <TabPanel value={tabValue} index={2}>
+          <GridContainer>
+            {/* Rank and Level Card */}
+            <GridItem>
+              <Card 
+                elevation={2} 
+                sx={{ 
+                  p: 3, 
+                  borderRadius: 2,
+                  background: 'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)',
+                  color: 'white'
+                }}
+              >
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                  <StarIcon fontSize="large" sx={{ mr: 2 }} />
+                  <Typography variant="h5" fontWeight="bold">
+                    Rank: {rank}
+                  </Typography>
+                </Box>
+                
+                <Typography variant="body1" gutterBottom>
+                  Level {level} Coder
+                </Typography>
+                
+                <Box sx={{ mt: 3, mb: 1, display: 'flex', justifyContent: 'space-between' }}>
+                  <Typography variant="body2">
+                    Level Progress
+                  </Typography>
+                  <Typography variant="body2" fontWeight="bold">
+                    {Math.round(getCurrentLevelProgress())}%
+                  </Typography>
+                </Box>
+                
+                <LinearProgress 
+                  variant="determinate" 
+                  value={getCurrentLevelProgress()} 
+                  sx={{ 
+                    height: 10,
+                    borderRadius: 5,
+                    mb: 2,
+                    bgcolor: 'rgba(255,255,255,0.2)',
+                    '& .MuiLinearProgress-bar': {
+                      bgcolor: 'rgba(255,255,255,0.9)'
+                    }
+                  }}
+                />
+                
+                <Typography variant="body2" sx={{ mt: 2, opacity: 0.8 }}>
+                  XP: {xp} points
+                </Typography>
+              </Card>
+            </GridItem>
+            
+            {/* Problems Solved Card */}
+            <GridItem>
+              <Card elevation={2} sx={{ p: 3, borderRadius: 2 }}>
+                <Typography variant="h6" gutterBottom>
+                  Problems Solved
+                </Typography>
+                
+                <Typography variant="h3" color="primary" fontWeight="bold" sx={{ my: 2 }}>
+                  {totalSolved}
+                </Typography>
+                
+                <Box sx={{ mt: 3 }}>
+                  <Box sx={{ display: 'flex', mx: -0.5 }}>
+                    <GridItemThird>
+                      <Card 
+                        elevation={0} 
+                        sx={{ 
+                          p: 1.5, 
+                          borderRadius: 2, 
+                          bgcolor: '#90caf9',
+                          color: 'white',
+                          textAlign: 'center'
+                        }}
+                      >
+                        <Typography variant="h6" fontWeight="bold">
+                          {easySolved}
+                        </Typography>
+                        <Typography variant="caption">
+                          Easy
+                        </Typography>
+                      </Card>
+                    </GridItemThird>
+                    <GridItemThird>
+                      <Card 
+                        elevation={0} 
+                        sx={{ 
+                          p: 1.5, 
+                          borderRadius: 2, 
+                          bgcolor: '#ffb74d',
+                          color: 'white',
+                          textAlign: 'center'
+                        }}
+                      >
+                        <Typography variant="h6" fontWeight="bold">
+                          {mediumSolved}
+                        </Typography>
+                        <Typography variant="caption">
+                          Medium
+                        </Typography>
+                      </Card>
+                    </GridItemThird>
+                    <GridItemThird>
+                      <Card 
+                        elevation={0} 
+                        sx={{ 
+                          p: 1.5, 
+                          borderRadius: 2, 
+                          bgcolor: '#f48fb1',
+                          color: 'white',
+                          textAlign: 'center'
+                        }}
+                      >
+                        <Typography variant="h6" fontWeight="bold">
+                          {hardSolved}
+                        </Typography>
+                        <Typography variant="caption">
+                          Hard
+                        </Typography>
+                      </Card>
+                    </GridItemThird>
+                  </Box>
+                </Box>
+              </Card>
+            </GridItem>
+            
+            {/* XP Breakdown Card */}
+            <GridItemFull>
+              <Card elevation={2} sx={{ p: 3, borderRadius: 2 }}>
+                <Typography variant="h6" gutterBottom>
+                  XP Breakdown
+                </Typography>
+                
+                <TableContainer component={Paper} elevation={0} sx={{ mt: 2 }}>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Difficulty</TableCell>
+                        <TableCell align="center">Solved</TableCell>
+                        <TableCell align="center">XP per Problem</TableCell>
+                        <TableCell align="right">Total XP</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      <TableRow>
+                        <TableCell>
+                          <Chip 
+                            label="Easy" 
+                            size="small" 
+                            sx={{ bgcolor: '#90caf9', color: 'white' }} 
+                          />
+                        </TableCell>
+                        <TableCell align="center">{easySolved}</TableCell>
+                        <TableCell align="center">10</TableCell>
+                        <TableCell align="right">{easySolved * 10}</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell>
+                          <Chip 
+                            label="Medium" 
+                            size="small" 
+                            sx={{ bgcolor: '#ffb74d', color: 'white' }} 
+                          />
+                        </TableCell>
+                        <TableCell align="center">{mediumSolved}</TableCell>
+                        <TableCell align="center">20</TableCell>
+                        <TableCell align="right">{mediumSolved * 20}</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell>
+                          <Chip 
+                            label="Hard" 
+                            size="small" 
+                            sx={{ bgcolor: '#f48fb1', color: 'white' }} 
+                          />
+                        </TableCell>
+                        <TableCell align="center">{hardSolved}</TableCell>
+                        <TableCell align="center">40</TableCell>
+                        <TableCell align="right">{hardSolved * 40}</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell colSpan={3}>
+                          <Typography variant="subtitle2">Total XP</Typography>
+                        </TableCell>
+                        <TableCell align="right">
+                          <Typography variant="subtitle1" fontWeight="bold">
+                            {xp}
+                          </Typography>
+                        </TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </Card>
+            </GridItemFull>
+
+            {/* Reset Progress Button */}
+            <GridItemFull>
+              <Box sx={{ mt: 3, display: 'flex', justifyContent: 'center' }}>
+                <Button 
+                  variant="outlined" 
+                  color="error" 
+                  onClick={() => {
+                    if (window.confirm('Are you sure you want to reset all your progress? This cannot be undone.')) {
+                      resetProgress();
+                      // Show a notification and refresh the page
+                      setSnackbar({
+                        open: true,
+                        message: 'All progress has been reset successfully',
+                        severity: 'success'
+                      });
+                      setTimeout(() => window.location.reload(), 1500);
+                    }
+                  }}
+                  startIcon={<DeleteIcon />}
+                  sx={{ mt: 2 }}
+                >
+                  Reset All Progress
+                </Button>
+              </Box>
+            </GridItemFull>
+          </GridContainer>
+        </TabPanel>
+        
+        <TabPanel value={tabValue} index={3}>
+          {sessions.length > 0 ? (
+            <TableContainer component={Paper} elevation={2}>
+              <Table aria-label="study history table">
+                <TableHead sx={{ bgcolor: theme.palette.primary.main }}>
+                  <TableRow>
+                    <TableCell sx={{ color: '#fff', fontWeight: 'bold' }}>Date</TableCell>
+                    {!deckId && (
+                      <TableCell sx={{ color: '#fff', fontWeight: 'bold' }}>Deck</TableCell>
+                    )}
+                    <TableCell sx={{ color: '#fff', fontWeight: 'bold' }}>Score</TableCell>
+                    <TableCell sx={{ color: '#fff', fontWeight: 'bold' }}>Cards</TableCell>
+                    {!isMobile && (
+                      <TableCell sx={{ color: '#fff', fontWeight: 'bold' }}>Time Spent</TableCell>
+                    )}
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {sessions.map((session) => (
+                    <TableRow 
+                      key={session.id} 
+                      sx={{ 
+                        '&:hover': {
+                          backgroundColor: theme.palette.action.hover
+                        }
+                      }}
+                    >
+                      <TableCell>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <DateRangeIcon sx={{ mr: 1, fontSize: '1rem', color: theme.palette.text.secondary }} />
+                          <Typography variant="body2">{formatDate(session.date)}</Typography>
+                        </Box>
+                      </TableCell>
+                      
+                      {!deckId && (
+                        <TableCell>
+                          <Chip 
+                            label={session.deckTitle} 
+                            size="small" 
+                            sx={{ 
+                              maxWidth: '150px', 
+                              fontWeight: 'medium',
+                              bgcolor: theme.palette.primary.light,
+                              color: theme.palette.primary.contrastText
+                            }} 
+                          />
+                        </TableCell>
+                      )}
+                      
+                      <TableCell>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <Typography fontWeight="bold">{session.score}%</Typography>
+                          <Box sx={{ ml: 1, width: '50px', display: 'flex', alignItems: 'center' }}>
+                            <LinearProgress 
+                              variant="determinate" 
+                              value={session.score} 
+                              sx={{ 
+                                width: '100%',
+                                height: 8,
+                                borderRadius: 5,
+                                backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'
+                              }}
+                            />
+                          </Box>
+                        </Box>
+                      </TableCell>
+                      
+                      <TableCell>
+                        <Typography>
+                          {session.cardsCorrect}/{session.cardsStudied}
+                        </Typography>
+                      </TableCell>
+                      
+                      {!isMobile && (
+                        <TableCell>
+                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <TimerIcon sx={{ mr: 1, fontSize: '1rem', color: theme.palette.text.secondary }} />
+                            <Typography variant="body2">{session.duration} min</Typography>
+                          </Box>
+                        </TableCell>
+                      )}
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          ) : (
+            <Box sx={{ textAlign: 'center', py: 4 }}>
+              <Alert severity="info" sx={{ maxWidth: '600px', mx: 'auto' }}>
+                <Typography variant="body1">
+                  You haven't completed any study sessions yet.
+                </Typography>
+              </Alert>
+              
+              <Typography sx={{ mt: 4 }}>
+                Study some flashcards to start tracking your performance!
               </Typography>
             </Box>
           )}

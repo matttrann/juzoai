@@ -15,6 +15,7 @@ import ProblemDetail from './components/ProblemDetail';
 import ProblemRoulette from './components/ProblemRoulette';
 import { AuthProvider } from './contexts/AuthContext';
 import { LoadingBarProvider } from './contexts/LoadingBarContext';
+import { ProblemProgressProvider } from './contexts/ProblemProgressContext';
 
 function App() {
   // Define dark theme
@@ -60,32 +61,34 @@ function App() {
     <AuthProvider>
       <ThemeProvider theme={darkTheme}>
         <LoadingBarProvider>
-          <CssBaseline />
-          <Router>
-            <Routes>
-              {/* Main application routes */}
-              <Route path="/" element={<Layout />}>
-                <Route index element={<Home />} />
-                <Route path="decks" element={<DeckList />} />
-                <Route path="decks/new" element={<DeckForm />} />
-                <Route path="decks/:deckId/study" element={<FlashcardStudy />} />
-                <Route path="decks/:deckId/edit" element={<DeckForm />} />
-                <Route path="decks/:deckId/flashcards/new" element={<FlashcardForm />} />
-                <Route path="performance" element={<PerformanceDashboard />} />
-                <Route path="performance/deck/:deckId" element={<PerformanceDashboard />} />
-                <Route path="performance/:deckId" element={<PerformanceDashboard />} />
-                <Route path="dsa-visualizer" element={<DSAVisualizer />} />
-                <Route path="problems" element={<Problems />} />
-                <Route path="problem-roulette" element={<ProblemRoulette />} />
-                <Route path="problems/:problemId" element={<ProblemDetail />} />
-                <Route path=":problemId" element={<ProblemDetail />} />
-                
-                {/* Redirect login/register routes to home */}
-                <Route path="login" element={<Navigate replace to="/" />} />
-                <Route path="register" element={<Navigate replace to="/" />} />
-              </Route>
-            </Routes>
-          </Router>
+          <ProblemProgressProvider>
+            <CssBaseline />
+            <Router>
+              <Routes>
+                {/* Main application routes */}
+                <Route path="/" element={<Layout />}>
+                  <Route index element={<Home />} />
+                  <Route path="decks" element={<DeckList />} />
+                  <Route path="decks/new" element={<DeckForm />} />
+                  <Route path="decks/:deckId/study" element={<FlashcardStudy />} />
+                  <Route path="decks/:deckId/edit" element={<DeckForm />} />
+                  <Route path="decks/:deckId/flashcards/new" element={<FlashcardForm />} />
+                  <Route path="performance" element={<PerformanceDashboard />} />
+                  <Route path="performance/deck/:deckId" element={<PerformanceDashboard />} />
+                  <Route path="performance/:deckId" element={<PerformanceDashboard />} />
+                  <Route path="dsa-visualizer" element={<DSAVisualizer />} />
+                  <Route path="problems" element={<Problems />} />
+                  <Route path="problem-roulette" element={<ProblemRoulette />} />
+                  <Route path="problems/:problemId" element={<ProblemDetail />} />
+                  <Route path=":problemId" element={<ProblemDetail />} />
+                  
+                  {/* Redirect login/register routes to home */}
+                  <Route path="login" element={<Navigate replace to="/" />} />
+                  <Route path="register" element={<Navigate replace to="/" />} />
+                </Route>
+              </Routes>
+            </Router>
+          </ProblemProgressProvider>
         </LoadingBarProvider>
       </ThemeProvider>
     </AuthProvider>

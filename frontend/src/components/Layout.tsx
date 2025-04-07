@@ -16,7 +16,10 @@ import {
   useTheme,
   Avatar,
   Menu,
-  MenuItem
+  MenuItem,
+  LinearProgress,
+  Chip,
+  Tooltip
 } from '@mui/material';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -28,9 +31,11 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import SettingsIcon from '@mui/icons-material/Settings';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import CasinoIcon from '@mui/icons-material/Casino';
+import StarIcon from '@mui/icons-material/Star';
 import authService, { User } from '../services/authService';
 import { useLoadingOnRouteChange } from '../utils/loadingUtils';
 import { useAppLoadingBar } from '../contexts/LoadingBarContext';
+import { useProblemProgress } from '../contexts/ProblemProgressContext';
 import Footer from './Footer';
 
 // Drawer width for desktop view
@@ -57,6 +62,18 @@ const Layout: React.FC = () => {
   
   // Get the loading bar for manual control if needed
   const loadingBar = useAppLoadingBar();
+  
+  // Get problem progress data
+  const { 
+    level, 
+    rank, 
+    getCurrentLevelProgress, 
+    getXpToNextLevel, 
+    totalSolved 
+  } = useProblemProgress();
+
+  // Show problem stats only on coding problem related pages
+  const showProblemStats = location.pathname.includes('problem');
   
   // Check authentication status on component mount
   useEffect(() => {
@@ -175,49 +192,114 @@ const Layout: React.FC = () => {
           <Typography variant="h6" noWrap component="div">
             Juzo.AI
           </Typography>
-          {isLoggedIn && user && (
-            <>
-              <IconButton
-                onClick={handleUserMenuOpen}
-                size="small"
-                aria-controls={Boolean(anchorEl) ? 'account-menu' : undefined}
-                aria-haspopup="true"
-                aria-expanded={Boolean(anchorEl) ? 'true' : undefined}
-              >
-                <Avatar 
-                  sx={{ 
-                    width: 36, 
-                    height: 36,
-                    cursor: 'pointer',
-                    bgcolor: 'primary.main'
-                  }}
-                  src={user.avatar}
-                  alt={user.name || user.username}
+          
+          <Box sx={{ 
+            display: 'flex', 
+            alignItems: 'center',
+            gap: 2,
+            ml: 'auto',
+            mr: { xs: 0, sm: 2 }
+          }}>
+            {/* XP Level Bar */}
+            {showProblemStats && (
+              <Box sx={{ 
+                display: 'flex', 
+                alignItems: 'center',
+                maxWidth: { xs: 120, sm: 200 },
+                flexDirection: 'column',
+                mr: 1
+              }}>
+                <Box sx={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  width: '100%',
+                  mb: 0.5,
+                  justifyContent: 'space-between'
+                }}>
+                  <Tooltip title={`Level ${level}`}>
+                    <Typography variant="caption" sx={{ color: 'white', fontWeight: 'bold' }}>
+                      Lvl {level}
+                    </Typography>
+                  </Tooltip>
+                  
+                  <Tooltip title={`${totalSolved} problems solved`}>
+                    <Chip
+                      size="small"
+                      label={rank}
+                      icon={<StarIcon fontSize="small" />}
+                      sx={{ 
+                        bgcolor: 'primary.dark', 
+                        color: 'white',
+                        height: 20,
+                        '& .MuiChip-label': { px: 1, py: 0 },
+                        '& .MuiChip-icon': { ml: 0.5 }
+                      }}
+                    />
+                  </Tooltip>
+                </Box>
+                
+                <Tooltip title={`${getXpToNextLevel()} XP to next level`}>
+                  <LinearProgress 
+                    variant="determinate" 
+                    value={getCurrentLevelProgress()} 
+                    sx={{ 
+                      width: '100%', 
+                      height: 6, 
+                      borderRadius: 3,
+                      bgcolor: 'rgba(255,255,255,0.2)',
+                      '& .MuiLinearProgress-bar': {
+                        bgcolor: 'primary.light'
+                      }
+                    }}
+                  />
+                </Tooltip>
+              </Box>
+            )}
+            
+            {isLoggedIn && user && (
+              <>
+                <IconButton
+                  onClick={handleUserMenuOpen}
+                  size="small"
+                  aria-controls={Boolean(anchorEl) ? 'account-menu' : undefined}
+                  aria-haspopup="true"
+                  aria-expanded={Boolean(anchorEl) ? 'true' : undefined}
                 >
-                  {(user.name || user.username).charAt(0).toUpperCase()}
-                </Avatar>
-              </IconButton>
-              <Menu
-                id="account-menu"
-                anchorEl={anchorEl}
-                open={Boolean(anchorEl)}
-                onClose={handleUserMenuClose}
-                transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-                anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-              >
-                <MenuItem disabled>
-                  <Typography variant="body2">{user.email}</Typography>
-                </MenuItem>
-                <Divider />
-                <MenuItem onClick={handleLogout}>
-                  <ListItemIcon>
-                    <LogoutIcon fontSize="small" />
-                  </ListItemIcon>
-                  Logout
-                </MenuItem>
-              </Menu>
-            </>
-          )}
+                  <Avatar 
+                    sx={{ 
+                      width: 36, 
+                      height: 36,
+                      cursor: 'pointer',
+                      bgcolor: 'primary.main'
+                    }}
+                    src={user.avatar}
+                    alt={user.name || user.username}
+                  >
+                    {(user.name || user.username).charAt(0).toUpperCase()}
+                  </Avatar>
+                </IconButton>
+                <Menu
+                  id="account-menu"
+                  anchorEl={anchorEl}
+                  open={Boolean(anchorEl)}
+                  onClose={handleUserMenuClose}
+                  transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+                  anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+                >
+                  <MenuItem disabled>
+                    <Typography variant="body2">{user.email}</Typography>
+                  </MenuItem>
+                  <Divider />
+                  <MenuItem onClick={handleLogout}>
+                    <ListItemIcon>
+                      <LogoutIcon fontSize="small" />
+                    </ListItemIcon>
+                    Logout
+                  </MenuItem>
+                </Menu>
+              </>
+            )}
+          </Box>
         </Toolbar>
       </AppBar>
       
