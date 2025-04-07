@@ -198,7 +198,7 @@ const PlinkoGame: React.FC = () => {
           width: BOARD_WIDTH,
           height: BOARD_HEIGHT,
           wireframes: false,
-          background: theme.palette.mode === 'dark' ? '#1a2027' : '#f5f5f5',
+          background: 'transparent',
           pixelRatio: window.devicePixelRatio || 1,
         }
       });
@@ -253,7 +253,7 @@ const PlinkoGame: React.FC = () => {
         BOARD_HEIGHT, 
         { 
           isStatic: true,
-          render: { fillStyle: theme.palette.grey[800] },
+          render: { fillStyle: 'transparent' },
           label: 'wall',
         }
       );
@@ -265,7 +265,7 @@ const PlinkoGame: React.FC = () => {
         BOARD_HEIGHT, 
         { 
           isStatic: true,
-          render: { fillStyle: theme.palette.grey[800] },
+          render: { fillStyle: 'transparent' },
           label: 'wall',
         }
       );
@@ -277,7 +277,7 @@ const PlinkoGame: React.FC = () => {
         wallThickness, 
         { 
           isStatic: true,
-          render: { fillStyle: theme.palette.grey[800] },
+          render: { fillStyle: 'transparent' },
           label: 'ground',
         }
       );
@@ -457,9 +457,8 @@ const PlinkoGame: React.FC = () => {
     // Clear canvas
     ctx.clearRect(0, 0, BOARD_WIDTH, BOARD_HEIGHT);
     
-    // Draw background
-    ctx.fillStyle = theme.palette.mode === 'dark' ? '#1a2027' : '#f5f5f5';
-    ctx.fillRect(0, 0, BOARD_WIDTH, BOARD_HEIGHT);
+    // Use transparent background
+    // No background fill - leave transparent
     
     // Draw pins in pyramid pattern
     ctx.fillStyle = theme.palette.mode === 'dark' ? '#90caf9' : '#90caf9';
@@ -754,9 +753,17 @@ const PlinkoGame: React.FC = () => {
   };
 
   return (
-    <Container maxWidth="lg" sx={{ my: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+    <Container 
+      maxWidth="lg" 
+      sx={{ 
+        display: 'flex', 
+        flexDirection: 'column', 
+        alignItems: 'center',
+        p: 0
+      }}
+    >
       {/* Current Balance */}
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, mt: 2 }}>
         <Typography variant="h6" sx={{ mr: 1 }}>
           Level {level} XP:
         </Typography>
@@ -766,21 +773,23 @@ const PlinkoGame: React.FC = () => {
       </Box>
       
       <Paper 
-        elevation={2}
+        elevation={0}
         sx={{
           width: '100%',
           maxWidth: 600,
           borderRadius: 1,
           overflow: 'hidden',
-          backgroundColor: theme.palette.background.paper,
+          backgroundColor: 'transparent',
+          boxShadow: 'none',
+          border: 'none',
         }}
       >
         {/* Simple Header */}
         <Box sx={{ 
           p: 2, 
-          borderBottom: 1, 
-          borderColor: 'divider',
-          textAlign: 'center'
+          borderBottom: 'none', 
+          textAlign: 'center',
+          backgroundColor: 'transparent',
         }}>
           <Typography variant="h6">
             XP Booster Plinko
@@ -795,7 +804,7 @@ const PlinkoGame: React.FC = () => {
             height={BOARD_HEIGHT}
             style={{ 
               display: 'block',
-              backgroundColor: theme.palette.mode === 'dark' ? '#1a2027' : '#f5f5f5',
+              backgroundColor: 'transparent',
               width: '100%',
               height: 'auto',
               zIndex: 1,
@@ -840,7 +849,12 @@ const PlinkoGame: React.FC = () => {
         </Box>
         
         {/* Drop Ball Button */}
-        <Box sx={{ p: 2, textAlign: 'center', borderTop: 1, borderColor: 'divider' }}>
+        <Box sx={{ 
+          p: 2, 
+          textAlign: 'center', 
+          borderTop: 'none', 
+          backgroundColor: 'transparent' 
+        }}>
           <Button
             variant="contained"
             color="primary"
@@ -868,7 +882,15 @@ const PlinkoGame: React.FC = () => {
       </Paper>
       
       {/* Status Message */}
-      <Paper sx={{ mt: 2, p: 2, width: '100%', maxWidth: 600, borderRadius: 1 }}>
+      <Paper sx={{ 
+        mt: 2, 
+        p: 2, 
+        width: '100%', 
+        maxWidth: 600, 
+        borderRadius: 1,
+        backgroundColor: 'transparent',
+        boxShadow: 'none',
+      }}>
         {canPlay ? (
           <Alert severity="info" sx={{ mb: 0 }}>
             <Typography variant="body2">
