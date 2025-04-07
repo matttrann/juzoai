@@ -159,7 +159,7 @@ const XPBoosterPlinko: React.FC<XPBoosterPlinkoProps> = ({ open, onClose, levelU
     
     if (normalizedValue > 0.8) return theme.palette.error.main; // Highest - Red
     if (normalizedValue > 0.6) return theme.palette.warning.main; // High - Orange
-    if (normalizedValue > 0.4) return theme.palette.info.main; // Medium - Blue
+    if (normalizedValue > 0.4) return '#90caf9'; // Medium - Blue
     if (normalizedValue > 0.2) return theme.palette.success.light; // Low-medium - Light Green
     return theme.palette.success.main; // Low - Green
   }, [theme, getMultipliers]);

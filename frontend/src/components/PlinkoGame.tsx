@@ -145,11 +145,11 @@ const PlinkoGame: React.FC = () => {
     // Normalize the multiplier value on a 0-1 scale
     const normalizedValue = (multiplier - minMultiplier) / (maxMultiplier - minMultiplier);
     
-    if (multiplier >= 3) return '#0d47a1'; // Highest - Deep blue
-    if (multiplier >= 1.5) return '#1565c0'; // High - Medium blue
-    if (multiplier >= 1.0) return '#1976d2'; // Medium - Blue
-    if (multiplier >= 0.5) return '#2196f3'; // Low-medium - Light blue
-    return '#64b5f6'; // Low - Lighter blue
+    if (multiplier >= 3) return '#90caf9'; // Highest - Deep blue
+    if (multiplier >= 1.5) return '#90caf9'; // High - Medium blue
+    if (multiplier >= 1.0) return '#90caf9'; // Medium - Blue
+    if (multiplier >= 0.5) return '#90caf9'; // Low-medium - Light blue
+    return '#90caf9'; // Low - Lighter blue
   }, [theme, MULTIPLIERS]);
   
   // Clean up physics engine
@@ -231,8 +231,8 @@ const PlinkoGame: React.FC = () => {
             restitution: 0.5,
             friction: 0.05,
             render: {
-              fillStyle: theme.palette.mode === 'dark' ? '#2196f3' : '#1976d2',
-              strokeStyle: theme.palette.mode === 'dark' ? '#64b5f6' : '#0d47a1',
+              fillStyle: theme.palette.mode === 'dark' ? '#90caf9' : '#90caf9',
+              strokeStyle: theme.palette.mode === 'dark' ? '#90caf9' : '#90caf9',
               lineWidth: 1,
             },
             label: 'pin',
@@ -294,7 +294,7 @@ const PlinkoGame: React.FC = () => {
       for (let i = 0; i < numBins; i++) {
         const binX = i * binWidth + binWidth/2; // Center of the bin rectangle
         // Use a consistent blue color
-        const binColor = '#1976d2'; 
+        const binColor = '#90caf9'; 
         
         // Add a bin with small, square appearance
         const bin = Matter.Bodies.rectangle(binX, binY, binWidth - 2, binHeight, {
@@ -462,8 +462,8 @@ const PlinkoGame: React.FC = () => {
     ctx.fillRect(0, 0, BOARD_WIDTH, BOARD_HEIGHT);
     
     // Draw pins in pyramid pattern
-    ctx.fillStyle = theme.palette.mode === 'dark' ? '#2196f3' : '#1976d2';
-    ctx.strokeStyle = theme.palette.mode === 'dark' ? '#64b5f6' : '#0d47a1';
+    ctx.fillStyle = theme.palette.mode === 'dark' ? '#90caf9' : '#90caf9';
+    ctx.strokeStyle = theme.palette.mode === 'dark' ? '#90caf9' : '#90caf9';
     ctx.lineWidth = 1;
     
     const pinSpacing = BOARD_WIDTH / (Math.max(rows, 8) + 2);
@@ -495,7 +495,7 @@ const PlinkoGame: React.FC = () => {
     
     for (let i = 0; i < numBins; i++) {
       const binX = i * binWidth;
-      const binColor = '#1976d2'; // Consistent blue color
+      const binColor = '#90caf9'; // Consistent blue color
       
       // Draw bin
       ctx.fillStyle = binColor;
@@ -709,7 +709,7 @@ const PlinkoGame: React.FC = () => {
         density: 0.002,
         render: {
           fillStyle: theme.palette.mode === 'dark' ? '#bbdefb' : '#e3f2fd',
-          strokeStyle: theme.palette.mode === 'dark' ? '#1976d2' : '#1565c0',
+          strokeStyle: theme.palette.mode === 'dark' ? '#90caf9' : '#90caf9',
           lineWidth: 1,
         },
         label: 'ball',
@@ -760,7 +760,7 @@ const PlinkoGame: React.FC = () => {
         <Typography variant="h6" sx={{ mr: 1 }}>
           Level {level} XP:
         </Typography>
-        <Typography variant="h5" fontWeight="bold" color="primary" sx={{ color: '#2196f3' }}>
+        <Typography variant="h5" fontWeight="bold" color="primary" sx={{ color: '#90caf9' }}>
           {level * 100}
         </Typography>
       </Box>
@@ -850,9 +850,9 @@ const PlinkoGame: React.FC = () => {
             sx={{ 
               minWidth: 180, 
               py: 1, 
-              bgcolor: theme.palette.mode === 'dark' ? theme.palette.primary.main : '#2196f3',
+              bgcolor: theme.palette.mode === 'dark' ? theme.palette.primary.main : '#90caf9',
               '&:hover': {
-                bgcolor: theme.palette.mode === 'dark' ? theme.palette.primary.dark : '#1976d2'
+                bgcolor: theme.palette.mode === 'dark' ? theme.palette.primary.dark : '#90caf9'
               }
             }}
           >

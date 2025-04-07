@@ -26,7 +26,7 @@ function App() {
         palette: {
           mode: 'dark',
           primary: {
-            main: blue[300],
+            main: '#90caf9',
           },
           secondary: {
             main: amber[500],

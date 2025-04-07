@@ -378,7 +378,13 @@ const PerformanceDashboard: React.FC = () => {
           onClose={handleSnackbarClose} 
           severity={snackbar.severity} 
           variant="filled"
-          sx={{ width: '100%' }}
+          sx={{ 
+            width: '100%',
+            '&.MuiAlert-filledInfo': {
+              backgroundColor: '#90caf9',
+              color: 'rgba(0, 0, 0, 0.87)'
+            }
+          }}
         >
           {snackbar.message}
         </Alert>
