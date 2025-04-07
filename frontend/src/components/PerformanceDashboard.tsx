@@ -110,15 +110,21 @@ const generateMockSessions = (deckId?: number): StudySession[] => {
 };
 
 // Create styled components to replace Grid
-const GridContainer = styled(Box)(({ theme }) => ({
+interface GridContainerProps {
+  spacing?: number;
+}
+
+const GridContainer = styled(Box)<GridContainerProps>(({ theme, spacing = 0 }) => ({
   display: 'flex',
   flexWrap: 'wrap',
   margin: theme.spacing(-1.5),
   width: 'calc(100% + 24px)',
+  '& > *': {
+    padding: theme.spacing(spacing / 2 || 1.5),
+  }
 }));
 
 const GridItem = styled(Box)(({ theme }) => ({
-  padding: theme.spacing(1.5),
   flexGrow: 0,
   maxWidth: '100%',
   flexBasis: '100%',
@@ -129,14 +135,12 @@ const GridItem = styled(Box)(({ theme }) => ({
 }));
 
 const GridItemFull = styled(Box)(({ theme }) => ({
-  padding: theme.spacing(1.5),
   flexGrow: 0,
   maxWidth: '100%',
   flexBasis: '100%',
 }));
 
 const GridItemThird = styled(Box)(({ theme }) => ({
-  padding: theme.spacing(0.5),
   flexGrow: 0,
   maxWidth: '33.33%',
   flexBasis: '33.33%',
@@ -179,7 +183,9 @@ const PerformanceDashboard: React.FC = () => {
     mediumSolved, 
     hardSolved,
     getCurrentLevelProgress,
-    resetProgress
+    resetProgress,
+    getXpToNextLevel,
+    addXp
   } = useProblemProgress();
 
   useEffect(() => {
@@ -349,6 +355,15 @@ const PerformanceDashboard: React.FC = () => {
       </Container>
     );
   }
+
+  // Function to test the XP Booster
+  const testXPBooster = () => {
+    // Add XP to trigger a level up and show the XP booster
+    const xpNeeded = getXpToNextLevel();
+    // Use a multiple of the minimum XP to ensure level-up
+    const xpToAdd = Math.max(xpNeeded, 50);
+    addXp(xpToAdd, 'Medium');
+  };
 
   return (
     <Container maxWidth="lg" sx={{ pt: { xs: 2, sm: 4 } }}>
@@ -688,227 +703,70 @@ const PerformanceDashboard: React.FC = () => {
         </TabPanel>
         
         <TabPanel value={tabValue} index={2}>
-          <GridContainer>
-            {/* Rank and Level Card */}
-            <GridItem>
-              <Card 
-                elevation={2} 
-                sx={{ 
-                  p: 3, 
-                  borderRadius: 2,
-                  background: 'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)',
-                  color: 'white'
-                }}
-              >
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <StarIcon fontSize="large" sx={{ mr: 2 }} />
-                  <Typography variant="h5" fontWeight="bold">
-                    Rank: {rank}
-                  </Typography>
-                </Box>
-                
-                <Typography variant="body1" gutterBottom>
-                  Level {level} Coder
-                </Typography>
-                
-                <Box sx={{ mt: 3, mb: 1, display: 'flex', justifyContent: 'space-between' }}>
-                  <Typography variant="body2">
-                    Level Progress
-                  </Typography>
-                  <Typography variant="body2" fontWeight="bold">
-                    {Math.round(getCurrentLevelProgress())}%
-                  </Typography>
-                </Box>
-                
-                <LinearProgress 
-                  variant="determinate" 
-                  value={getCurrentLevelProgress()} 
-                  sx={{ 
-                    height: 10,
-                    borderRadius: 5,
-                    mb: 2,
-                    bgcolor: 'rgba(255,255,255,0.2)',
-                    '& .MuiLinearProgress-bar': {
-                      bgcolor: 'rgba(255,255,255,0.9)'
-                    }
-                  }}
-                />
-                
-                <Typography variant="body2" sx={{ mt: 2, opacity: 0.8 }}>
-                  XP: {xp} points
-                </Typography>
-              </Card>
-            </GridItem>
-            
-            {/* Problems Solved Card */}
-            <GridItem>
-              <Card elevation={2} sx={{ p: 3, borderRadius: 2 }}>
-                <Typography variant="h6" gutterBottom>
-                  Problems Solved
-                </Typography>
-                
-                <Typography variant="h3" color="primary" fontWeight="bold" sx={{ my: 2 }}>
-                  {totalSolved}
-                </Typography>
-                
-                <Box sx={{ mt: 3 }}>
-                  <Box sx={{ display: 'flex', mx: -0.5 }}>
-                    <GridItemThird>
-                      <Card 
-                        elevation={0} 
-                        sx={{ 
-                          p: 1.5, 
-                          borderRadius: 2, 
-                          bgcolor: '#90caf9',
-                          color: 'white',
-                          textAlign: 'center'
-                        }}
-                      >
-                        <Typography variant="h6" fontWeight="bold">
-                          {easySolved}
-                        </Typography>
-                        <Typography variant="caption">
-                          Easy
-                        </Typography>
-                      </Card>
-                    </GridItemThird>
-                    <GridItemThird>
-                      <Card 
-                        elevation={0} 
-                        sx={{ 
-                          p: 1.5, 
-                          borderRadius: 2, 
-                          bgcolor: '#ffb74d',
-                          color: 'white',
-                          textAlign: 'center'
-                        }}
-                      >
-                        <Typography variant="h6" fontWeight="bold">
-                          {mediumSolved}
-                        </Typography>
-                        <Typography variant="caption">
-                          Medium
-                        </Typography>
-                      </Card>
-                    </GridItemThird>
-                    <GridItemThird>
-                      <Card 
-                        elevation={0} 
-                        sx={{ 
-                          p: 1.5, 
-                          borderRadius: 2, 
-                          bgcolor: '#f48fb1',
-                          color: 'white',
-                          textAlign: 'center'
-                        }}
-                      >
-                        <Typography variant="h6" fontWeight="bold">
-                          {hardSolved}
-                        </Typography>
-                        <Typography variant="caption">
-                          Hard
-                        </Typography>
-                      </Card>
-                    </GridItemThird>
+          <GridContainer spacing={3}>
+            <GridItemFull>
+              <Paper elevation={3} sx={{ p: 3, mb: 3, borderRadius: 2 }}>
+                <Typography variant="h6" gutterBottom>Your Performance</Typography>
+                <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', mb: 3 }}>
+                  <Box sx={{ mb: { xs: 2, sm: 0 } }}>
+                    <Typography variant="body2" color="text.secondary">Level</Typography>
+                    <Typography variant="h4">{level}</Typography>
+                    <Typography variant="subtitle1" color="primary" fontWeight="bold">{rank}</Typography>
+                  </Box>
+                  <Box sx={{ mb: { xs: 2, sm: 0 } }}>
+                    <Typography variant="body2" color="text.secondary">XP</Typography>
+                    <Typography variant="h4">{xp}</Typography>
+                    <Typography variant="subtitle2" color="text.secondary">{getXpToNextLevel()} XP to next level</Typography>
+                  </Box>
+                  <Box>
+                    <Typography variant="body2" color="text.secondary">Problems Solved</Typography>
+                    <Typography variant="h4">{totalSolved}</Typography>
+                    <Typography variant="subtitle2" color="text.secondary">
+                      {easySolved} Easy • {mediumSolved} Medium • {hardSolved} Hard
+                    </Typography>
                   </Box>
                 </Box>
-              </Card>
-            </GridItem>
-            
-            {/* XP Breakdown Card */}
-            <GridItemFull>
-              <Card elevation={2} sx={{ p: 3, borderRadius: 2 }}>
-                <Typography variant="h6" gutterBottom>
-                  XP Breakdown
-                </Typography>
-                
-                <TableContainer component={Paper} elevation={0} sx={{ mt: 2 }}>
-                  <Table>
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>Difficulty</TableCell>
-                        <TableCell align="center">Solved</TableCell>
-                        <TableCell align="center">XP per Problem</TableCell>
-                        <TableCell align="right">Total XP</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      <TableRow>
-                        <TableCell>
-                          <Chip 
-                            label="Easy" 
-                            size="small" 
-                            sx={{ bgcolor: '#90caf9', color: 'white' }} 
-                          />
-                        </TableCell>
-                        <TableCell align="center">{easySolved}</TableCell>
-                        <TableCell align="center">10</TableCell>
-                        <TableCell align="right">{easySolved * 10}</TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell>
-                          <Chip 
-                            label="Medium" 
-                            size="small" 
-                            sx={{ bgcolor: '#ffb74d', color: 'white' }} 
-                          />
-                        </TableCell>
-                        <TableCell align="center">{mediumSolved}</TableCell>
-                        <TableCell align="center">20</TableCell>
-                        <TableCell align="right">{mediumSolved * 20}</TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell>
-                          <Chip 
-                            label="Hard" 
-                            size="small" 
-                            sx={{ bgcolor: '#f48fb1', color: 'white' }} 
-                          />
-                        </TableCell>
-                        <TableCell align="center">{hardSolved}</TableCell>
-                        <TableCell align="center">40</TableCell>
-                        <TableCell align="right">{hardSolved * 40}</TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell colSpan={3}>
-                          <Typography variant="subtitle2">Total XP</Typography>
-                        </TableCell>
-                        <TableCell align="right">
-                          <Typography variant="subtitle1" fontWeight="bold">
-                            {xp}
-                          </Typography>
-                        </TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              </Card>
+                <Box sx={{ mb: 2 }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                    Level Progress: {Math.round(getCurrentLevelProgress())}%
+                  </Typography>
+                  <LinearProgress 
+                    variant="determinate" 
+                    value={getCurrentLevelProgress()} 
+                    sx={{ 
+                      height: 10,
+                      borderRadius: 5,
+                      bgcolor: 'rgba(144, 202, 249, 0.2)',
+                      '& .MuiLinearProgress-bar': {
+                        borderRadius: 5,
+                      },
+                    }}
+                  />
+                </Box>
+              </Paper>
             </GridItemFull>
-
-            {/* Reset Progress Button */}
+            
+            {/* Add test buttons for development */}
             <GridItemFull>
-              <Box sx={{ mt: 3, display: 'flex', justifyContent: 'center' }}>
-                <Button 
-                  variant="outlined" 
-                  color="error" 
-                  onClick={() => {
-                    if (window.confirm('Are you sure you want to reset all your progress? This cannot be undone.')) {
-                      resetProgress();
-                      // Show a notification and refresh the page
-                      setSnackbar({
-                        open: true,
-                        message: 'All progress has been reset successfully',
-                        severity: 'success'
-                      });
-                      setTimeout(() => window.location.reload(), 1500);
-                    }
-                  }}
-                  startIcon={<DeleteIcon />}
-                  sx={{ mt: 2 }}
-                >
-                  Reset All Progress
-                </Button>
-              </Box>
+              <Paper elevation={3} sx={{ p: 3, borderRadius: 2 }}>
+                <Typography variant="h6" gutterBottom>Developer Tools</Typography>
+                <Box sx={{ display: 'flex', gap: 2 }}>
+                  <Button 
+                    variant="contained" 
+                    color="secondary" 
+                    onClick={testXPBooster} 
+                  >
+                    Test XP Booster
+                  </Button>
+                  <Button 
+                    variant="outlined" 
+                    color="error" 
+                    onClick={resetProgress}
+                  >
+                    Reset Progress
+                  </Button>
+                </Box>
+              </Paper>
             </GridItemFull>
           </GridContainer>
         </TabPanel>

@@ -18,6 +18,7 @@
     "@types/react-router-dom": "^5.3.3",
     "@uiw/react-textarea-code-editor": "^3.1.0",
     "axios": "^1.8.4",
+    "matter-js": "^0.19.0",
     "react": "^19.0.0",
     "react-confetti-explosion": "^2.1.2",
     "react-dom": "^19.0.0",
@@ -50,5 +51,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@types/matter-js": "^0.19.8"
   }
 }

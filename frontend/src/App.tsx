@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
-import CssBaseline from '@mui/material/CssBaseline';
+import { ThemeProvider, createTheme, responsiveFontSizes, CssBaseline } from '@mui/material';
+import { blue, amber } from '@mui/material/colors';
 import Layout from './components/Layout';
 import Home from './components/Home';
 import DeckList from './components/DeckList';
@@ -13,56 +13,81 @@ import DSAVisualizer from './components/DSAVisualizer';
 import Problems from './components/Problems';
 import ProblemDetail from './components/ProblemDetail';
 import ProblemRoulette from './components/ProblemRoulette';
+import PlinkoGame from './components/PlinkoGame';
 import { AuthProvider } from './contexts/AuthContext';
 import { LoadingBarProvider } from './contexts/LoadingBarContext';
 import { ProblemProgressProvider } from './contexts/ProblemProgressContext';
+import XPBoosterWrapper from './components/XPBoosterWrapper';
 
 function App() {
   // Define dark theme
-  const darkTheme = useMemo(() => 
-    createTheme({
-      palette: {
-        mode: 'dark',
-        primary: {
-          main: '#90caf9',
+  const theme = useMemo(() => 
+    responsiveFontSizes(
+      createTheme({
+        palette: {
+          mode: 'dark',
+          primary: {
+            main: blue[300],
+          },
+          secondary: {
+            main: amber[500],
+          },
+          background: {
+            default: '#121212',
+            paper: '#1e1e1e',
+          },
         },
-        secondary: {
-          main: '#f48fb1',
+        typography: {
+          fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
         },
-        background: {
-          default: '#121212',
-          paper: '#1e1e1e',
-        },
-      },
-      typography: {
-        fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
-      },
-      components: {
-        MuiCard: {
-          styleOverrides: {
-            root: {
-              borderRadius: 8,
+        components: {
+          MuiCard: {
+            styleOverrides: {
+              root: {
+                backgroundColor: '#1e1e1e',
+                borderRadius: '8px',
+                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.2)',
+                transition: 'transform 0.2s, box-shadow 0.2s',
+                '&:hover': {
+                  transform: 'translateY(-5px)',
+                  boxShadow: '0 10px 15px rgba(0, 0, 0, 0.3)',
+                },
+              },
+            },
+          },
+          MuiAppBar: {
+            styleOverrides: {
+              root: {
+                backgroundColor: '#121212',
+                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+              },
+            },
+          },
+          MuiButton: {
+            styleOverrides: {
+              root: {
+                borderRadius: '8px',
+                textTransform: 'none',
+                fontWeight: 600,
+              },
+              containedPrimary: {
+                '&:hover': {
+                  boxShadow: '0 8px 16px rgba(33, 150, 243, 0.3)',
+                },
+              },
             },
           },
         },
-        MuiButton: {
-          styleOverrides: {
-            root: {
-              borderRadius: 6,
-              textTransform: 'none',
-            },
-          },
-        },
-      },
-    }),
+      })
+    ),
   []);
 
   return (
     <AuthProvider>
-      <ThemeProvider theme={darkTheme}>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
         <LoadingBarProvider>
           <ProblemProgressProvider>
-            <CssBaseline />
             <Router>
               <Routes>
                 {/* Main application routes */}
@@ -79,6 +104,7 @@ function App() {
                   <Route path="dsa-visualizer" element={<DSAVisualizer />} />
                   <Route path="problems" element={<Problems />} />
                   <Route path="problem-roulette" element={<ProblemRoulette />} />
+                  <Route path="xp-booster" element={<PlinkoGame />} />
                   <Route path="problems/:problemId" element={<ProblemDetail />} />
                   <Route path=":problemId" element={<ProblemDetail />} />
                   
@@ -87,6 +113,9 @@ function App() {
                   <Route path="register" element={<Navigate replace to="/" />} />
                 </Route>
               </Routes>
+              
+              {/* XP Booster integration component moved inside Router */}
+              <XPBoosterWrapper />
             </Router>
           </ProblemProgressProvider>
         </LoadingBarProvider>

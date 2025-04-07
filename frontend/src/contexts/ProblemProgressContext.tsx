@@ -37,6 +37,10 @@ interface ProblemProgressContextProps {
   getCurrentLevelProgress: () => number; // Returns progress percentage toward next level
   getXpToNextLevel: () => number;
   resetProgress: () => void; // Added reset function for testing
+  // New properties for XP Booster
+  showLevelUpBooster: boolean;
+  recentLevelUp: number | null;
+  closeLevelUpBooster: () => void;
 }
 
 interface ProgressData {
@@ -48,6 +52,8 @@ interface ProgressData {
   mediumSolved: number;
   hardSolved: number;
   lastUpdated: number;
+  // Tracking if the user has seen the XP booster for this level
+  boosterLevelsShown: number[];
 }
 
 const ProblemProgressContext = createContext<ProblemProgressContextProps | undefined>(undefined);
@@ -73,6 +79,11 @@ export const ProblemProgressProvider: React.FC<ProblemProgressProviderProps> = (
   const [mediumSolved, setMediumSolved] = useState<number>(0);
   const [hardSolved, setHardSolved] = useState<number>(0);
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
+  
+  // New state for XP Booster
+  const [boosterLevelsShown, setBoosterLevelsShown] = useState<number[]>([]);
+  const [showLevelUpBooster, setShowLevelUpBooster] = useState<boolean>(false);
+  const [recentLevelUp, setRecentLevelUp] = useState<number | null>(null);
 
   // Calculate rank based on level
   const calculateRank = useCallback((currentLevel: number): string => {
@@ -102,7 +113,8 @@ export const ProblemProgressProvider: React.FC<ProblemProgressProviderProps> = (
       easySolved,
       mediumSolved,
       hardSolved,
-      lastUpdated: Date.now()
+      lastUpdated: Date.now(),
+      boosterLevelsShown
     };
     
     try {
@@ -111,7 +123,7 @@ export const ProblemProgressProvider: React.FC<ProblemProgressProviderProps> = (
     } catch (error) {
       console.error('Failed to save progress to localStorage:', error);
     }
-  }, [xp, level, rank, totalSolved, easySolved, mediumSolved, hardSolved, isInitialized]);
+  }, [xp, level, rank, totalSolved, easySolved, mediumSolved, hardSolved, isInitialized, boosterLevelsShown]);
 
   // Load stored progress from localStorage on mount
   useEffect(() => {
@@ -130,6 +142,11 @@ export const ProblemProgressProvider: React.FC<ProblemProgressProviderProps> = (
         setEasySolved(progress.easySolved || 0);
         setMediumSolved(progress.mediumSolved || 0);
         setHardSolved(progress.hardSolved || 0);
+        
+        // Load booster levels shown state
+        if (progress.boosterLevelsShown) {
+          setBoosterLevelsShown(progress.boosterLevelsShown);
+        }
       }
       
       // Mark as initialized after loading
@@ -153,7 +170,16 @@ export const ProblemProgressProvider: React.FC<ProblemProgressProviderProps> = (
     if (isInitialized) {
       saveToLocalStorage();
     }
-  }, [xp, level, rank, totalSolved, easySolved, mediumSolved, hardSolved, saveToLocalStorage, isInitialized]);
+  }, [xp, level, rank, totalSolved, easySolved, mediumSolved, hardSolved, boosterLevelsShown, saveToLocalStorage, isInitialized]);
+
+  // Close the XP Booster dialog and mark the level as shown
+  const closeLevelUpBooster = useCallback(() => {
+    if (recentLevelUp && !boosterLevelsShown.includes(recentLevelUp)) {
+      setBoosterLevelsShown(prev => [...prev, recentLevelUp]);
+    }
+    setShowLevelUpBooster(false);
+    setRecentLevelUp(null);
+  }, [recentLevelUp, boosterLevelsShown]);
 
   // Add XP and update level
   const addXp = useCallback((amount: number, difficulty: 'Easy' | 'Medium' | 'Hard') => {
@@ -168,6 +194,13 @@ export const ProblemProgressProvider: React.FC<ProblemProgressProviderProps> = (
       if (newLevel > level) {
         setLevel(newLevel);
         console.log(`Leveled up to ${newLevel}!`);
+        
+        // Check if we've already shown the booster for this level
+        if (!boosterLevelsShown.includes(newLevel)) {
+          // Trigger the XP booster for the level up
+          setRecentLevelUp(newLevel);
+          setShowLevelUpBooster(true);
+        }
       }
       
       return newXp;
@@ -182,7 +215,7 @@ export const ProblemProgressProvider: React.FC<ProblemProgressProviderProps> = (
     } else {
       setHardSolved(prev => prev + 1);
     }
-  }, [level]);
+  }, [level, boosterLevelsShown]);
 
   // Calculate progress percentage toward next level
   const getCurrentLevelProgress = useCallback(() => {
@@ -208,6 +241,9 @@ export const ProblemProgressProvider: React.FC<ProblemProgressProviderProps> = (
     setEasySolved(0);
     setMediumSolved(0);
     setHardSolved(0);
+    setBoosterLevelsShown([]);
+    setShowLevelUpBooster(false);
+    setRecentLevelUp(null);
     
     // Clear localStorage
     localStorage.removeItem(STORAGE_KEY);
@@ -229,6 +265,11 @@ export const ProblemProgressProvider: React.FC<ProblemProgressProviderProps> = (
           setEasySolved(newProgress.easySolved);
           setMediumSolved(newProgress.mediumSolved);
           setHardSolved(newProgress.hardSolved);
+          
+          // Update booster levels shown state
+          if (newProgress.boosterLevelsShown) {
+            setBoosterLevelsShown(newProgress.boosterLevelsShown);
+          }
         } catch (error) {
           console.error('Error parsing storage event data:', error);
         }
@@ -252,7 +293,10 @@ export const ProblemProgressProvider: React.FC<ProblemProgressProviderProps> = (
         addXp,
         getCurrentLevelProgress,
         getXpToNextLevel,
-        resetProgress
+        resetProgress,
+        showLevelUpBooster,
+        recentLevelUp,
+        closeLevelUpBooster
       }}
     >
       {children}
