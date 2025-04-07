@@ -397,70 +397,6 @@ const PerformanceDashboard: React.FC = () => {
         {deckId ? `${deckTitle} Performance` : 'Your Learning Performance'}
       </Typography>
       
-      <Box sx={{ mb: 4 }}>
-        <Card 
-          elevation={3}
-          sx={{
-            background: theme.palette.mode === 'dark' 
-              ? 'linear-gradient(145deg, #2D3748 30%, #1A202C 90%)'
-              : 'linear-gradient(145deg, #f5f7fa 30%, #e4e7eb 90%)',
-            borderRadius: 2
-          }}
-        >
-          <CardContent>
-            {stats ? (
-              <Box 
-                sx={{
-                  display: 'flex',
-                  flexDirection: isMobile ? 'column' : 'row',
-                  justifyContent: 'space-around',
-                  alignItems: 'center',
-                  gap: 3
-                }}
-              >
-                <Box sx={{ textAlign: 'center' }}>
-                  <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                    <SchoolIcon sx={{ mr: 0.5, verticalAlign: 'text-bottom' }}/>
-                    Study Sessions
-                  </Typography>
-                  <Typography variant="h4">
-                    {totalSessions}
-                  </Typography>
-                </Box>
-                
-                <Divider orientation={isMobile ? "horizontal" : "vertical"} flexItem />
-                
-                <Box sx={{ textAlign: 'center' }}>
-                  <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                    <EqualizerIcon sx={{ mr: 0.5, verticalAlign: 'text-bottom' }}/>
-                    Average Score
-                  </Typography>
-                  <Typography variant="h4">
-                    {averageScore.toFixed(1)}%
-                  </Typography>
-                </Box>
-                
-                <Divider orientation={isMobile ? "horizontal" : "vertical"} flexItem />
-                
-                <Box sx={{ textAlign: 'center' }}>
-                  <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                    <TrendingUpIcon sx={{ mr: 0.5, verticalAlign: 'text-bottom' }}/>
-                    Improvement
-                  </Typography>
-                  <Typography variant="h4" color={improvement >= 0 ? 'success.main' : 'error.main'}>
-                    {improvement >= 0 ? '+' : ''}{improvement.toFixed(1)}%
-                  </Typography>
-                </Box>
-              </Box>
-            ) : (
-              <Box sx={{ textAlign: 'center', p: 2 }}>
-                <Typography>No performance data available</Typography>
-              </Box>
-            )}
-          </CardContent>
-        </Card>
-      </Box>
-      
       <Box sx={{ width: '100%' }}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Tabs 
@@ -470,115 +406,13 @@ const PerformanceDashboard: React.FC = () => {
             variant={isMobile ? 'scrollable' : 'fullWidth'}
             scrollButtons={isMobile ? 'auto' : false}
           >
-            <Tab label="Overview" {...a11yProps(0)} />
-            <Tab label="Flashcard Stats" {...a11yProps(1)} />
-            <Tab label="Coding Stats" {...a11yProps(2)} />
-            <Tab label="History" {...a11yProps(3)} />
+            <Tab label="Flashcard Stats" {...a11yProps(0)} />
+            <Tab label="Coding Stats" {...a11yProps(1)} />
+            <Tab label="Deck History" {...a11yProps(2)} />
           </Tabs>
         </Box>
         
         <TabPanel value={tabValue} index={0}>
-          {sessions.length > 0 ? (
-            <TableContainer component={Paper} elevation={2}>
-              <Table aria-label="study history table">
-                <TableHead sx={{ bgcolor: theme.palette.primary.main }}>
-                  <TableRow>
-                    <TableCell sx={{ color: '#fff', fontWeight: 'bold' }}>Date</TableCell>
-                    {!deckId && (
-                      <TableCell sx={{ color: '#fff', fontWeight: 'bold' }}>Deck</TableCell>
-                    )}
-                    <TableCell sx={{ color: '#fff', fontWeight: 'bold' }}>Score</TableCell>
-                    <TableCell sx={{ color: '#fff', fontWeight: 'bold' }}>Cards</TableCell>
-                    {!isMobile && (
-                      <TableCell sx={{ color: '#fff', fontWeight: 'bold' }}>Time Spent</TableCell>
-                    )}
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {sessions.map((session) => (
-                    <TableRow 
-                      key={session.id} 
-                      sx={{ 
-                        '&:hover': {
-                          backgroundColor: theme.palette.action.hover
-                        }
-                      }}
-                    >
-                      <TableCell>
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <DateRangeIcon sx={{ mr: 1, fontSize: '1rem', color: theme.palette.text.secondary }} />
-                          <Typography variant="body2">{formatDate(session.date)}</Typography>
-                        </Box>
-                      </TableCell>
-                      
-                      {!deckId && (
-                        <TableCell>
-                          <Chip 
-                            label={session.deckTitle} 
-                            size="small" 
-                            sx={{ 
-                              maxWidth: '150px', 
-                              fontWeight: 'medium',
-                              bgcolor: theme.palette.primary.light,
-                              color: theme.palette.primary.contrastText
-                            }} 
-                          />
-                        </TableCell>
-                      )}
-                      
-                      <TableCell>
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <Typography fontWeight="bold">{session.score}%</Typography>
-                          <Box sx={{ ml: 1, width: '50px', display: 'flex', alignItems: 'center' }}>
-                            <LinearProgress 
-                              variant="determinate" 
-                              value={session.score} 
-                              sx={{ 
-                                width: '100%',
-                                height: 8,
-                                borderRadius: 5,
-                                backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'
-                              }}
-                            />
-                          </Box>
-                        </Box>
-                      </TableCell>
-                      
-                      <TableCell>
-                        <Typography>
-                          {session.cardsCorrect}/{session.cardsStudied}
-                        </Typography>
-                      </TableCell>
-                      
-                      {!isMobile && (
-                        <TableCell>
-                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                            <TimerIcon sx={{ mr: 1, fontSize: '1rem', color: theme.palette.text.secondary }} />
-                            <Typography variant="body2">{session.duration} min</Typography>
-                          </Box>
-                        </TableCell>
-                      )}
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          ) : (
-            <Box sx={{ textAlign: 'center', py: 4 }}>
-              <Alert severity="info" sx={{ maxWidth: '600px', mx: 'auto' }}>
-                <Typography variant="body1">
-                  You haven't completed any study sessions yet.
-                </Typography>
-              </Alert>
-              
-              <Typography sx={{ mt: 4 }}>
-                Study some flashcards to start tracking your performance!
-              </Typography>
-            </Box>
-          )}
-        </TabPanel>
-        
-        <TabPanel value={tabValue} index={1}>
           {sessions.length > 0 ? (
             <Box>
               <GridContainer>
@@ -702,7 +536,7 @@ const PerformanceDashboard: React.FC = () => {
           )}
         </TabPanel>
         
-        <TabPanel value={tabValue} index={2}>
+        <TabPanel value={tabValue} index={1}>
           <GridContainer spacing={3}>
             <GridItemFull>
               <Paper elevation={3} sx={{ p: 3, mb: 3, borderRadius: 2 }}>
@@ -771,7 +605,7 @@ const PerformanceDashboard: React.FC = () => {
           </GridContainer>
         </TabPanel>
         
-        <TabPanel value={tabValue} index={3}>
+        <TabPanel value={tabValue} index={2}>
           {sessions.length > 0 ? (
             <TableContainer component={Paper} elevation={2}>
               <Table aria-label="study history table">

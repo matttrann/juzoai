@@ -103,6 +103,7 @@ const PlinkoGame: React.FC = () => {
   const [gameState, setGameState] = useState<'ready' | 'playing' | 'ended'>('ready');
   const [result, setResult] = useState<{multiplier: number, xpBoost: number} | null>(null);
   const [canPlay, setCanPlay] = useState<boolean>(true);
+  const [binLandingProcessed, setBinLandingProcessed] = useState<boolean>(false);
   
   // Game settings
   const [rows, setRows] = useState<number>(DEFAULT_ROWS);
@@ -345,10 +346,13 @@ const PlinkoGame: React.FC = () => {
           }
           
           // If we found a ball and bin collision
-          if (ballBody && binBody) {
+          if (ballBody && binBody && !binLandingProcessed) {
             // Only process if this ball is active and at the bottom of the board
             if (activeBallsRef.current.has(ballBody as PlinkoBody) && 
                 ballBody.position.y > BOARD_HEIGHT - binHeight - BALL_RADIUS) {
+              // Mark bin landing as processed to prevent multiple hits
+              setBinLandingProcessed(true);
+              
               // Remove from active balls to prevent multiple bin hits
               activeBallsRef.current.delete(ballBody as PlinkoBody);
               
@@ -361,6 +365,17 @@ const PlinkoGame: React.FC = () => {
               
               // Play bin landing sound
               playBinLandSound(multiplier);
+              
+              // Lock the ball in place by removing all velocity and making it static
+              Matter.Body.setVelocity(ballBody, { x: 0, y: 0 });
+              Matter.Body.setStatic(ballBody, true);
+              
+              // Position ball at the center of the bin
+              const binIndex = parseInt(binBody.label?.split('-')[1] || '0');
+              const binWidth = BOARD_WIDTH / MULTIPLIERS.length;
+              const centerX = binIndex * binWidth + binWidth / 2;
+              const centerY = BOARD_HEIGHT - binHeight / 2;
+              Matter.Body.setPosition(ballBody, { x: centerX, y: centerY - BALL_RADIUS });
               
               // Create result object
               const resultObj = {
@@ -574,6 +589,9 @@ const PlinkoGame: React.FC = () => {
   const dropBall = useCallback(() => {
     if (gameState !== 'ready' || !canPlay) return;
     
+    // Reset bin landing processed flag
+    setBinLandingProcessed(false);
+    
     if (!worldRef.current) {
       console.warn('World ref not available, using fallback drop');
       
@@ -629,7 +647,10 @@ const PlinkoGame: React.FC = () => {
             ctx.fill();
             
             // Check if ball reached bottom
-            if (ball.y > BOARD_HEIGHT - 90) {
+            if (ball.y > BOARD_HEIGHT - 90 && !binLandingProcessed) {
+              // Mark bin landing as processed
+              setBinLandingProcessed(true);
+              
               // Calculate which bin based on x position
               const binWidth = BOARD_WIDTH / MULTIPLIERS.length;
               const binIndex = Math.min(
@@ -637,6 +658,22 @@ const PlinkoGame: React.FC = () => {
                 MULTIPLIERS.length - 1
               );
               multiplier = MULTIPLIERS[binIndex];
+              
+              // Lock the ball in the center of the bin
+              ball.x = binIndex * binWidth + binWidth / 2;
+              ball.y = BOARD_HEIGHT - 30; // Position just above bottom
+              ball.vx = 0;
+              ball.vy = 0;
+              
+              // Draw the final position of the ball
+              ctx.clearRect(0, 0, BOARD_WIDTH, BOARD_HEIGHT);
+              renderFallbackGame(); // Redraw the board
+              
+              // Draw ball at final position
+              ctx.fillStyle = theme.palette.mode === 'dark' ? '#bbdefb' : '#e3f2fd';
+              ctx.beginPath();
+              ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+              ctx.fill();
               
               const baseXpBoost = level * 10;
               const finalXpBoost = Math.floor(baseXpBoost * multiplier);
@@ -698,7 +735,7 @@ const PlinkoGame: React.FC = () => {
     Matter.World.add(worldRef.current, ball);
     ballsRef.current.push(ball as PlinkoBody);
     activeBallsRef.current.add(ball as PlinkoBody);
-  }, [worldRef, gameState, theme, level, addXp, canPlay, getRiskAsDifficulty]);
+  }, [worldRef, gameState, theme, level, addXp, canPlay, getRiskAsDifficulty, setBinLandingProcessed]);
   
   // Reset function - just for visual reset, doesn't allow replaying
   const reset = useCallback(() => {
@@ -712,9 +749,12 @@ const PlinkoGame: React.FC = () => {
     ballsRef.current = [];
     activeBallsRef.current.clear();
     
+    // Reset bin landing processed flag
+    setBinLandingProcessed(false);
+    
     // But keep the game ended since we don't allow replays
     setGameState('ended');
-  }, []);
+  }, [setBinLandingProcessed]);
   
   // Get the result text
   const getResultText = () => {
