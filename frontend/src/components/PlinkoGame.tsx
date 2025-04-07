@@ -374,6 +374,39 @@ const PlinkoGame: React.FC = () => {
               
               // Play bin landing sound
               playBinLandSound(multiplier);
+
+              // Animate the bin - move it down and then back up
+              const binOriginalPosition = { ...binBody.position };
+              let animationStep = 0;
+              const totalSteps = 15; // Total steps for down and up animation
+              
+              const animateBin = () => {
+                if (binBody === null) return;
+                
+                if (animationStep < totalSteps / 2) {
+                  // Moving down
+                  Matter.Body.setPosition(binBody, {
+                    x: binBody.position.x,
+                    y: binOriginalPosition.y + (animationStep * 1.5)
+                  });
+                } else if (animationStep < totalSteps) {
+                  // Moving back up
+                  Matter.Body.setPosition(binBody, {
+                    x: binBody.position.x,
+                    y: binOriginalPosition.y + ((totalSteps - animationStep) * 1.5)
+                  });
+                } else {
+                  // Reset to original position
+                  Matter.Body.setPosition(binBody, binOriginalPosition);
+                  return; // End animation
+                }
+                
+                animationStep++;
+                setTimeout(animateBin, 20);
+              };
+              
+              // Start bin animation
+              animateBin();
               
               // Create result object
               const resultObj = {
@@ -423,8 +456,9 @@ const PlinkoGame: React.FC = () => {
                 }
               };
               
-              // Start the shrinking animation
-              setTimeout(shrinkBall, 100);
+              // Start the shrinking animation after bin animation has moved down
+              // This creates the effect of the bin "swallowing" the ball
+              setTimeout(shrinkBall, 150);
             }
           }
         }
@@ -726,6 +760,109 @@ const PlinkoGame: React.FC = () => {
               ball.vx = 0;
               ball.vy = 0;
               
+              // Save the bin position and dimensions for animation
+              const binRect = {
+                x: binIndex * binWidth,
+                y: BOARD_HEIGHT - binHeight,
+                width: binWidth,
+                height: binHeight
+              };
+              
+              // Animate the bin moving down and up
+              let binAnimStep = 0;
+              const binTotalSteps = 15;
+              
+              const animateBin = () => {
+                // Clear the entire canvas and redraw background
+                ctx.clearRect(0, 0, BOARD_WIDTH, BOARD_HEIGHT);
+                renderFallbackGame();
+                
+                // Calculate current offset
+                let yOffset = 0;
+                if (binAnimStep < binTotalSteps / 2) {
+                  // Moving down
+                  yOffset = binAnimStep * 1.5;
+                } else if (binAnimStep < binTotalSteps) {
+                  // Moving back up
+                  yOffset = (binTotalSteps - binAnimStep) * 1.5;
+                }
+                
+                // Clear just the specific bin we're animating
+                ctx.clearRect(
+                  binRect.x, 
+                  binRect.y - 2, 
+                  binRect.width, 
+                  binRect.height + 30
+                );
+                
+                // Draw the bin at the new position
+                const cornerRadius = 8;
+                
+                ctx.save();
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+                ctx.shadowBlur = 10;
+                ctx.shadowOffsetX = 2;
+                ctx.shadowOffsetY = 2;
+                
+                ctx.fillStyle = '#90caf9';
+                
+                // Draw rounded rectangle for the bin with offset
+                ctx.beginPath();
+                ctx.moveTo(binRect.x + cornerRadius, binRect.y + yOffset);
+                ctx.lineTo(binRect.x + binRect.width - cornerRadius, binRect.y + yOffset);
+                ctx.quadraticCurveTo(binRect.x + binRect.width, binRect.y + yOffset, binRect.x + binRect.width, binRect.y + yOffset + cornerRadius);
+                ctx.lineTo(binRect.x + binRect.width, binRect.y + yOffset + binRect.height - cornerRadius);
+                ctx.quadraticCurveTo(binRect.x + binRect.width, binRect.y + yOffset + binRect.height, binRect.x + binRect.width - cornerRadius, binRect.y + yOffset + binRect.height);
+                ctx.lineTo(binRect.x + cornerRadius, binRect.y + yOffset + binRect.height);
+                ctx.quadraticCurveTo(binRect.x, binRect.y + yOffset + binRect.height, binRect.x, binRect.y + yOffset + binRect.height - cornerRadius);
+                ctx.lineTo(binRect.x, binRect.y + yOffset + cornerRadius);
+                ctx.quadraticCurveTo(binRect.x, binRect.y + yOffset, binRect.x + cornerRadius, binRect.y + yOffset);
+                ctx.closePath();
+                ctx.fill();
+                
+                // Add border
+                ctx.shadowColor = 'transparent';
+                ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                
+                // Draw multiplier text
+                const centerX = binRect.x + binRect.width / 2;
+                const centerY = binRect.y + yOffset + binRect.height / 2;
+                
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
+                ctx.shadowBlur = 3;
+                ctx.shadowOffsetX = 1;
+                ctx.shadowOffsetY = 1;
+                ctx.font = 'bold 16px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.strokeStyle = '#000000';
+                ctx.lineWidth = 3;
+                ctx.strokeText(`${multiplier}×`, centerX, centerY);
+                
+                ctx.shadowColor = 'transparent';
+                ctx.fillStyle = '#ffffff';
+                ctx.fillText(`${multiplier}×`, centerX, centerY);
+                
+                // Draw the ball
+                ctx.fillStyle = theme.palette.mode === 'dark' ? '#bbdefb' : '#e3f2fd';
+                ctx.beginPath();
+                ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.restore();
+                
+                // Continue animation if not done
+                if (binAnimStep < binTotalSteps) {
+                  binAnimStep++;
+                  requestAnimationFrame(animateBin);
+                } else {
+                  // Start the shrinking animation after bin animation is complete
+                  shrinkBall();
+                }
+              };
+              
               // Animate the ball shrinking and disappearing into the bin
               const shrinkBall = () => {
                 // Redraw the background where the ball was
@@ -773,8 +910,9 @@ const PlinkoGame: React.FC = () => {
                 }
               };
               
-              // Start the shrinking animation
-              shrinkBall();
+              // Start bin animation
+              animateBin();
+              
               return; // Stop the main animation
             }
             
