@@ -288,20 +288,21 @@ const PlinkoGame: React.FC = () => {
       const bins: PlinkoBody[] = [];
       const numBins = MULTIPLIERS.length;
       const binWidth = BOARD_WIDTH / numBins;
-      const binHeight = 60; // Slightly taller bins for better visibility
-      const binY = BOARD_HEIGHT - binHeight/2;
+      const binHeight = 40; // Smaller, more square-like bins
+      const binY = BOARD_HEIGHT - binHeight/2; // Center of the bin rectangle
       
       for (let i = 0; i < numBins; i++) {
-        const binX = i * binWidth + binWidth/2;
-        const binColor = getMultiplierColor(MULTIPLIERS[i]);
+        const binX = i * binWidth + binWidth/2; // Center of the bin rectangle
+        // Use a consistent blue color
+        const binColor = '#1976d2'; 
         
-        // Add a border to the bin for better visibility
+        // Add a bin with small, square appearance
         const bin = Matter.Bodies.rectangle(binX, binY, binWidth - 2, binHeight, {
           isStatic: true,
           isSensor: true,
           render: {
             fillStyle: binColor,
-            strokeStyle: theme.palette.grey[700],
+            strokeStyle: 'rgba(0, 0, 0, 0.5)',
             lineWidth: 1,
           },
           label: `bin-${i}`,
@@ -374,8 +375,8 @@ const PlinkoGame: React.FC = () => {
               const binIndex = parseInt(binBody.label?.split('-')[1] || '0');
               const binWidth = BOARD_WIDTH / MULTIPLIERS.length;
               const centerX = binIndex * binWidth + binWidth / 2;
-              const centerY = BOARD_HEIGHT - binHeight / 2;
-              Matter.Body.setPosition(ballBody, { x: centerX, y: centerY - BALL_RADIUS });
+              const centerY = BOARD_HEIGHT - binHeight - BALL_RADIUS; // Position ball on top of bin
+              Matter.Body.setPosition(ballBody, { x: centerX, y: centerY });
               
               // Create result object
               const resultObj = {
@@ -409,7 +410,7 @@ const PlinkoGame: React.FC = () => {
       Matter.Runner.run(runner, engine);
       runnerRef.current = runner;
       
-      // Draw multiplier labels with better styling
+      // Draw multiplier labels with clear visibility
       setTimeout(() => {
         if (renderRef.current?.canvas?.getContext) {
           const ctx = renderRef.current.canvas.getContext('2d');
@@ -419,23 +420,15 @@ const PlinkoGame: React.FC = () => {
               const binX = i * binWidth + binWidth/2;
               const binY = BOARD_HEIGHT - binHeight/2;
               
-              // Draw multiplier text with background for better visibility
+              // Draw multiplier with high contrast text
               ctx.font = 'bold 16px Arial';
               ctx.textAlign = 'center';
               ctx.textBaseline = 'middle';
               
-              // Draw a semi-transparent background circle
-              ctx.beginPath();
-              ctx.arc(binX, binY, 18, 0, Math.PI * 2);
-              ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
-              ctx.fill();
-              
-              // Draw outline
-              ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
-              ctx.lineWidth = 2;
-              ctx.stroke();
-              
-              // Draw multiplier text
+              // White text with black outline for maximum visibility
+              ctx.strokeStyle = '#000000';
+              ctx.lineWidth = 3;
+              ctx.strokeText(`${mult}×`, binX, binY);
               ctx.fillStyle = '#ffffff';
               ctx.fillText(`${mult}×`, binX, binY);
             });
@@ -497,42 +490,34 @@ const PlinkoGame: React.FC = () => {
     // Draw bins
     const numBins = MULTIPLIERS.length;
     const binWidth = BOARD_WIDTH / numBins;
-    const binHeight = 60; // Slightly taller bins
+    const binHeight = 40; // Smaller, more square-like bins
     const binY = BOARD_HEIGHT - binHeight;
     
     for (let i = 0; i < numBins; i++) {
       const binX = i * binWidth;
-      const binColor = getMultiplierColor(MULTIPLIERS[i]);
+      const binColor = '#1976d2'; // Consistent blue color
       
       // Draw bin
       ctx.fillStyle = binColor;
       ctx.fillRect(binX, binY, binWidth, binHeight);
       
       // Add border
-      ctx.strokeStyle = theme.palette.grey[800];
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.5)';
       ctx.lineWidth = 1;
       ctx.strokeRect(binX, binY, binWidth, binHeight);
       
-      // Add multiplier text with better styling
+      // Add multiplier text directly on the bin
       const centerX = binX + binWidth / 2;
       const centerY = binY + binHeight / 2;
       
-      // Draw circle background
-      ctx.beginPath();
-      ctx.arc(centerX, centerY, 18, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
-      ctx.fill();
-      
-      // Draw circle border
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
-      ctx.lineWidth = 2;
-      ctx.stroke();
-      
-      // Draw text
-      ctx.fillStyle = '#ffffff';
+      // Draw text with high visibility
       ctx.font = 'bold 16px Arial';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
+      ctx.strokeStyle = '#000000';
+      ctx.lineWidth = 3;
+      ctx.strokeText(`${MULTIPLIERS[i]}×`, centerX, centerY);
+      ctx.fillStyle = '#ffffff';
       ctx.fillText(`${MULTIPLIERS[i]}×`, centerX, centerY);
     }
   }, [theme, getMultiplierColor, rows, MULTIPLIERS]);
@@ -653,6 +638,7 @@ const PlinkoGame: React.FC = () => {
               
               // Calculate which bin based on x position
               const binWidth = BOARD_WIDTH / MULTIPLIERS.length;
+              const binHeight = 40; // Match the binHeight used elsewhere
               const binIndex = Math.min(
                 Math.floor(ball.x / binWidth),
                 MULTIPLIERS.length - 1
@@ -661,7 +647,7 @@ const PlinkoGame: React.FC = () => {
               
               // Lock the ball in the center of the bin
               ball.x = binIndex * binWidth + binWidth / 2;
-              ball.y = BOARD_HEIGHT - 30; // Position just above bottom
+              ball.y = BOARD_HEIGHT - binHeight - BALL_RADIUS; // Position just above the bin top
               ball.vx = 0;
               ball.vy = 0;
               

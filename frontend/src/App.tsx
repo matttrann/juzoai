@@ -17,7 +17,6 @@ import PlinkoGame from './components/PlinkoGame';
 import { AuthProvider } from './contexts/AuthContext';
 import { LoadingBarProvider } from './contexts/LoadingBarContext';
 import { ProblemProgressProvider } from './contexts/ProblemProgressContext';
-import XPBoosterWrapper from './components/XPBoosterWrapper';
 
 function App() {
   // Define dark theme
@@ -113,9 +112,6 @@ function App() {
                   <Route path="register" element={<Navigate replace to="/" />} />
                 </Route>
               </Routes>
-              
-              {/* XP Booster integration component moved inside Router */}
-              <XPBoosterWrapper />
             </Router>
           </ProblemProgressProvider>
         </LoadingBarProvider>

@@ -37,10 +37,6 @@ interface ProblemProgressContextProps {
   getCurrentLevelProgress: () => number; // Returns progress percentage toward next level
   getXpToNextLevel: () => number;
   resetProgress: () => void; // Added reset function for testing
-  // New properties for XP Booster
-  showLevelUpBooster: boolean;
-  recentLevelUp: number | null;
-  closeLevelUpBooster: () => void;
 }
 
 interface ProgressData {
@@ -82,8 +78,6 @@ export const ProblemProgressProvider: React.FC<ProblemProgressProviderProps> = (
   
   // New state for XP Booster
   const [boosterLevelsShown, setBoosterLevelsShown] = useState<number[]>([]);
-  const [showLevelUpBooster, setShowLevelUpBooster] = useState<boolean>(false);
-  const [recentLevelUp, setRecentLevelUp] = useState<number | null>(null);
 
   // Calculate rank based on level
   const calculateRank = useCallback((currentLevel: number): string => {
@@ -172,15 +166,6 @@ export const ProblemProgressProvider: React.FC<ProblemProgressProviderProps> = (
     }
   }, [xp, level, rank, totalSolved, easySolved, mediumSolved, hardSolved, boosterLevelsShown, saveToLocalStorage, isInitialized]);
 
-  // Close the XP Booster dialog and mark the level as shown
-  const closeLevelUpBooster = useCallback(() => {
-    if (recentLevelUp && !boosterLevelsShown.includes(recentLevelUp)) {
-      setBoosterLevelsShown(prev => [...prev, recentLevelUp]);
-    }
-    setShowLevelUpBooster(false);
-    setRecentLevelUp(null);
-  }, [recentLevelUp, boosterLevelsShown]);
-
   // Add XP and update level
   const addXp = useCallback((amount: number, difficulty: 'Easy' | 'Medium' | 'Hard') => {
     console.log(`Adding ${amount} XP for solving ${difficulty} problem`);
@@ -194,13 +179,6 @@ export const ProblemProgressProvider: React.FC<ProblemProgressProviderProps> = (
       if (newLevel > level) {
         setLevel(newLevel);
         console.log(`Leveled up to ${newLevel}!`);
-        
-        // Check if we've already shown the booster for this level
-        if (!boosterLevelsShown.includes(newLevel)) {
-          // Trigger the XP booster for the level up
-          setRecentLevelUp(newLevel);
-          setShowLevelUpBooster(true);
-        }
       }
       
       return newXp;
@@ -215,7 +193,7 @@ export const ProblemProgressProvider: React.FC<ProblemProgressProviderProps> = (
     } else {
       setHardSolved(prev => prev + 1);
     }
-  }, [level, boosterLevelsShown]);
+  }, [level]);
 
   // Calculate progress percentage toward next level
   const getCurrentLevelProgress = useCallback(() => {
@@ -242,8 +220,6 @@ export const ProblemProgressProvider: React.FC<ProblemProgressProviderProps> = (
     setMediumSolved(0);
     setHardSolved(0);
     setBoosterLevelsShown([]);
-    setShowLevelUpBooster(false);
-    setRecentLevelUp(null);
     
     // Clear localStorage
     localStorage.removeItem(STORAGE_KEY);
@@ -293,10 +269,7 @@ export const ProblemProgressProvider: React.FC<ProblemProgressProviderProps> = (
         addXp,
         getCurrentLevelProgress,
         getXpToNextLevel,
-        resetProgress,
-        showLevelUpBooster,
-        recentLevelUp,
-        closeLevelUpBooster
+        resetProgress
       }}
     >
       {children}
