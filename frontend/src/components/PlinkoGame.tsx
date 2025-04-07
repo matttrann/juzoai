@@ -410,8 +410,8 @@ const PlinkoGame: React.FC = () => {
       Matter.Runner.run(runner, engine);
       runnerRef.current = runner;
       
-      // Draw multiplier labels with clear visibility
-      setTimeout(() => {
+      // Use afterRender event to ensure multiplier text is drawn on every frame
+      Matter.Events.on(render, 'afterRender', () => {
         if (renderRef.current?.canvas?.getContext) {
           const ctx = renderRef.current.canvas.getContext('2d');
           if (ctx) {
@@ -434,7 +434,7 @@ const PlinkoGame: React.FC = () => {
             });
           }
         }
-      }, 200);
+      });
       
       console.log('Physics engine initialized successfully');
       
@@ -509,6 +509,9 @@ const PlinkoGame: React.FC = () => {
       // Add multiplier text directly on the bin
       const centerX = binX + binWidth / 2;
       const centerY = binY + binHeight / 2;
+      
+      // First clear any existing text
+      ctx.clearRect(centerX - 20, centerY - 15, 40, 30);
       
       // Draw text with high visibility
       ctx.font = 'bold 16px Arial';
@@ -795,6 +798,8 @@ const PlinkoGame: React.FC = () => {
               backgroundColor: theme.palette.mode === 'dark' ? '#1a2027' : '#f5f5f5',
               width: '100%',
               height: 'auto',
+              zIndex: 1,
+              position: 'relative'
             }}
           />
           
