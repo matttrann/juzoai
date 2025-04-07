@@ -81,43 +81,29 @@ export const ProblemProgressProvider: React.FC<ProblemProgressProviderProps> = (
 
   // Calculate rank based on level
   const calculateRank = useCallback((currentLevel: number): string => {
+    // Log current level and RANKS for debugging
+    console.log('Calculating rank for level:', currentLevel);
+    console.log('Available ranks:', RANKS);
+    
     const rankLevels = Object.keys(RANKS).map(Number).sort((a, b) => a - b);
+    console.log('Rank levels (sorted):', rankLevels);
+    
     let newRank = RANKS[0];
     
     for (let i = rankLevels.length - 1; i >= 0; i--) {
       const rankLevel = rankLevels[i];
+      console.log('Checking rank level:', rankLevel);
+      
       if (currentLevel >= rankLevel) {
         newRank = RANKS[rankLevel];
+        console.log('Found matching rank:', newRank, 'for level:', currentLevel);
         break;
       }
     }
     
+    console.log('Final calculated rank:', newRank);
     return newRank;
   }, []);
-
-  // Helper to save all progress to localStorage
-  const saveToLocalStorage = useCallback(() => {
-    if (!isInitialized) return;
-    
-    const progressData: ProgressData = {
-      xp,
-      level,
-      rank,
-      totalSolved,
-      easySolved,
-      mediumSolved,
-      hardSolved,
-      lastUpdated: Date.now(),
-      boosterLevelsShown
-    };
-    
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(progressData));
-      console.log('Progress saved to localStorage:', progressData);
-    } catch (error) {
-      console.error('Failed to save progress to localStorage:', error);
-    }
-  }, [xp, level, rank, totalSolved, easySolved, mediumSolved, hardSolved, isInitialized, boosterLevelsShown]);
 
   // Load stored progress from localStorage on mount
   useEffect(() => {
@@ -155,30 +141,77 @@ export const ProblemProgressProvider: React.FC<ProblemProgressProviderProps> = (
   useEffect(() => {
     if (!isInitialized) return;
     
-    const newRank = calculateRank(level);
-    setRank(newRank);
-  }, [level, calculateRank, isInitialized]);
+    console.log('Level changed to:', level, 'calculating new rank');
+    
+    // Use timeout to ensure this happens after level updates are fully processed
+    const timeoutId = setTimeout(() => {
+      const newRank = calculateRank(level);
+      console.log('Setting rank from', rank, 'to', newRank);
+      
+      // Only update if the rank actually changed to avoid unnecessary rerenders
+      if (newRank !== rank) {
+        setRank(newRank);
+      } else {
+        console.log('Rank remained the same, skipping update');
+      }
+    }, 10);
+    
+    return () => clearTimeout(timeoutId);
+  }, [level, calculateRank, isInitialized, rank]);
 
   // Save progress to localStorage whenever it changes
   useEffect(() => {
-    if (isInitialized) {
-      saveToLocalStorage();
-    }
-  }, [xp, level, rank, totalSolved, easySolved, mediumSolved, hardSolved, boosterLevelsShown, saveToLocalStorage, isInitialized]);
+    if (!isInitialized) return;
+    
+    // Use timeout to ensure this happens after state updates are committed
+    const timeoutId = setTimeout(() => {
+      console.log('Saving progress to localStorage with current state:');
+      console.log('XP:', xp, 'Level:', level, 'Rank:', rank);
+      
+      const progressData: ProgressData = {
+        xp,
+        level,
+        rank,
+        totalSolved,
+        easySolved,
+        mediumSolved,
+        hardSolved,
+        lastUpdated: Date.now(),
+        boosterLevelsShown
+      };
+      
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(progressData));
+        console.log('Progress saved to localStorage:', progressData);
+      } catch (error) {
+        console.error('Failed to save progress to localStorage:', error);
+      }
+    }, 50); // Small delay to ensure state is fully updated
+    
+    return () => clearTimeout(timeoutId);
+  }, [xp, level, rank, totalSolved, easySolved, mediumSolved, hardSolved, boosterLevelsShown, isInitialized]);
 
   // Add XP and update level
   const addXp = useCallback((amount: number, difficulty: 'Easy' | 'Medium' | 'Hard') => {
     console.log(`Adding ${amount} XP for solving ${difficulty} problem`);
     
+    // Use a more reliable pattern for state updates that depend on each other
     setXp(prevXp => {
       const newXp = prevXp + amount;
+      console.log(`XP updated from ${prevXp} to ${newXp}`);
+      
       // Calculate new level based on XP
       const newLevel = Math.floor(newXp / XP_PER_LEVEL) + 1;
+      console.log(`Calculated new level: ${newLevel}, current level: ${level}`);
       
-      // Update level if increased
+      // Update level in a separate effect to avoid race conditions
       if (newLevel > level) {
-        setLevel(newLevel);
-        console.log(`Leveled up to ${newLevel}!`);
+        console.log(`Will update level from ${level} to ${newLevel}`);
+        // Use setTimeout to ensure this runs in the next event loop
+        // after the XP update has been processed
+        setTimeout(() => {
+          setLevel(newLevel);
+        }, 0);
       }
       
       return newXp;

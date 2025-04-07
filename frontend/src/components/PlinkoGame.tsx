@@ -7,8 +7,10 @@ import {
   useTheme,
   Button,
   Alert,
+  Stack,
 } from '@mui/material';
 import { useProblemProgress } from '../contexts/ProblemProgressContext';
+import { useNavigate } from 'react-router-dom';
 // @ts-ignore
 const Matter = require('matter-js');
 
@@ -98,6 +100,7 @@ const PlinkoGame: React.FC = () => {
   const theme = useTheme();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { level, addXp } = useProblemProgress();
+  const navigate = useNavigate();
   
   // Game state
   const [gameState, setGameState] = useState<'ready' | 'playing' | 'ended'>('ready');
@@ -184,7 +187,7 @@ const PlinkoGame: React.FC = () => {
     try {
       // Create engine with proper gravity
       const engine = Matter.Engine.create({
-        gravity: { x: 0, y: 0.5 }, // Lower gravity for smoother motion
+        gravity: { x: 0, y: 0.3 }, // Lower gravity for slower ball motion
         enableSleeping: false,
       });
       
@@ -296,14 +299,19 @@ const PlinkoGame: React.FC = () => {
         // Use a consistent blue color
         const binColor = '#90caf9'; 
         
-        // Add a bin with small, square appearance
-        const bin = Matter.Bodies.rectangle(binX, binY, binWidth - 2, binHeight, {
+        // Create a rectangle with rounded corners using chamfer
+        const bin = Matter.Bodies.rectangle(binX, binY, binWidth - 4, binHeight, {
           isStatic: true,
           isSensor: true,
+          chamfer: { radius: 8 }, // Add rounded corners
           render: {
             fillStyle: binColor,
-            strokeStyle: 'rgba(0, 0, 0, 0.5)',
-            lineWidth: 1,
+            strokeStyle: 'rgba(0, 0, 0, 0.3)',
+            lineWidth: 2,
+            shadowColor: 'rgba(0, 0, 0, 0.5)',
+            shadowBlur: 10,
+            shadowOffsetX: 2,
+            shadowOffsetY: 2,
           },
           label: `bin-${i}`,
         });
@@ -367,35 +375,56 @@ const PlinkoGame: React.FC = () => {
               // Play bin landing sound
               playBinLandSound(multiplier);
               
-              // Lock the ball in place by removing all velocity and making it static
-              Matter.Body.setVelocity(ballBody, { x: 0, y: 0 });
-              Matter.Body.setStatic(ballBody, true);
-              
-              // Position ball at the center of the bin
-              const binIndex = parseInt(binBody.label?.split('-')[1] || '0');
-              const binWidth = BOARD_WIDTH / MULTIPLIERS.length;
-              const centerX = binIndex * binWidth + binWidth / 2;
-              const centerY = BOARD_HEIGHT - binHeight - BALL_RADIUS; // Position ball on top of bin
-              Matter.Body.setPosition(ballBody, { x: centerX, y: centerY });
-              
               // Create result object
               const resultObj = {
                 multiplier,
                 xpBoost: finalXpBoost
               };
               
-              // Update result and end game
-              setTimeout(() => {
-                setResult(resultObj);
-                setGameState('ended');
+              // Make the ball slowly disappear into the bin
+              const shrinkBall = () => {
+                // Get the current radius
+                if (ballBody === null) return;
                 
-                // Add the XP
-                addXp(finalXpBoost, getRiskAsDifficulty(riskLevel));
+                const currentRadius = (ballBody as any).circleRadius;
                 
-                // Player can't play again until next level
-                setCanPlay(false);
-                localStorage.setItem('lastPlinkoLevel', level.toString());
-              }, 500);
+                if (currentRadius > 1) {
+                  // Shrink the ball by scaling it down
+                  const scale = 0.9; // 10% smaller each time
+                  Matter.Body.scale(ballBody, scale, scale);
+                  
+                  // Also move it down slightly to create a "sinking" effect
+                  const currentY = ballBody.position.y;
+                  Matter.Body.setPosition(ballBody, { 
+                    x: ballBody.position.x, 
+                    y: currentY + 0.5 
+                  });
+                  
+                  // Continue shrinking
+                  setTimeout(shrinkBall, 50);
+                } else {
+                  // Remove the ball when it's small enough
+                  if (worldRef.current) {
+                    Matter.World.remove(worldRef.current, ballBody);
+                  }
+                  
+                  // Update result and end game
+                  setTimeout(() => {
+                    setResult(resultObj);
+                    setGameState('ended');
+                    
+                    // Add the XP
+                    addXp(finalXpBoost, getRiskAsDifficulty(riskLevel));
+                    
+                    // Player can't play again until next level
+                    setCanPlay(false);
+                    localStorage.setItem('lastPlinkoLevel', level.toString());
+                  }, 200);
+                }
+              };
+              
+              // Start the shrinking animation
+              setTimeout(shrinkBall, 100);
             }
           }
         }
@@ -420,17 +449,32 @@ const PlinkoGame: React.FC = () => {
               const binX = i * binWidth + binWidth/2;
               const binY = BOARD_HEIGHT - binHeight/2;
               
+              // Save context state
+              ctx.save();
+              
               // Draw multiplier with high contrast text
               ctx.font = 'bold 16px Arial';
               ctx.textAlign = 'center';
               ctx.textBaseline = 'middle';
               
+              // Text shadow for depth
+              ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
+              ctx.shadowBlur = 3;
+              ctx.shadowOffsetX = 1;
+              ctx.shadowOffsetY = 1;
+              
               // White text with black outline for maximum visibility
               ctx.strokeStyle = '#000000';
               ctx.lineWidth = 3;
               ctx.strokeText(`${mult}×`, binX, binY);
+              
+              // Remove shadow for the fill to make it crisp
+              ctx.shadowColor = 'transparent';
               ctx.fillStyle = '#ffffff';
               ctx.fillText(`${mult}×`, binX, binY);
+              
+              // Restore context state
+              ctx.restore();
             });
           }
         }
@@ -486,7 +530,7 @@ const PlinkoGame: React.FC = () => {
       }
     }
     
-    // Draw bins
+    // Draw bins with rounded corners
     const numBins = MULTIPLIERS.length;
     const binWidth = BOARD_WIDTH / numBins;
     const binHeight = 40; // Smaller, more square-like bins
@@ -495,24 +539,46 @@ const PlinkoGame: React.FC = () => {
     for (let i = 0; i < numBins; i++) {
       const binX = i * binWidth;
       const binColor = '#90caf9'; // Consistent blue color
+      const cornerRadius = 8;
       
-      // Draw bin
+      // Save the current context state
+      ctx.save();
+      
+      // Create shadow for depth effect
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+      ctx.shadowBlur = 10;
+      ctx.shadowOffsetX = 2;
+      ctx.shadowOffsetY = 2;
+      
+      // Set the bin fill color
       ctx.fillStyle = binColor;
-      ctx.fillRect(binX, binY, binWidth, binHeight);
+      
+      // Draw rounded rectangle for the bin
+      ctx.beginPath();
+      ctx.moveTo(binX + cornerRadius, binY);
+      ctx.lineTo(binX + binWidth - cornerRadius, binY);
+      ctx.quadraticCurveTo(binX + binWidth, binY, binX + binWidth, binY + cornerRadius);
+      ctx.lineTo(binX + binWidth, binY + binHeight - cornerRadius);
+      ctx.quadraticCurveTo(binX + binWidth, binY + binHeight, binX + binWidth - cornerRadius, binY + binHeight);
+      ctx.lineTo(binX + cornerRadius, binY + binHeight);
+      ctx.quadraticCurveTo(binX, binY + binHeight, binX, binY + binHeight - cornerRadius);
+      ctx.lineTo(binX, binY + cornerRadius);
+      ctx.quadraticCurveTo(binX, binY, binX + cornerRadius, binY);
+      ctx.closePath();
+      ctx.fill();
       
       // Add border
-      ctx.strokeStyle = 'rgba(0, 0, 0, 0.5)';
-      ctx.lineWidth = 1;
-      ctx.strokeRect(binX, binY, binWidth, binHeight);
+      ctx.shadowColor = 'transparent'; // Remove shadow for the stroke
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
       
       // Add multiplier text directly on the bin
       const centerX = binX + binWidth / 2;
       const centerY = binY + binHeight / 2;
       
-      // First clear any existing text
-      ctx.clearRect(centerX - 20, centerY - 15, 40, 30);
-      
       // Draw text with high visibility
+      ctx.shadowColor = 'transparent'; // Remove shadow for text
       ctx.font = 'bold 16px Arial';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
@@ -521,6 +587,9 @@ const PlinkoGame: React.FC = () => {
       ctx.strokeText(`${MULTIPLIERS[i]}×`, centerX, centerY);
       ctx.fillStyle = '#ffffff';
       ctx.fillText(`${MULTIPLIERS[i]}×`, centerX, centerY);
+      
+      // Restore the context state
+      ctx.restore();
     }
   }, [theme, getMultiplierColor, rows, MULTIPLIERS]);
   
@@ -615,8 +684,8 @@ const PlinkoGame: React.FC = () => {
               ball.radius * 2 + 4
             );
             
-            // Update position with gravity
-            ball.vy += 0.2 * dt;
+            // Update position with gravity (reduced for slower motion)
+            ball.vy += 0.12 * dt;
             ball.x += ball.vx * dt;
             ball.y += ball.vy * dt;
             
@@ -647,41 +716,66 @@ const PlinkoGame: React.FC = () => {
               );
               multiplier = MULTIPLIERS[binIndex];
               
-              // Lock the ball in the center of the bin
+              // Redraw the board before starting the shrink animation
+              ctx.clearRect(0, 0, BOARD_WIDTH, BOARD_HEIGHT);
+              renderFallbackGame();
+              
+              // Lock the ball position in the center of the bin
               ball.x = binIndex * binWidth + binWidth / 2;
-              ball.y = BOARD_HEIGHT - binHeight - BALL_RADIUS; // Position just above the bin top
+              ball.y = BOARD_HEIGHT - binHeight; // Position at the top of the bin
               ball.vx = 0;
               ball.vy = 0;
               
-              // Draw the final position of the ball
-              ctx.clearRect(0, 0, BOARD_WIDTH, BOARD_HEIGHT);
-              renderFallbackGame(); // Redraw the board
-              
-              // Draw ball at final position
-              ctx.fillStyle = theme.palette.mode === 'dark' ? '#bbdefb' : '#e3f2fd';
-              ctx.beginPath();
-              ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-              ctx.fill();
-              
-              const baseXpBoost = level * 10;
-              const finalXpBoost = Math.floor(baseXpBoost * multiplier);
-              
-              const resultObj = {
-                multiplier,
-                xpBoost: finalXpBoost
+              // Animate the ball shrinking and disappearing into the bin
+              const shrinkBall = () => {
+                // Redraw the background where the ball was
+                ctx.clearRect(
+                  ball.x - BALL_RADIUS - 2, 
+                  ball.y - BALL_RADIUS - 2, 
+                  BALL_RADIUS * 2 + 4, 
+                  BALL_RADIUS * 2 + 4
+                );
+                
+                // Shrink the ball
+                ball.radius *= 0.8;
+                
+                // Move the ball down slightly
+                ball.y += 1;
+                
+                // Draw the ball at its new size
+                if (ball.radius > 1) {
+                  ctx.fillStyle = theme.palette.mode === 'dark' ? '#bbdefb' : '#e3f2fd';
+                  ctx.beginPath();
+                  ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+                  ctx.fill();
+                  
+                  // Continue shrinking
+                  requestAnimationFrame(shrinkBall);
+                } else {
+                  // Ball has disappeared, finish the game
+                  const baseXpBoost = level * 10;
+                  const finalXpBoost = Math.floor(baseXpBoost * multiplier);
+                  
+                  const resultObj = {
+                    multiplier,
+                    xpBoost: finalXpBoost
+                  };
+                  
+                  // Add XP and show result
+                  addXp(finalXpBoost, getRiskAsDifficulty('Medium'));
+                  
+                  setTimeout(() => {
+                    setResult(resultObj);
+                    setGameState('ended');
+                    setCanPlay(false);
+                    localStorage.setItem('lastPlinkoLevel', level.toString());
+                  }, 200);
+                }
               };
               
-              // Add XP and show result
-              addXp(finalXpBoost, getRiskAsDifficulty('Medium'));
-              
-              setTimeout(() => {
-                setResult(resultObj);
-                setGameState('ended');
-                setCanPlay(false);
-                localStorage.setItem('lastPlinkoLevel', level.toString());
-              }, 500);
-              
-              return; // Stop animation
+              // Start the shrinking animation
+              shrinkBall();
+              return; // Stop the main animation
             }
             
             requestAnimationFrame(animate);
@@ -826,24 +920,48 @@ const PlinkoGame: React.FC = () => {
                 backgroundColor: 'rgba(0, 0, 0, 0.85)',
                 color: 'white',
                 textAlign: 'center',
-                width: '60%',
+                width: '80%',
                 zIndex: 20,
               }}
             >
               <Typography variant="h5" component="div" gutterBottom fontWeight="bold">
                 {result.multiplier}x Multiplier!
               </Typography>
-              <Typography variant="h6" sx={{ mb: 2 }}>
+              <Typography variant="h6" sx={{ mb: 3 }}>
                 +{result.xpBoost} XP Boost!
               </Typography>
-              <Button 
-                variant="contained" 
-                color="primary"
-                onClick={reset}
-                size="medium"
-              >
-                Clear Board
-              </Button>
+              
+              <Stack spacing={2} direction="column" sx={{ mb: 1 }}>
+                <Button 
+                  variant="contained" 
+                  color="primary"
+                  onClick={() => navigate('/problems')}
+                  size="medium"
+                  sx={{ fontWeight: 'bold' }}
+                >
+                  Go to Coding Problems
+                </Button>
+                
+                <Button 
+                  variant="contained" 
+                  color="secondary"
+                  onClick={() => navigate('/problem-roulette')}
+                  size="medium"
+                  sx={{ fontWeight: 'bold' }}
+                >
+                  Try Problem Roulette
+                </Button>
+                
+                <Button 
+                  variant="outlined" 
+                  color="inherit"
+                  onClick={reset}
+                  size="medium"
+                  sx={{ mt: 1 }}
+                >
+                  Clear Board
+                </Button>
+              </Stack>
             </Paper>
           )}
         </Box>

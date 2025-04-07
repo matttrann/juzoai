@@ -1332,7 +1332,7 @@ const evaluateSubmission = async (code: string, problemId: string): Promise<{suc
   
   // In a real app, this would send the code to a backend API for evaluation
   // Here we do a simplified pattern check for common solutions
-
+  
   if (problemId === 'two-sum') {
     // For Two Sum, we'll check if the solution contains the key elements of a correct solution
     const containsHashMap = code.includes('{}') || 
@@ -1360,9 +1360,9 @@ const evaluateSubmission = async (code: string, problemId: string): Promise<{suc
     // Even simple brute force solutions should work
     else if (containsIteration && containsReturn && containsTargetCheck) {
       console.log('Two Sum solution acceptable - detected brute force approach');
-      return {
+        return {
         success: true, // Still valid, just not optimal
-        results: [
+          results: [
           {testCase: 'nums = [2,7,11,15], target = 9', expected: '[0,1]', actual: '[0,1]', passed: true},
           {testCase: 'nums = [3,2,4], target = 6', expected: '[1,2]', actual: '[1,2]', passed: true},
           {testCase: 'nums = [3,3], target = 6', expected: '[0,1]', actual: '[0,1]', passed: true}
@@ -1408,18 +1408,18 @@ const evaluateSubmission = async (code: string, problemId: string): Promise<{suc
   // A minimal check for a reasonably complete solution
   if (hasReturnStatement && (hasLooping || hasConditions)) {
     console.log('Generic solution looks reasonable');
-    return {
-      success: true,
-      results: [
+      return {
+        success: true,
+        results: [
         {testCase: 'Test Case 1', expected: 'Expected Output', actual: 'Expected Output', passed: true},
         {testCase: 'Test Case 2', expected: 'Expected Output', actual: 'Expected Output', passed: true}
       ]
     };
-  } else {
+    } else {
     console.log('Generic solution is incomplete');
-    return {
-      success: false,
-      results: [
+      return {
+        success: false,
+        results: [
         {testCase: 'Test Case 1', expected: 'Expected Output', actual: 'Incomplete implementation', passed: false}
       ],
       error: 'Your solution appears to be incomplete. Make sure it includes proper logic and return statements.'
@@ -1544,8 +1544,8 @@ const ProblemDetail: React.FC = () => {
         }
         
         // Set success message
-        setSnackbar({
-          open: true,
+      setSnackbar({
+        open: true,
           message: '🎉 All test cases passed! You earned XP for this solution!',
           severity: 'success'
         });
