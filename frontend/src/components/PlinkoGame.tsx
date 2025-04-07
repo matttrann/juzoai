@@ -1094,10 +1094,10 @@ const PlinkoGame: React.FC = () => {
               }}
             >
               <Typography variant="h5" component="div" gutterBottom fontWeight="bold">
-                {result.multiplier}x Multiplier!
+                XP Booster!
               </Typography>
               <Typography variant="h6" sx={{ mb: 3 }}>
-                +{result.xpBoost} XP Boost!
+                +{result.xpBoost} XP
               </Typography>
               
               <Stack spacing={2} direction="column" sx={{ mb: 1 }}>
