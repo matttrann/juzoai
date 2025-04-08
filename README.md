@@ -46,8 +46,8 @@ A modern flashcard and coding practise application designed to help you study an
 
 1. Clone the repository
 ```bash
-git clone https://github.com/yourusername/flashcard-app.git
-cd flashcard-app
+git clone https://github.com/matttrann/juzoai.git
+cd juzoai
 ```
 
 2. Install frontend dependencies
