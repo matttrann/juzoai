@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -16,6 +16,8 @@ import {
   Stepper,
   Step,
   StepLabel,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { DSA_QUIZZES } from '../data/dsaQuizzes';
@@ -24,6 +26,10 @@ import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
 
 const DSAQuiz: React.FC = () => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
+
   const [currentTopic, setCurrentTopic] = useState<string>("");
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
@@ -90,31 +96,57 @@ const DSAQuiz: React.FC = () => {
   const progress = ((currentQuestionIndex + 1) / currentTopicQuestions.length) * 100;
 
   return (
-    <Box sx={{ maxWidth: 800, mx: 'auto', p: 3 }}>
-      <Typography variant="h4" gutterBottom>
+    <Box sx={{ 
+      maxWidth: 800, 
+      mx: 'auto', 
+      p: { xs: 1.5, sm: 2, md: 3 }
+    }}>
+      <Typography 
+        variant={isMobile ? "h5" : "h4"}
+        gutterBottom
+      >
         DSA Quiz Practice
       </Typography>
 
       {!currentTopic ? (
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+        <Box sx={{ 
+          display: 'flex', 
+          flexWrap: 'wrap', 
+          gap: { xs: 1, sm: 1.5, md: 2 },
+          justifyContent: { xs: 'center', sm: 'flex-start' }
+        }}>
           {DSA_QUIZZES.map((topic) => (
             <Card
               key={topic.name}
               sx={{ 
-                width: 200, 
-                height: 120,
+                width: { xs: '45%', sm: 180, md: 200 },
+                height: { xs: 100, sm: 110, md: 120 },
                 cursor: 'pointer',
                 display: 'flex',
                 flexDirection: 'column',
-                justifyContent: 'center'
+                justifyContent: 'center',
+                minWidth: { xs: 140, sm: 160 }
               }}
               onClick={() => handleTopicSelect(topic.name)}
             >
-              <CardContent>
-                <Typography variant="h6" align="center" gutterBottom>
+              <CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
+                <Typography 
+                  variant={isMobile ? "subtitle1" : "h6"} 
+                  align="center" 
+                  gutterBottom
+                  sx={{ 
+                    fontSize: { xs: '0.95rem', sm: '1.1rem', md: '1.25rem' },
+                    wordBreak: 'break-word'
+                  }}
+                >
                   {topic.name}
                 </Typography>
-                <Typography variant="body2" color="text.secondary" align="center">
+                <Typography 
+                  variant="body2" 
+                  color="text.secondary" 
+                  align="center"
+                  sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+                >
                   {topic.questions.length} questions
                 </Typography>
               </CardContent>
@@ -123,14 +155,20 @@ const DSAQuiz: React.FC = () => {
         </Box>
       ) : (
         <>
-          <Paper elevation={3} sx={{ p: 3, mb: 2 }}>
+          <Paper elevation={3} sx={{ p: { xs: 2, sm: 3 }, mb: 2 }}>
             <Typography variant="h6" gutterBottom>
               Topic: {currentTopic}
             </Typography>
             
             {/* Progress indicators */}
             <Box sx={{ mb: 3 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+              <Box sx={{ 
+                display: 'flex', 
+                flexDirection: { xs: 'column', sm: 'row' }, 
+                justifyContent: 'space-between', 
+                mb: 1,
+                gap: { xs: 0.5, sm: 0 }
+              }}>
                 <Typography variant="body2">
                   Question {currentQuestionIndex + 1} of {currentTopicQuestions.length}
                 </Typography>
@@ -141,24 +179,44 @@ const DSAQuiz: React.FC = () => {
               
               <LinearProgress variant="determinate" value={progress} sx={{ mb: 2, height: 8, borderRadius: 4 }} />
               
-              <Stepper activeStep={currentQuestionIndex} alternativeLabel>
-                {currentTopicQuestions.map((_, index) => (
-                  <Step key={index} completed={answeredQuestions[index]}>
-                    <StepLabel 
-                      StepIconProps={{
-                        icon: answeredQuestions[index] ? 
-                          (correctAnswers[index] ? 
-                            <CheckCircleOutlineIcon color="success" /> : 
-                            <CancelOutlinedIcon color="error" />) : 
-                          index + 1
-                      }}
-                    />
-                  </Step>
-                ))}
-              </Stepper>
+              {/* Hide stepper on very small screens */}
+              {!isMobile && (
+                <Stepper 
+                  activeStep={currentQuestionIndex} 
+                  alternativeLabel
+                  sx={{ 
+                    overflowX: 'auto',
+                    '& .MuiStepConnector-root': {
+                      top: { xs: 8, sm: 10 } 
+                    }
+                  }}
+                >
+                  {currentTopicQuestions.map((_, index) => (
+                    <Step key={index} completed={answeredQuestions[index]}>
+                      <StepLabel 
+                        StepIconProps={{
+                          icon: answeredQuestions[index] ? 
+                            (correctAnswers[index] ? 
+                              <CheckCircleOutlineIcon color="success" /> : 
+                              <CancelOutlinedIcon color="error" />) : 
+                            index + 1
+                        }}
+                      />
+                    </Step>
+                  ))}
+                </Stepper>
+              )}
             </Box>
             
-            <Typography variant="h6" gutterBottom>
+            <Typography 
+              variant={isMobile ? "subtitle1" : "h6"} 
+              gutterBottom
+              sx={{ 
+                fontSize: { xs: '1rem', sm: '1.1rem', md: '1.25rem' },
+                fontWeight: 'medium',
+                lineHeight: 1.4
+              }}
+            >
               {currentQuestion?.question}
             </Typography>
 
@@ -171,6 +229,10 @@ const DSAQuiz: React.FC = () => {
                     control={<Radio />}
                     label={option}
                     sx={{
+                      mb: { xs: 1, sm: 0.5 },
+                      '& .MuiFormControlLabel-label': {
+                        fontSize: { xs: '0.9rem', sm: '1rem' }
+                      },
                       ...(showFeedback && {
                         color: index === currentQuestion.correctAnswer ? 'success.main' : 
                                 (index === selectedAnswer ? 'error.main' : 'inherit'),
@@ -198,14 +260,20 @@ const DSAQuiz: React.FC = () => {
               </Fade>
             )}
 
-            <Box sx={{ mt: 2 }}>
+            <Box sx={{ 
+              mt: 2,
+              display: 'flex', 
+              flexDirection: { xs: 'column', sm: 'row' },
+              gap: { xs: 1, sm: 0 }
+            }}>
               {!showFeedback ? (
                 <Button
                   variant="contained"
                   onClick={handleCheckAnswer}
                   disabled={selectedAnswer === null}
                   color="primary"
-                  sx={{ mr: 1 }}
+                  fullWidth={isMobile}
+                  sx={{ mr: { sm: 1 } }}
                 >
                   Check Answer
                 </Button>
@@ -214,6 +282,7 @@ const DSAQuiz: React.FC = () => {
                   variant="contained"
                   onClick={handleNextQuestion}
                   color="primary"
+                  fullWidth={isMobile}
                 >
                   {currentQuestionIndex < currentTopicQuestions.length - 1 ? 'Next Question' : 'Finish Quiz'}
                 </Button>
@@ -222,7 +291,8 @@ const DSAQuiz: React.FC = () => {
               <Button
                 variant="outlined"
                 onClick={() => setCurrentTopic("")}
-                sx={{ ml: 1 }}
+                fullWidth={isMobile}
+                sx={{ ml: { sm: 1 }, mt: { xs: 1, sm: 0 } }}
               >
                 Choose Different Topic
               </Button>
@@ -230,7 +300,7 @@ const DSAQuiz: React.FC = () => {
           </Paper>
 
           {showResult && (
-            <Paper elevation={3} sx={{ p: 3 }}>
+            <Paper elevation={3} sx={{ p: { xs: 2, sm: 3 } }}>
               <Typography variant="h6" gutterBottom>
                 Quiz Results
               </Typography>
@@ -240,35 +310,45 @@ const DSAQuiz: React.FC = () => {
               <Typography variant="body1">
                 Percentage: {((score / currentTopicQuestions.length) * 100).toFixed(1)}%
               </Typography>
-              <Box sx={{ mt: 4 }}>
-                <Stepper activeStep={-1} alternativeLabel>
-                  {currentTopicQuestions.map((question, index) => (
-                    <Step key={index} completed={answeredQuestions[index]}>
-                      <StepLabel 
-                        StepIconProps={{
-                          icon: correctAnswers[index] ? 
-                            <CheckCircleOutlineIcon color="success" /> : 
-                            <CancelOutlinedIcon color="error" />
-                        }}
-                      >
-                        Question {index + 1}
-                      </StepLabel>
-                    </Step>
-                  ))}
-                </Stepper>
-              </Box>
-              <Box sx={{ mt: 3 }}>
+              
+              {!isMobile && (
+                <Box sx={{ mt: 4 }}>
+                  <Stepper activeStep={-1} alternativeLabel>
+                    {currentTopicQuestions.map((question, index) => (
+                      <Step key={index} completed={answeredQuestions[index]}>
+                        <StepLabel 
+                          StepIconProps={{
+                            icon: correctAnswers[index] ? 
+                              <CheckCircleOutlineIcon color="success" /> : 
+                              <CancelOutlinedIcon color="error" />
+                          }}
+                        >
+                          Question {index + 1}
+                        </StepLabel>
+                      </Step>
+                    ))}
+                  </Stepper>
+                </Box>
+              )}
+              
+              <Box sx={{ 
+                mt: 3,
+                display: 'flex',
+                flexDirection: { xs: 'column', sm: 'row' },
+                gap: { xs: 1, sm: 2 }
+              }}>
                 <Button
                   variant="contained"
                   onClick={() => handleTopicSelect(currentTopic)}
-                  sx={{ mt: 2 }}
+                  fullWidth={isMobile}
                 >
                   Try Again
                 </Button>
                 <Button
                   variant="outlined"
                   onClick={() => setCurrentTopic("")}
-                  sx={{ mt: 2, ml: 2 }}
+                  fullWidth={isMobile}
+                  sx={{ mt: { xs: 0, sm: 0 } }}
                 >
                   Choose Different Topic
                 </Button>
