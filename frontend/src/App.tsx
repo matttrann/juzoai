@@ -14,6 +14,7 @@ import Problems from './components/Problems';
 import ProblemDetail from './components/ProblemDetail';
 import ProblemRoulette from './components/ProblemRoulette';
 import PlinkoGame from './components/PlinkoGame';
+import DSAQuiz from './components/DSAQuiz';
 import { AuthProvider } from './contexts/AuthContext';
 import { LoadingBarProvider } from './contexts/LoadingBarContext';
 import { ProblemProgressProvider } from './contexts/ProblemProgressContext';
@@ -101,6 +102,7 @@ function App() {
                   <Route path="performance/deck/:deckId" element={<PerformanceDashboard />} />
                   <Route path="performance/:deckId" element={<PerformanceDashboard />} />
                   <Route path="dsa-visualizer" element={<DSAVisualizer />} />
+                  <Route path="dsa-quiz" element={<DSAQuiz />} />
                   <Route path="problems" element={<Problems />} />
                   <Route path="problem-roulette" element={<ProblemRoulette />} />
                   <Route path="xp-booster" element={<PlinkoGame />} />
