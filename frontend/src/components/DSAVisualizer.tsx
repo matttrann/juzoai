@@ -15,7 +15,7 @@ const DSAVisualizer: React.FC = () => {
   return (
     <Container maxWidth="xl">
       <Box sx={{ pt: { xs: 2, sm: 4 } }}>
-        <Typography
+        <Typography 
           variant={isMobile ? 'h5' : 'h4'}
           component="h1"
           align="center"
@@ -25,7 +25,7 @@ const DSAVisualizer: React.FC = () => {
           Data Structures & Algorithms Visualizer
         </Typography>
         <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
-          <Tabs
+              <Tabs 
             value={mainTab}
             onChange={handleMainTabChange}
             aria-label="main dsa visualizer tabs"
@@ -34,8 +34,8 @@ const DSAVisualizer: React.FC = () => {
           >
             <Tab label="Data Structures" />
             <Tab label="Algorithms" />
-          </Tabs>
-        </Box>
+              </Tabs>
+            </Box>
         {mainTab === 0 && <DataStructuresVisualizer />}
         {mainTab === 1 && <AlgorithmsVisualizer />}
       </Box>
